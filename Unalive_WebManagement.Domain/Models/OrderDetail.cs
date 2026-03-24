@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Unalive_WebManagement.Models;
+
+public partial class OrderDetail
+{
+    public int OrderId { get; set; }
+
+    public int ProductId { get; set; }
+
+    public int Quantity { get; set; }
+
+    public decimal Subtotal { get; set; }
+
+    public virtual Order Order { get; set; } = null!;
+
+    public virtual Item Product { get; set; } = null!;
+}
