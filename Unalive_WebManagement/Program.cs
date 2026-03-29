@@ -18,28 +18,31 @@ builder.Services.AddDbContext<UnaliveDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 
 // Register Repositories
-builder.Services.AddScoped<IBannerRepository, BannerRepository>();
-builder.Services.AddScoped<IBannerItemRepository, BannerItemRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
-builder.Services.AddScoped<IReportRepository, ReportRepository>();
-builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserItemRepository, UserItemRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+builder.Services.AddScoped<IAbilitiesSetRepository, AbilitiesSetRepository>();
+builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+builder.Services.AddScoped<IBundleItemRepository, BundleItemRepository>();
+builder.Services.AddScoped<ICharacterAttackRepository, CharacterAttackRepository>();
+builder.Services.AddScoped<ICharacterPassiveRepository, CharacterPassiveRepository>();
+builder.Services.AddScoped<ICharacterPvPRepository, CharacterPvPRepository>();
+builder.Services.AddScoped<ICharacterSkillRepository, CharacterSkillRepository>();
+builder.Services.AddScoped<ICharacterStatRepository, CharacterStatRepository>();
+builder.Services.AddScoped<IGemBundleRepository, GemBundleRepository>();
+builder.Services.AddScoped<ISkinAndCharacterBundleRepository, SkinAndCharacterBundleRepository>();
+builder.Services.AddScoped<IShopOrderRepository, ShopOrderRepository>();
+builder.Services.AddScoped<IShopOrderDetailRepository, ShopOrderDetailRepository>();
+builder.Services.AddScoped<ITopUpHistoryRepository, TopUpHistoryRepository>();
+builder.Services.AddScoped<IUserBundleRepository, UserBundleRepository>();
 
 // Register Services
-builder.Services.AddScoped<IBannerService, BannerService>();
-builder.Services.AddScoped<IBannerItemService, BannerItemService>();
 builder.Services.AddScoped<IItemService, ItemService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
-builder.Services.AddScoped<IReportService, ReportService>();
-builder.Services.AddScoped<IStaffService, StaffService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserItemService, UserItemService>();
+builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<IShopService, ShopService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure JWT authentication

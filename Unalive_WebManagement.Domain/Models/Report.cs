@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
 namespace Unalive_WebManagement.Models;
 
@@ -17,15 +16,9 @@ public partial class Report
 
     public DateTime SendDate { get; set; }
 
-    public string Status { get; set; } = null!;
-
-    public int? ApprovedBy { get; set; }
+    public bool Approved { get; set; }
 
     public DateTime? ApprovedDate { get; set; }
 
-    public virtual User Accused { get; set; } = null!;
-
-    public virtual User Sender { get; set; } = null!;
-
-    public virtual Staff? ApprovedByNavigation { get; set; }
+    public int? ApprovedBy { get; set; }
 }

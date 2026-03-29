@@ -5,19 +5,9 @@ using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.DAL.Repositories
 {
-    public class BannerRepository : Repository<Banner>, IBannerRepository
-    {
-        public BannerRepository(UnaliveDbContext context) : base(context) { }
-    }
-
     public class ItemRepository : Repository<Item>, IItemRepository
     {
         public ItemRepository(UnaliveDbContext context) : base(context) { }
-    }
-
-    public class BannerItemRepository : Repository<BannerItem>, IBannerItemRepository
-    {
-        public BannerItemRepository(UnaliveDbContext context) : base(context) { }
     }
 
     public class UserRepository : Repository<User>, IUserRepository
@@ -40,16 +30,6 @@ namespace Unalive_WebManagement.DAL.Repositories
         public NotificationRepository(UnaliveDbContext context) : base(context) { }
     }
 
-    public class OrderRepository : Repository<Order>, IOrderRepository
-    {
-        public OrderRepository(UnaliveDbContext context) : base(context) { }
-    }
-
-    public class OrderDetailRepository : Repository<OrderDetail>, IOrderDetailRepository
-    {
-        public OrderDetailRepository(UnaliveDbContext context) : base(context) { }
-    }
-
     public class ReportRepository : Repository<Report>, IReportRepository
     {
         public ReportRepository(UnaliveDbContext context) : base(context) { }
@@ -66,5 +46,74 @@ namespace Unalive_WebManagement.DAL.Repositories
             return await _dbSet.FirstOrDefaultAsync(s => s.Email.Trim() == trimmedEmail);
         }
     }
-}
 
+    public class AbilitiesSetRepository : Repository<AbilitiesSet>, IAbilitiesSetRepository
+    {
+        public AbilitiesSetRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRepository
+    {
+        public AnnouncementRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class BundleItemRepository : Repository<BundleItem>, IBundleItemRepository
+    {
+        public BundleItemRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class CharacterAttackRepository : Repository<CharacterAttack>, ICharacterAttackRepository
+    {
+        public CharacterAttackRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class CharacterPassiveRepository : Repository<CharacterPassive>, ICharacterPassiveRepository
+    {
+        public CharacterPassiveRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class CharacterPvPRepository : Repository<CharacterPvP>, ICharacterPvPRepository
+    {
+        public CharacterPvPRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class CharacterSkillRepository : Repository<CharacterSkill>, ICharacterSkillRepository
+    {
+        public CharacterSkillRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class CharacterStatRepository : Repository<CharacterStat>, ICharacterStatRepository
+    {
+        public CharacterStatRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class GemBundleRepository : Repository<GemBundle>, IGemBundleRepository
+    {
+        public GemBundleRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class SkinAndCharacterBundleRepository : Repository<SkinAndCharacterBundle>, ISkinAndCharacterBundleRepository
+    {
+        public SkinAndCharacterBundleRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class ShopOrderRepository : Repository<ShopOrder>, IShopOrderRepository
+    {
+        public ShopOrderRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class ShopOrderDetailRepository : Repository<ShopOrderDetail>, IShopOrderDetailRepository
+    {
+        public ShopOrderDetailRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class TopUpHistoryRepository : Repository<TopUpHistory>, ITopUpHistoryRepository
+    {
+        public TopUpHistoryRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class UserBundleRepository : Repository<UserBundle>, IUserBundleRepository
+    {
+        public UserBundleRepository(UnaliveDbContext context) : base(context) { }
+    }
+}

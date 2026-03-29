@@ -35,7 +35,6 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 Token = token,
                 Email = staff.Email,
-                FullName = staff.FullName,
                 Role = staff.Role
             };
         }
@@ -66,4 +65,3 @@ namespace Unalive_WebManagement.BLL.Services
         }
     }
 }
-

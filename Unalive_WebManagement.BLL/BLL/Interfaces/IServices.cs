@@ -2,13 +2,9 @@ using Unalive_WebManagement.DTOs;
 
 namespace Unalive_WebManagement.BLL.Interfaces
 {
-    public interface IBannerService
+    public interface IAuthService
     {
-        Task<IEnumerable<BannerDto>> GetAllBannersAsync();
-        Task<BannerDto?> GetBannerByIdAsync(int id);
-        Task<BannerDto> CreateBannerAsync(CreateBannerDto dto);
-        Task UpdateBannerAsync(int id, UpdateBannerDto dto);
-        Task DeleteBannerAsync(int id);
+        Task<LoginResponse?> LoginAsync(LoginRequest request);
     }
 
     public interface IItemService
@@ -20,67 +16,27 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task DeleteItemAsync(int id);
     }
 
-    public interface IBannerItemService
+    public interface ICharacterService
     {
-        Task<IEnumerable<BannerItemDto>> GetAllBannerItemsAsync();
-        Task<BannerItemDto?> GetBannerItemByIdAsync(int bannerId, int itemId);
-        Task<BannerItemDto> CreateBannerItemAsync(CreateBannerItemDto dto);
-        Task DeleteBannerItemAsync(int bannerId, int itemId);
+        Task<IEnumerable<CharacterStatDto>> GetAllCharacterStatsAsync();
+        Task<CharacterStatDto?> GetCharacterStatByIdAsync(int id);
+        Task<IEnumerable<CharacterPvPDto>> GetAllCharacterPvPsAsync();
+        Task<CharacterPvPDto?> GetCharacterPvPByIdAsync(int id);
+        Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync();
+        Task<CharacterPassiveDto?> GetCharacterPassiveByIdAsync(int id);
+        Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync();
+        Task<CharacterSkillDto?> GetCharacterSkillByIdAsync(int id);
+        Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync();
+        Task<CharacterAttackDto?> GetCharacterAttackByIdAsync(int id);
+        Task<AbilitiesSetDto?> GetAbilitiesSetByTacticIdAsync(int id);
     }
 
-    public interface IUserService
+    public interface IShopService
     {
-        Task<IEnumerable<UserDto>> GetAllUsersAsync();
-        Task<UserDto?> GetUserByIdAsync(int id);
-        Task<UserDto> CreateUserAsync(CreateUserDto dto);
-        Task UpdateUserAsync(int id, UpdateUserDto dto);
-        Task DeleteUserAsync(int id);
-    }
-
-    public interface IUserItemService
-    {
-        Task<IEnumerable<UserItemDto>> GetAllUserItemsAsync();
-        Task<IEnumerable<UserItemDto>> GetUserItemsByUserIdAsync(int userId);
-        Task<UserItemDto?> GetUserItemByIdAsync(int id);
-        Task<UserItemDto> CreateUserItemAsync(CreateUserItemDto dto);
-        Task UpdateUserItemAsync(int id, UpdateUserItemDto dto);
-        Task DeleteUserItemAsync(int id);
-    }
-
-    public interface INotificationService
-    {
-        Task<IEnumerable<NotificationDto>> GetAllNotificationsAsync();
-        Task<NotificationDto?> GetNotificationByIdAsync(int id);
-    }
-
-    public interface IOrderService
-    {
-        Task<IEnumerable<OrderDto>> GetAllOrdersAsync();
-        Task<OrderDto?> GetOrderByIdAsync(int id);
-    }
-
-    public interface IOrderDetailService
-    {
-        Task<IEnumerable<OrderDetailDto>> GetAllOrderDetailsAsync();
-        Task<OrderDetailDto?> GetOrderDetailByIdAsync(int orderId, int productId);
-    }
-
-    public interface IReportService
-    {
-        Task<IEnumerable<ReportDto>> GetAllReportsAsync();
-        Task<ReportDto?> GetReportByIdAsync(int id);
-        Task<bool> ApproveReportAsync(int reportId, int staffId);
-    }
-
-    public interface IStaffService
-    {
-        Task<IEnumerable<StaffDto>> GetAllStaffAsync();
-        Task<StaffDto?> GetStaffByIdAsync(int id);
-        Task<StaffDto?> GetStaffByEmailAsync(string email);
-    }
-
-    public interface IAuthService
-    {
-        Task<LoginResponse?> LoginAsync(LoginRequest request);
+        Task<IEnumerable<GemBundleDto>> GetAllGemBundlesAsync();
+        Task<IEnumerable<SkinAndCharacterBundleDto>> GetAllSkinAndCharacterBundlesAsync();
+        Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync();
+        Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId);
+        Task<IEnumerable<TopUpHistoryDto>> GetAllTopUpHistoriesAsync();
     }
 }

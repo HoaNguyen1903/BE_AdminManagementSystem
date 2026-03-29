@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
 namespace Unalive_WebManagement.Models;
 
@@ -11,9 +10,5 @@ public partial class Staff
 
     public string Password { get; set; } = null!;
 
-    public string FullName { get; set; } = null!;
-
     public string Role { get; set; } = null!;
-
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

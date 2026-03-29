@@ -20,10 +20,9 @@ namespace Unalive_WebManagement.BLL.Services
             return items.Select(i => new ItemDto
             {
                 ItemId = i.ItemId,
-                Name = i.Name,
-                Price = i.Price,
-                Description = i.Description,
-                Type = i.Type
+                ItemName = i.ItemName,
+                ItemDescription = i.ItemDescription,
+                ItemType = i.ItemType
             });
         }
 
@@ -35,10 +34,9 @@ namespace Unalive_WebManagement.BLL.Services
             return new ItemDto
             {
                 ItemId = item.ItemId,
-                Name = item.Name,
-                Price = item.Price,
-                Description = item.Description,
-                Type = item.Type
+                ItemName = item.ItemName,
+                ItemDescription = item.ItemDescription,
+                ItemType = item.ItemType
             };
         }
 
@@ -46,10 +44,9 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var item = new Item
             {
-                Name = dto.Name,
-                Price = dto.Price,
-                Description = dto.Description,
-                Type = dto.Type
+                ItemName = dto.ItemName,
+                ItemDescription = dto.ItemDescription,
+                ItemType = dto.ItemType
             };
 
             var created = await _itemRepository.AddAsync(item);
@@ -57,10 +54,9 @@ namespace Unalive_WebManagement.BLL.Services
             return new ItemDto
             {
                 ItemId = created.ItemId,
-                Name = created.Name,
-                Price = created.Price,
-                Description = created.Description,
-                Type = created.Type
+                ItemName = created.ItemName,
+                ItemDescription = created.ItemDescription,
+                ItemType = created.ItemType
             };
         }
 
@@ -69,10 +65,9 @@ namespace Unalive_WebManagement.BLL.Services
             var item = await _itemRepository.GetByIdAsync(id);
             if (item == null) throw new KeyNotFoundException($"Item with ID {id} not found");
 
-            item.Name = dto.Name;
-            item.Price = dto.Price;
-            item.Description = dto.Description;
-            item.Type = dto.Type;
+            item.ItemName = dto.ItemName;
+            item.ItemDescription = dto.ItemDescription;
+            item.ItemType = dto.ItemType;
 
             await _itemRepository.UpdateAsync(item);
         }
