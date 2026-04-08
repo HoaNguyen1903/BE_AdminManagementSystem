@@ -2,28 +2,41 @@ using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
 using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
+using Unalive_WebManagement.BLL.Helpers;
 
 namespace Unalive_WebManagement.BLL.Services
 {
     public class ItemService : IItemService
     {
         private readonly IItemRepository _itemRepository;
+        private readonly IAnnouncementRepository _announcementRepository;
+        private readonly INotificationRepository _notificationRepository;
 
-        public ItemService(IItemRepository itemRepository)
+        public ItemService(
+            IItemRepository itemRepository, 
+            IAnnouncementRepository announcementRepository,
+            INotificationRepository notificationRepository)
         {
             _itemRepository = itemRepository;
+            _announcementRepository = announcementRepository;
+            _notificationRepository = notificationRepository;
         }
 
-        public async Task<IEnumerable<ItemDto>> GetAllItemsAsync()
+        public async Task<IEnumerable<ItemDto>> GetAllItemsAsync(QueryParameters query)
         {
             var items = await _itemRepository.GetAllAsync();
-            return items.Select(i => new ItemDto
+            var dtos = items.Select(i => new ItemDto
             {
                 ItemId = i.ItemId,
                 ItemName = i.ItemName,
                 ItemDescription = i.ItemDescription,
                 ItemType = i.ItemType
             });
+
+            return dtos.ApplyQuery(query, (i, s) => 
+                i.ItemName.Contains(s, StringComparison.OrdinalIgnoreCase) || 
+                i.ItemDescription.Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                i.ItemType.Contains(s, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<ItemDto?> GetItemByIdAsync(int id)
@@ -40,7 +53,7 @@ namespace Unalive_WebManagement.BLL.Services
             };
         }
 
-        public async Task<ItemDto> CreateItemAsync(CreateItemDto dto)
+        public async Task<ItemDto> CreateItemAsync(CreateItemDto dto, int staffId)
         {
             var item = new Item
             {
@@ -50,6 +63,29 @@ namespace Unalive_WebManagement.BLL.Services
             };
 
             var created = await _itemRepository.AddAsync(item);
+
+            // Create automatic announcement
+            var announcement = new Announcement
+            {
+                Title = $"[{created.ItemName}] added to the game",
+                Content = "",
+                Type = "General",
+                Status = "Drafted",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(7),
+                CreatedBy = staffId,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _announcementRepository.AddAsync(announcement);
+
+            // Create notification to staff
+            var notification = new Notification
+            {
+                NotificationMessage = "There's an announcement waiting to be edited or published.",
+                ReceiverId = staffId,
+                Read = false
+            };
+            await _notificationRepository.AddAsync(notification);
 
             return new ItemDto
             {

@@ -9,11 +9,46 @@ namespace Unalive_WebManagement.DTOs
         public float BundlePrice { get; set; }
     }
 
+    public class CreateGemBundleDto
+    {
+        public string BundleName { get; set; } = null!;
+        public float BundlePrice { get; set; }
+    }
+
+    public class UpdateGemBundleDto : CreateGemBundleDto { }
+
     public class SkinAndCharacterBundleDto
     {
         public int SkinAndCharacterBundleId { get; set; }
         public string BundleName { get; set; } = null!;
         public float BundlePrice { get; set; }
+    }
+
+    public class CreateSkinAndCharacterBundleDto
+    {
+        public string BundleName { get; set; } = null!;
+        public float BundlePrice { get; set; }
+    }
+
+    public class UpdateSkinAndCharacterBundleDto : CreateSkinAndCharacterBundleDto { }
+
+    public class BundleItemDto
+    {
+        public int SkinAndCharacterBundleId { get; set; }
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class CreateBundleItemDto
+    {
+        public int SkinAndCharacterBundleId { get; set; }
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class UpdateBundleItemDto
+    {
+        public int Quantity { get; set; }
     }
 
     public class ShopOrderDto

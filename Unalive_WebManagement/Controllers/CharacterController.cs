@@ -18,9 +18,9 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("stats")]
-        public async Task<ActionResult<IEnumerable<CharacterStatDto>>> GetAllStats()
+        public async Task<ActionResult<IEnumerable<CharacterStatDto>>> GetAllStats([FromQuery] QueryParameters query)
         {
-            return Ok(await _characterService.GetAllCharacterStatsAsync());
+            return Ok(await _characterService.GetAllCharacterStatsAsync(query));
         }
 
         [HttpGet("stats/{id}")]
@@ -32,9 +32,9 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("pvp")]
-        public async Task<ActionResult<IEnumerable<CharacterPvPDto>>> GetAllPvPs()
+        public async Task<ActionResult<IEnumerable<CharacterPvPDto>>> GetAllPvPs([FromQuery] QueryParameters query)
         {
-            return Ok(await _characterService.GetAllCharacterPvPsAsync());
+            return Ok(await _characterService.GetAllCharacterPvPsAsync(query));
         }
 
         [HttpGet("pvp/{id}")]
@@ -46,21 +46,21 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("passives")]
-        public async Task<ActionResult<IEnumerable<CharacterPassiveDto>>> GetAllPassives()
+        public async Task<ActionResult<IEnumerable<CharacterPassiveDto>>> GetAllPassives([FromQuery] QueryParameters query)
         {
-            return Ok(await _characterService.GetAllCharacterPassivesAsync());
+            return Ok(await _characterService.GetAllCharacterPassivesAsync(query));
         }
 
         [HttpGet("skills")]
-        public async Task<ActionResult<IEnumerable<CharacterSkillDto>>> GetAllSkills()
+        public async Task<ActionResult<IEnumerable<CharacterSkillDto>>> GetAllSkills([FromQuery] QueryParameters query)
         {
-            return Ok(await _characterService.GetAllCharacterSkillsAsync());
+            return Ok(await _characterService.GetAllCharacterSkillsAsync(query));
         }
 
         [HttpGet("attacks")]
-        public async Task<ActionResult<IEnumerable<CharacterAttackDto>>> GetAllAttacks()
+        public async Task<ActionResult<IEnumerable<CharacterAttackDto>>> GetAllAttacks([FromQuery] QueryParameters query)
         {
-            return Ok(await _characterService.GetAllCharacterAttacksAsync());
+            return Ok(await _characterService.GetAllCharacterAttacksAsync(query));
         }
 
         [HttpGet("abilities/{tacticId}")]

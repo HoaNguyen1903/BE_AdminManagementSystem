@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DTOs;
 
@@ -18,9 +19,9 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll([FromQuery] QueryParameters query)
         {
-            return Ok(await _itemService.GetAllItemsAsync());
+            return Ok(await _itemService.GetAllItemsAsync(query));
         }
 
         [HttpGet("{id}")]
@@ -34,7 +35,8 @@ namespace Unalive_WebManagement.Controllers
         [HttpPost]
         public async Task<ActionResult<ItemDto>> Create([FromBody] CreateItemDto dto)
         {
-            var created = await _itemService.CreateItemAsync(dto);
+            var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var created = await _itemService.CreateItemAsync(dto, staffId);
             return CreatedAtAction(nameof(GetById), new { id = created.ItemId }, created);
         }
 

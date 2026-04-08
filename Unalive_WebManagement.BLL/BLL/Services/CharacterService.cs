@@ -2,6 +2,7 @@ using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
 using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
+using Unalive_WebManagement.BLL.Helpers;
 
 namespace Unalive_WebManagement.BLL.Services
 {
@@ -30,15 +31,16 @@ namespace Unalive_WebManagement.BLL.Services
             _abilitiesRepository = abilitiesRepository;
         }
 
-        public async Task<IEnumerable<CharacterStatDto>> GetAllCharacterStatsAsync()
+        public async Task<IEnumerable<CharacterStatDto>> GetAllCharacterStatsAsync(QueryParameters query)
         {
             var stats = await _statRepository.GetAllAsync();
-            return stats.Select(s => new CharacterStatDto
+            var dtos = stats.Select(s => new CharacterStatDto
             {
                 CharacterId = s.CharacterId,
                 MoveRange = s.MoveRange,
                 MaxHealth = s.MaxHealth
             });
+            return dtos.ApplyQuery(query, (s, search) => s.CharacterId.ToString().Contains(search));
         }
 
         public async Task<CharacterStatDto?> GetCharacterStatByIdAsync(int id)
@@ -48,15 +50,18 @@ namespace Unalive_WebManagement.BLL.Services
             return new CharacterStatDto { CharacterId = s.CharacterId, MoveRange = s.MoveRange, MaxHealth = s.MaxHealth };
         }
 
-        public async Task<IEnumerable<CharacterPvPDto>> GetAllCharacterPvPsAsync()
+        public async Task<IEnumerable<CharacterPvPDto>> GetAllCharacterPvPsAsync(QueryParameters query)
         {
             var pvps = await _pvpRepository.GetAllAsync();
-            return pvps.Select(p => new CharacterPvPDto
+            var dtos = pvps.Select(p => new CharacterPvPDto
             {
                 CharacterTacticId = p.CharacterTacticId,
                 Name = p.Name,
                 Description = p.Description
             });
+            return dtos.ApplyQuery(query, (p, search) => 
+                p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                p.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<CharacterPvPDto?> GetCharacterPvPByIdAsync(int id)
@@ -66,16 +71,19 @@ namespace Unalive_WebManagement.BLL.Services
             return new CharacterPvPDto { CharacterTacticId = p.CharacterTacticId, Name = p.Name, Description = p.Description };
         }
 
-        public async Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync()
+        public async Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync(QueryParameters query)
         {
             var passives = await _passiveRepository.GetAllAsync();
-            return passives.Select(p => new CharacterPassiveDto
+            var dtos = passives.Select(p => new CharacterPassiveDto
             {
                 CharacterPassiveId = p.CharacterPassiveId,
                 Name = p.Name,
                 Description = p.Description,
                 LockedState = p.LockedState
             });
+            return dtos.ApplyQuery(query, (p, search) => 
+                p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                p.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<CharacterPassiveDto?> GetCharacterPassiveByIdAsync(int id)
@@ -85,10 +93,10 @@ namespace Unalive_WebManagement.BLL.Services
             return new CharacterPassiveDto { CharacterPassiveId = p.CharacterPassiveId, Name = p.Name, Description = p.Description, LockedState = p.LockedState };
         }
 
-        public async Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync()
+        public async Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync(QueryParameters query)
         {
             var skills = await _skillRepository.GetAllAsync();
-            return skills.Select(s => new CharacterSkillDto
+            var dtos = skills.Select(s => new CharacterSkillDto
             {
                 CharacterSkillId = s.CharacterSkillId,
                 Name = s.Name,
@@ -100,6 +108,9 @@ namespace Unalive_WebManagement.BLL.Services
                 CritRate = s.CritRate,
                 LockedState = s.LockedState
             });
+            return dtos.ApplyQuery(query, (s, search) => 
+                s.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                s.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<CharacterSkillDto?> GetCharacterSkillByIdAsync(int id)
@@ -120,10 +131,10 @@ namespace Unalive_WebManagement.BLL.Services
             };
         }
 
-        public async Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync()
+        public async Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync(QueryParameters query)
         {
             var attacks = await _attackRepository.GetAllAsync();
-            return attacks.Select(a => new CharacterAttackDto
+            var dtos = attacks.Select(a => new CharacterAttackDto
             {
                 CharacterAttackId = a.CharacterAttackId,
                 Name = a.Name,
@@ -135,6 +146,9 @@ namespace Unalive_WebManagement.BLL.Services
                 CritRate = a.CritRate,
                 LockedState = a.LockedState
             });
+            return dtos.ApplyQuery(query, (a, search) => 
+                a.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                a.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<CharacterAttackDto?> GetCharacterAttackByIdAsync(int id)

@@ -43,6 +43,9 @@ builder.Services.AddScoped<IUserBundleRepository, UserBundleRepository>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IShopService, ShopService>();
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure JWT authentication
