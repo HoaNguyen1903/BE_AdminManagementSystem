@@ -11,12 +11,18 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserItemRepository _userItemRepository;
         private readonly IUserBundleRepository _userBundleRepository;
+        private readonly IUserBanLogRepository _userBanLogRepository;
 
-        public UserService(IUserRepository userRepository, IUserItemRepository userItemRepository, IUserBundleRepository userBundleRepository)
+        public UserService(
+            IUserRepository userRepository, 
+            IUserItemRepository userItemRepository, 
+            IUserBundleRepository userBundleRepository,
+            IUserBanLogRepository userBanLogRepository)
         {
             _userRepository = userRepository;
             _userItemRepository = userItemRepository;
             _userBundleRepository = userBundleRepository;
+            _userBanLogRepository = userBanLogRepository;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync(QueryParameters query)
@@ -28,7 +34,8 @@ namespace Unalive_WebManagement.BLL.Services
                 Email = u.Email,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
-                Banned = u.Banned
+                Banned = u.BannedUntil.HasValue && u.BannedUntil > DateTime.UtcNow,
+                BannedUntil = u.BannedUntil
             });
             return dtos.ApplyQuery(query, (u, search) => 
                 u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) || 
@@ -40,7 +47,133 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var u = await _userRepository.GetByIdAsync(id);
             if (u == null) return null;
-            return new UserDto { UserId = u.UserId, Email = u.Email, FirstName = u.FirstName, LastName = u.LastName, Banned = u.Banned };
+            return new UserDto 
+            { 
+                UserId = u.UserId, 
+                Email = u.Email, 
+                FirstName = u.FirstName, 
+                LastName = u.LastName, 
+                Banned = u.BannedUntil.HasValue && u.BannedUntil > DateTime.UtcNow, 
+                BannedUntil = u.BannedUntil 
+            };
+        }
+
+        public async Task<UserDto> CreateUserAsync(CreateUserDto dto)
+        {
+            var user = new User
+            {
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                BannedUntil = null // Default to not banned
+            };
+            var created = await _userRepository.AddAsync(user);
+            return new UserDto
+            {
+                UserId = created.UserId,
+                Email = created.Email,
+                FirstName = created.FirstName,
+                LastName = created.LastName,
+                Banned = false,
+                BannedUntil = null
+            };
+        }
+
+        public async Task UpdateUserAsync(int id, UpdateUserDto dto)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null) throw new KeyNotFoundException();
+            user.Email = dto.Email;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.BannedUntil = dto.BannedUntil;
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task BanUserAsync(int id, BanUserRequest dto, int staffId)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null) throw new KeyNotFoundException();
+
+            user.BannedUntil = dto.BannedUntil;
+            await _userRepository.UpdateAsync(user);
+
+            var log = new UserBanLog
+            {
+                UserId = id,
+                BanReason = dto.BanReason,
+                BannedDate = DateTime.UtcNow,
+                BannedUntil = dto.BannedUntil,
+                BannedBy = staffId
+            };
+            await _userBanLogRepository.AddAsync(log);
+        }
+
+        // UserBanLog CRUD
+        public async Task<IEnumerable<UserBanLogDto>> GetAllUserBanLogsAsync(QueryParameters query)
+        {
+            var logs = await _userBanLogRepository.GetAllAsync();
+            var dtos = logs.Select(l => new UserBanLogDto
+            {
+                UserBanLogId = l.UserBanLogId,
+                UserId = l.UserId,
+                BanReason = l.BanReason,
+                BannedDate = l.BannedDate,
+                BannedUntil = l.BannedUntil,
+                BannedBy = l.BannedBy
+            });
+            return dtos.ApplyQuery(query, (l, search) => l.BanReason.Contains(search, StringComparison.OrdinalIgnoreCase) || l.UserId.ToString().Contains(search));
+        }
+
+        public async Task<IEnumerable<UserBanLogDto>> GetUserBanLogsByUserIdAsync(int userId, QueryParameters query)
+        {
+            var logs = await _userBanLogRepository.GetAllAsync();
+            var dtos = logs.Where(l => l.UserId == userId).Select(l => new UserBanLogDto
+            {
+                UserBanLogId = l.UserBanLogId,
+                UserId = l.UserId,
+                BanReason = l.BanReason,
+                BannedDate = l.BannedDate,
+                BannedUntil = l.BannedUntil,
+                BannedBy = l.BannedBy
+            });
+            return dtos.ApplyQuery(query, (l, search) => l.BanReason.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<UserBanLogDto> CreateUserBanLogAsync(CreateUserBanLogDto dto, int staffId)
+        {
+            var log = new UserBanLog
+            {
+                UserId = dto.UserId,
+                BanReason = dto.BanReason,
+                BannedDate = DateTime.UtcNow,
+                BannedUntil = dto.BannedUntil,
+                BannedBy = staffId
+            };
+            var created = await _userBanLogRepository.AddAsync(log);
+            return new UserBanLogDto
+            {
+                UserBanLogId = created.UserBanLogId,
+                UserId = created.UserId,
+                BanReason = created.BanReason,
+                BannedDate = created.BannedDate,
+                BannedUntil = created.BannedUntil,
+                BannedBy = created.BannedBy
+            };
+        }
+
+        public async Task UpdateUserBanLogAsync(int id, UpdateUserBanLogDto dto)
+        {
+            var log = await _userBanLogRepository.GetByIdAsync(id);
+            if (log == null) throw new KeyNotFoundException();
+            log.BanReason = dto.BanReason;
+            log.BannedUntil = dto.BannedUntil;
+            await _userBanLogRepository.UpdateAsync(log);
+        }
+
+        public async Task DeleteUserBanLogAsync(int id)
+        {
+            await _userBanLogRepository.DeleteAsync(id);
         }
 
         // UserItem CRUD

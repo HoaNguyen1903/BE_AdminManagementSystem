@@ -69,7 +69,16 @@ namespace Unalive_WebManagement.BLL.Interfaces
     {
         Task<IEnumerable<UserDto>> GetAllUsersAsync(QueryParameters query);
         Task<UserDto?> GetUserByIdAsync(int id);
+        Task<UserDto> CreateUserAsync(CreateUserDto dto);
+        Task UpdateUserAsync(int id, UpdateUserDto dto);
+        Task BanUserAsync(int id, BanUserRequest dto, int staffId);
         
+        Task<IEnumerable<UserBanLogDto>> GetAllUserBanLogsAsync(QueryParameters query);
+        Task<IEnumerable<UserBanLogDto>> GetUserBanLogsByUserIdAsync(int userId, QueryParameters query);
+        Task<UserBanLogDto> CreateUserBanLogAsync(CreateUserBanLogDto dto, int staffId);
+        Task UpdateUserBanLogAsync(int id, UpdateUserBanLogDto dto);
+        Task DeleteUserBanLogAsync(int id);
+
         Task<IEnumerable<UserItemDto>> GetAllUserItemsAsync(QueryParameters query);
         Task<IEnumerable<UserItemDto>> GetUserItemsByUserIdAsync(int userId, QueryParameters query);
         Task<UserItemDto> CreateUserItemAsync(CreateUserItemDto dto);
@@ -86,7 +95,10 @@ namespace Unalive_WebManagement.BLL.Interfaces
     public interface IFeedbackService
     {
         Task<IEnumerable<NotificationDto>> GetAllNotificationsAsync(QueryParameters query);
+        Task MarkNotificationReadAsync(int id);
+        Task MarkNotificationUnreadAsync(int id);
         Task<IEnumerable<ReportDto>> GetAllReportsAsync(QueryParameters query);
         Task<ReportDto?> GetReportByIdAsync(int id);
+        Task ApproveReportAsync(int id, int staffId);
     }
 }

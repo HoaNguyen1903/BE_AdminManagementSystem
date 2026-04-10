@@ -31,32 +31,19 @@ namespace Unalive_WebManagement.Controllers
             return Ok(user);
         }
 
-        // UserItem Endpoints
-        [HttpGet("items")]
-        public async Task<ActionResult<IEnumerable<UserItemDto>>> GetAllUserItems([FromQuery] QueryParameters query)
+        [HttpPost]
+        public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto dto)
         {
-            return Ok(await _userService.GetAllUserItemsAsync(query));
+            var created = await _userService.CreateUserAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
         }
 
-        [HttpGet("{userId}/items")]
-        public async Task<ActionResult<IEnumerable<UserItemDto>>> GetUserItems(int userId, [FromQuery] QueryParameters query)
-        {
-            return Ok(await _userService.GetUserItemsByUserIdAsync(userId, query));
-        }
-
-        [HttpPost("items")]
-        public async Task<ActionResult<UserItemDto>> CreateUserItem([FromBody] CreateUserItemDto dto)
-        {
-            var created = await _userService.CreateUserItemAsync(dto);
-            return Ok(created);
-        }
-
-        [HttpPut("{userId}/items/{itemId}")]
-        public async Task<IActionResult> UpdateUserItem(int userId, int itemId, [FromBody] UpdateUserItemDto dto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto dto)
         {
             try
             {
-                await _userService.UpdateUserItemAsync(userId, itemId, dto);
+                await _userService.UpdateUserAsync(id, dto);
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -65,10 +52,60 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
-        [HttpDelete("{userId}/items/{itemId}")]
-        public async Task<IActionResult> DeleteUserItem(int userId, int itemId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Ban(int id, [FromBody] BanUserRequest dto)
         {
-            await _userService.DeleteUserItemAsync(userId, itemId);
+            var staffId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            try
+            {
+                await _userService.BanUserAsync(id, dto, staffId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        // UserBanLog Endpoints
+        [HttpGet("ban-logs")]
+        public async Task<ActionResult<IEnumerable<UserBanLogDto>>> GetAllUserBanLogs([FromQuery] QueryParameters query)
+        {
+            return Ok(await _userService.GetAllUserBanLogsAsync(query));
+        }
+
+        [HttpGet("{userId}/ban-logs")]
+        public async Task<ActionResult<IEnumerable<UserBanLogDto>>> GetUserBanLogs(int userId, [FromQuery] QueryParameters query)
+        {
+            return Ok(await _userService.GetUserBanLogsByUserIdAsync(userId, query));
+        }
+
+        [HttpPost("ban-logs")]
+        public async Task<ActionResult<UserBanLogDto>> CreateUserBanLog([FromBody] CreateUserBanLogDto dto)
+        {
+            var staffId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var created = await _userService.CreateUserBanLogAsync(dto, staffId);
+            return Ok(created);
+        }
+
+        [HttpPut("ban-logs/{id}")]
+        public async Task<IActionResult> UpdateUserBanLog(int id, [FromBody] UpdateUserBanLogDto dto)
+        {
+            try
+            {
+                await _userService.UpdateUserBanLogAsync(id, dto);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("ban-logs/{id}")]
+        public async Task<IActionResult> DeleteUserBanLog(int id)
+        {
+            await _userService.DeleteUserBanLogAsync(id);
             return NoContent();
         }
 

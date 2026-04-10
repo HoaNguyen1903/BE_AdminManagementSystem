@@ -28,4 +28,5 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IShopOrderDetailRepository : IRepository<ShopOrderDetail> { }
     public interface ITopUpHistoryRepository : IRepository<TopUpHistory> { }
     public interface IUserBundleRepository : IRepository<UserBundle> { }
+    public interface IUserBanLogRepository : IRepository<UserBanLog> { }
 }

@@ -116,4 +116,9 @@ namespace Unalive_WebManagement.DAL.Repositories
     {
         public UserBundleRepository(UnaliveDbContext context) : base(context) { }
     }
+
+    public class UserBanLogRepository : Repository<UserBanLog>, IUserBanLogRepository
+    {
+        public UserBanLogRepository(UnaliveDbContext context) : base(context) { }
+    }
 }

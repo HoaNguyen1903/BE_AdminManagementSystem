@@ -13,4 +13,6 @@ public partial class User
     public string LastName { get; set; } = null!;
 
     public bool Banned { get; set; }
+
+    public DateTime? BannedUntil { get; set; }
 }

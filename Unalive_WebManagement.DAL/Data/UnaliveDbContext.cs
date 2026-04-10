@@ -28,6 +28,7 @@ public partial class UnaliveDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<UserBundle> UserBundles { get; set; }
     public virtual DbSet<UserItem> UserItems { get; set; }
+    public virtual DbSet<UserBanLog> UserBanLogs { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,6 +36,12 @@ public partial class UnaliveDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         #region Entity Configurations
+        modelBuilder.Entity<UserBanLog>(entity =>
+        {
+            entity.HasKey(e => e.UserBanLogId);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
+            entity.HasOne(d => d.BannedByNavigation).WithMany().HasForeignKey(d => d.BannedBy);
+        });
 
         modelBuilder.Entity<User>(entity =>
         {
@@ -42,6 +49,8 @@ public partial class UnaliveDbContext : DbContext
             entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
             entity.Property(e => e.FirstName).HasMaxLength(100);
             entity.Property(e => e.LastName).HasMaxLength(100);
+            entity.Property(e => e.Banned)
+                .HasComputedColumnSql("CASE WHEN [BannedUntil] > GETUTCDATE() THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END");
         });
 
         modelBuilder.Entity<Staff>(entity =>

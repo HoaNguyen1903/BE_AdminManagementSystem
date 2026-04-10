@@ -30,6 +30,22 @@ namespace Unalive_WebManagement.BLL.Services
             return dtos.ApplyQuery(query, (n, search) => n.NotificationMessage.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
+        public async Task MarkNotificationReadAsync(int id)
+        {
+            var n = await _notificationRepository.GetByIdAsync(id);
+            if (n == null) throw new KeyNotFoundException();
+            n.Read = true;
+            await _notificationRepository.UpdateAsync(n);
+        }
+
+        public async Task MarkNotificationUnreadAsync(int id)
+        {
+            var n = await _notificationRepository.GetByIdAsync(id);
+            if (n == null) throw new KeyNotFoundException();
+            n.Read = false;
+            await _notificationRepository.UpdateAsync(n);
+        }
+
         public async Task<IEnumerable<ReportDto>> GetAllReportsAsync(QueryParameters query)
         {
             var items = await _reportRepository.GetAllAsync();
@@ -64,6 +80,16 @@ namespace Unalive_WebManagement.BLL.Services
                 ApprovedDate = r.ApprovedDate,
                 ApprovedBy = r.ApprovedBy
             };
+        }
+
+        public async Task ApproveReportAsync(int id, int staffId)
+        {
+            var r = await _reportRepository.GetByIdAsync(id);
+            if (r == null) throw new KeyNotFoundException();
+            r.Approved = true;
+            r.ApprovedDate = DateTime.UtcNow;
+            r.ApprovedBy = staffId;
+            await _reportRepository.UpdateAsync(r);
         }
     }
 }

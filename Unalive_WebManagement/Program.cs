@@ -38,6 +38,7 @@ builder.Services.AddScoped<IShopOrderRepository, ShopOrderRepository>();
 builder.Services.AddScoped<IShopOrderDetailRepository, ShopOrderDetailRepository>();
 builder.Services.AddScoped<ITopUpHistoryRepository, TopUpHistoryRepository>();
 builder.Services.AddScoped<IUserBundleRepository, UserBundleRepository>();
+builder.Services.AddScoped<IUserBanLogRepository, UserBanLogRepository>();
 
 // Register Services
 builder.Services.AddScoped<IItemService, ItemService>();
@@ -119,12 +120,13 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");

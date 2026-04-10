@@ -23,6 +23,34 @@ namespace Unalive_WebManagement.Controllers
             return Ok(await _feedbackService.GetAllNotificationsAsync(query));
         }
 
+        [HttpPost("notifications/{id}/read")]
+        public async Task<IActionResult> MarkRead(int id)
+        {
+            try
+            {
+                await _feedbackService.MarkNotificationReadAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("notifications/{id}/unread")]
+        public async Task<IActionResult> MarkUnread(int id)
+        {
+            try
+            {
+                await _feedbackService.MarkNotificationUnreadAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpGet("reports")]
         public async Task<ActionResult<IEnumerable<ReportDto>>> GetAllReports([FromQuery] QueryParameters query)
         {
@@ -35,6 +63,21 @@ namespace Unalive_WebManagement.Controllers
             var report = await _feedbackService.GetReportByIdAsync(id);
             if (report == null) return NotFound();
             return Ok(report);
+        }
+
+        [HttpPost("reports/{id}/approve")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var staffId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            try
+            {
+                await _feedbackService.ApproveReportAsync(id, staffId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }
