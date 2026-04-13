@@ -13,6 +13,7 @@ namespace Unalive_WebManagement.DTOs
     public class CreateUserDto
     {
         public string Email { get; set; } = null!;
+        public string Password { get; set; } = null!;
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
     }
@@ -20,6 +21,7 @@ namespace Unalive_WebManagement.DTOs
     public class UpdateUserDto
     {
         public string Email { get; set; } = null!;
+        public string Password { get; set; } = null!;
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public bool Banned { get; set; }

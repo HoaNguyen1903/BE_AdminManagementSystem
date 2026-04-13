@@ -22,4 +22,11 @@ namespace Unalive_WebManagement.DTOs
         public DateTime? ApprovedDate { get; set; }
         public int? ApprovedBy { get; set; }
     }
+
+    public class CreateReportDto
+    {
+        public int AccusedId { get; set; }
+        public string Reason { get; set; } = null!;
+        public string? AdditionalInfo { get; set; }
+    }
 }

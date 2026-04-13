@@ -34,8 +34,15 @@ namespace Unalive_WebManagement.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto dto)
         {
-            var created = await _userService.CreateUserAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+            try
+            {
+                var created = await _userService.CreateUserAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
@@ -49,6 +56,10 @@ namespace Unalive_WebManagement.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
             }
         }
 

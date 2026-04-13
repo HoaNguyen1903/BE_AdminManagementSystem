@@ -28,15 +28,22 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync(QueryParameters query)
         {
             var users = await _userRepository.GetAllAsync();
-            var dtos = users.Select(u => new UserDto
-            {
-                UserId = u.UserId,
-                Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Banned = u.BannedUntil.HasValue && u.BannedUntil > DateTime.UtcNow,
-                BannedUntil = u.BannedUntil
+            var now = DateTime.UtcNow;
+            
+            var dtos = users.Select(u => {
+                // Return null if ban has expired or is null
+                var isBanned = u.BannedUntil.HasValue && u.BannedUntil > now;
+                return new UserDto
+                {
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Banned = isBanned,
+                    BannedUntil = isBanned ? u.BannedUntil : null
+                };
             });
+            
             return dtos.ApplyQuery(query, (u, search) => 
                 u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) || 
                 u.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) || 
@@ -47,22 +54,40 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var u = await _userRepository.GetByIdAsync(id);
             if (u == null) return null;
+            
+            var now = DateTime.UtcNow;
+            var isBanned = u.BannedUntil.HasValue && u.BannedUntil > now;
+            
+            // If ban has expired, update database to null
+            if (u.BannedUntil.HasValue && !isBanned)
+            {
+                u.BannedUntil = null;
+                await _userRepository.UpdateAsync(u);
+            }
+
             return new UserDto 
             { 
                 UserId = u.UserId, 
                 Email = u.Email, 
                 FirstName = u.FirstName, 
                 LastName = u.LastName, 
-                Banned = u.BannedUntil.HasValue && u.BannedUntil > DateTime.UtcNow, 
-                BannedUntil = u.BannedUntil 
+                Banned = isBanned, 
+                BannedUntil = isBanned ? u.BannedUntil : null 
             };
         }
 
         public async Task<UserDto> CreateUserAsync(CreateUserDto dto)
         {
+            var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email is already in use.");
+            }
+
             var user = new User
             {
                 Email = dto.Email,
+                Password = dto.Password,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 BannedUntil = null // Default to not banned
@@ -83,10 +108,27 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) throw new KeyNotFoundException();
+
+            // Check if email is being changed and if new email already exists
+            if (!user.Email.Equals(dto.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException("Email is already in use.");
+                }
+            }
+
             user.Email = dto.Email;
+            user.Password = dto.Password;
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
-            user.BannedUntil = dto.BannedUntil;
+            
+            // Set to null if past date or null
+            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTime.UtcNow) 
+                ? dto.BannedUntil 
+                : null;
+                
             await _userRepository.UpdateAsync(user);
         }
 
@@ -95,7 +137,11 @@ namespace Unalive_WebManagement.BLL.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) throw new KeyNotFoundException();
 
-            user.BannedUntil = dto.BannedUntil;
+            // Set to null if past date or null
+            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTime.UtcNow) 
+                ? dto.BannedUntil 
+                : null;
+
             await _userRepository.UpdateAsync(user);
 
             var log = new UserBanLog
@@ -103,7 +149,7 @@ namespace Unalive_WebManagement.BLL.Services
                 UserId = id,
                 BanReason = dto.BanReason,
                 BannedDate = DateTime.UtcNow,
-                BannedUntil = dto.BannedUntil,
+                BannedUntil = user.BannedUntil, // Log what was actually set
                 BannedBy = staffId
             };
             await _userBanLogRepository.AddAsync(log);

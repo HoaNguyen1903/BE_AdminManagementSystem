@@ -5,6 +5,8 @@ namespace Unalive_WebManagement.BLL.Interfaces
     public interface IAuthService
     {
         Task<LoginResponse?> LoginAsync(LoginRequest request);
+        Task<LoginResponse?> LoginUserAsync(LoginRequest request);
+        Task<LoginResponse?> RegisterUserAsync(RegisterRequest request);
     }
 
     public interface IItemService
@@ -54,6 +56,9 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query);
         Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId, QueryParameters query);
         Task<IEnumerable<TopUpHistoryDto>> GetAllTopUpHistoriesAsync(QueryParameters query);
+
+        Task PurchaseGemBundleAsync(int userId, int bundleId);
+        Task PurchaseSkinBundleAsync(int userId, int bundleId);
     }
 
     public interface IAnnouncementService
@@ -95,10 +100,12 @@ namespace Unalive_WebManagement.BLL.Interfaces
     public interface IFeedbackService
     {
         Task<IEnumerable<NotificationDto>> GetAllNotificationsAsync(QueryParameters query);
+        Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(int userId, QueryParameters query);
         Task MarkNotificationReadAsync(int id);
         Task MarkNotificationUnreadAsync(int id);
         Task<IEnumerable<ReportDto>> GetAllReportsAsync(QueryParameters query);
         Task<ReportDto?> GetReportByIdAsync(int id);
+        Task<ReportDto> CreateReportAsync(CreateReportDto dto, int senderId);
         Task ApproveReportAsync(int id, int staffId);
     }
 }

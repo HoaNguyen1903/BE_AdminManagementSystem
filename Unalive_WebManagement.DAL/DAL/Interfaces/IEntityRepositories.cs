@@ -3,7 +3,10 @@ using Unalive_WebManagement.Models;
 namespace Unalive_WebManagement.DAL.Interfaces
 {
     public interface IItemRepository : IRepository<Item> { }
-    public interface IUserRepository : IRepository<User> { }
+    public interface IUserRepository : IRepository<User>
+    {
+        Task<User?> GetByEmailAsync(string email);
+    }
     public interface IUserItemRepository : IRepository<UserItem>
     {
         Task<IEnumerable<UserItem>> GetByUserIdAsync(int userId);

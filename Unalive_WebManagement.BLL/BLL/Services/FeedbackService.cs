@@ -30,6 +30,19 @@ namespace Unalive_WebManagement.BLL.Services
             return dtos.ApplyQuery(query, (n, search) => n.NotificationMessage.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
+        public async Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(int userId, QueryParameters query)
+        {
+            var items = await _notificationRepository.GetAllAsync();
+            var dtos = items.Where(n => n.ReceiverId == userId).Select(n => new NotificationDto
+            {
+                NotificationId = n.NotificationId,
+                NotificationMessage = n.NotificationMessage,
+                ReceiverId = n.ReceiverId,
+                Read = n.Read
+            });
+            return dtos.ApplyQuery(query, (n, search) => n.NotificationMessage.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
+
         public async Task MarkNotificationReadAsync(int id)
         {
             var n = await _notificationRepository.GetByIdAsync(id);
@@ -79,6 +92,30 @@ namespace Unalive_WebManagement.BLL.Services
                 Approved = r.Approved,
                 ApprovedDate = r.ApprovedDate,
                 ApprovedBy = r.ApprovedBy
+            };
+        }
+
+        public async Task<ReportDto> CreateReportAsync(CreateReportDto dto, int senderId)
+        {
+            var r = new Report
+            {
+                SenderId = senderId,
+                AccusedId = dto.AccusedId,
+                Reason = dto.Reason,
+                AdditionalInfo = dto.AdditionalInfo,
+                SendDate = DateTime.UtcNow,
+                Approved = false
+            };
+            var created = await _reportRepository.AddAsync(r);
+            return new ReportDto
+            {
+                ReportId = created.ReportId,
+                SenderId = created.SenderId,
+                AccusedId = created.AccusedId,
+                Reason = created.Reason,
+                AdditionalInfo = created.AdditionalInfo,
+                SendDate = created.SendDate,
+                Approved = created.Approved
             };
         }
 

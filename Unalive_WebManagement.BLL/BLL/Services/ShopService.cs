@@ -16,6 +16,8 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IBundleItemRepository _bundleItemRepository;
         private readonly IAnnouncementRepository _announcementRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IUserBundleRepository _userBundleRepository;
+        private readonly IUserItemRepository _userItemRepository;
 
         public ShopService(
             IGemBundleRepository gemBundleRepository,
@@ -25,7 +27,9 @@ namespace Unalive_WebManagement.BLL.Services
             ITopUpHistoryRepository topUpHistoryRepository,
             IBundleItemRepository bundleItemRepository,
             IAnnouncementRepository announcementRepository,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository,
+            IUserBundleRepository userBundleRepository,
+            IUserItemRepository userItemRepository)
         {
             _gemBundleRepository = gemBundleRepository;
             _skinAndCharacterBundleRepository = skinAndCharacterBundleRepository;
@@ -35,6 +39,8 @@ namespace Unalive_WebManagement.BLL.Services
             _bundleItemRepository = bundleItemRepository;
             _announcementRepository = announcementRepository;
             _notificationRepository = notificationRepository;
+            _userBundleRepository = userBundleRepository;
+            _userItemRepository = userItemRepository;
         }
 
         // GemBundle CRUD
@@ -250,7 +256,87 @@ namespace Unalive_WebManagement.BLL.Services
                 Status = h.Status,
                 Date = h.Date
             });
-            return dtos.ApplyQuery(query, (h, search) => h.TransactionId.Contains(search, StringComparison.OrdinalIgnoreCase) || h.Status.Contains(search, StringComparison.OrdinalIgnoreCase));
+            return dtos.ApplyQuery(query, (h, search) => h.UserId.ToString().Contains(search) || (h.TransactionId != null && h.TransactionId.Contains(search, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        public async Task PurchaseGemBundleAsync(int userId, int bundleId)
+        {
+            var bundle = await _gemBundleRepository.GetByIdAsync(bundleId);
+            if (bundle == null) throw new KeyNotFoundException("Gem bundle not found");
+
+            // Create TopUpHistory
+            var history = new TopUpHistory
+            {
+                UserId = userId,
+                GemBundleId = bundleId,
+                GemsAmount = 0, // Should be defined in bundle but let's assume 0 for now
+                RealMoneyAmount = bundle.BundlePrice,
+                CurrencyCode = "USD",
+                PaymentGateway = "Simulator",
+                TransactionId = Guid.NewGuid().ToString(),
+                Status = "Success",
+                Date = DateTime.UtcNow
+            };
+            await _topUpHistoryRepository.AddAsync(history);
+
+            // Add to UserBundle
+            var userBundle = new UserBundle
+            {
+                UserId = userId,
+                GemBundleId = bundleId,
+                Remaining = 1
+            };
+            await _userBundleRepository.AddAsync(userBundle);
+        }
+
+        public async Task PurchaseSkinBundleAsync(int userId, int bundleId)
+        {
+            var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(bundleId);
+            if (bundle == null) throw new KeyNotFoundException("Skin bundle not found");
+
+            // Create ShopOrder
+            var order = new ShopOrder
+            {
+                UserId = userId,
+                TotalAmount = bundle.BundlePrice,
+                OrderDate = DateTime.UtcNow
+            };
+            var createdOrder = await _shopOrderRepository.AddAsync(order);
+
+            // Create ShopOrderDetail
+            var detail = new ShopOrderDetail
+            {
+                ShopOrderId = createdOrder.ShopOrderId,
+                SkinAndCharacterBundleId = bundleId,
+                Quantity = 1,
+                UnitPrice = bundle.BundlePrice
+            };
+            await _shopOrderDetailRepository.AddAsync(detail);
+
+            // Add to UserBundle
+            var userBundle = new UserBundle
+            {
+                UserId = userId,
+                SkinAndCharacterBundleId = bundleId,
+                Remaining = 1
+            };
+            await _userBundleRepository.AddAsync(userBundle);
+
+            // Add items from bundle to UserItem
+            var bundleItems = await _bundleItemRepository.GetAllAsync();
+            var itemsToAdd = bundleItems.Where(bi => bi.SkinAndCharacterBundleId == bundleId);
+
+            foreach (var bi in itemsToAdd)
+            {
+                var userItem = new UserItem
+                {
+                    UserId = userId,
+                    ItemId = bi.ItemId,
+                    Quantity = 1, // Assuming 1 for each item in bundle
+                    ShopOrderId = createdOrder.ShopOrderId
+                };
+                await _userItemRepository.AddAsync(userItem);
+            }
         }
     }
 }

@@ -13,6 +13,13 @@ namespace Unalive_WebManagement.DAL.Repositories
     public class UserRepository : Repository<User>, IUserRepository
     {
         public UserRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return null;
+            var trimmedEmail = email.Trim();
+            return await _dbSet.FirstOrDefaultAsync(u => u.Email.Trim() == trimmedEmail);
+        }
     }
 
     public class UserItemRepository : Repository<UserItem>, IUserItemRepository

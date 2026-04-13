@@ -46,7 +46,9 @@ public partial class UnaliveDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId);
+            entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Password).IsRequired().HasMaxLength(255);
             entity.Property(e => e.FirstName).HasMaxLength(100);
             entity.Property(e => e.LastName).HasMaxLength(100);
             entity.Property(e => e.Banned)
@@ -56,6 +58,7 @@ public partial class UnaliveDbContext : DbContext
         modelBuilder.Entity<Staff>(entity =>
         {
             entity.HasKey(e => e.StaffId);
+            entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
             entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
         });
