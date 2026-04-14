@@ -8,6 +8,8 @@ namespace Unalive_WebManagement.DTOs
         public string LastName { get; set; } = null!;
         public bool Banned { get; set; }
         public DateTime? BannedUntil { get; set; } = null!;
+        public DateTime? LastOnline { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 
     public class CreateUserDto
@@ -26,6 +28,15 @@ namespace Unalive_WebManagement.DTOs
         public string LastName { get; set; } = null!;
         public bool Banned { get; set; }
         public DateTime? BannedUntil { get; set; }
+        public DateTime? LastOnline { get; set; }
+        public string? AvatarUrl { get; set; }
+    }
+
+    public class UserStatusDto
+    {
+        public int UserId { get; set; }
+        public bool IsOnline { get; set; }
+        public DateTime? LastOnline { get; set; }
     }
 
     public class BanUserRequest

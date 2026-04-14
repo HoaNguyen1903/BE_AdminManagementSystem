@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
+using Unalive_WebManagement.BLL.Services;
 using Unalive_WebManagement.DTOs;
 
 namespace Unalive_WebManagement.Controllers
@@ -11,10 +14,12 @@ namespace Unalive_WebManagement.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IBlobService _blobService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IBlobService blobService)
         {
             _userService = userService;
+            _blobService = blobService;
         }
 
         [HttpGet]
@@ -76,6 +81,40 @@ namespace Unalive_WebManagement.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpPost("me/heartbeat")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> Heartbeat()
+        {
+            var userId = GetAuthenticatedUserId();
+            await _userService.UpdateUserLastOnlineAsync(userId);
+            return NoContent();
+        }
+
+        [HttpPost("me/logout")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = GetAuthenticatedUserId();
+            await _userService.UpdateUserLastOnlineAsync(userId);
+            return NoContent();
+        }
+
+        [HttpGet("{id}/status")]
+        public async Task<ActionResult<UserStatusDto>> GetStatus(int id, [FromQuery] int onlineThresholdSeconds = 60)
+        {
+            if (onlineThresholdSeconds <= 0) onlineThresholdSeconds = 60;
+
+            if (User.IsInRole("User"))
+            {
+                var currentUserId = GetAuthenticatedUserId();
+                if (currentUserId != id) return Forbid();
+            }
+
+            var status = await _userService.GetUserStatusAsync(id, onlineThresholdSeconds);
+            if (status == null) return NotFound();
+            return Ok(status);
         }
 
         // UserBanLog Endpoints
@@ -159,6 +198,41 @@ namespace Unalive_WebManagement.Controllers
         {
             await _userService.DeleteUserBundleAsync(userId, skinBundleId, gemBundleId);
             return NoContent();
+        }
+
+        private int GetAuthenticatedUserId()
+        {
+            var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(nameIdentifier, out var idFromNameIdentifier)) return idFromNameIdentifier;
+
+            var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue("sub");
+            if (int.TryParse(sub, out var idFromSub)) return idFromSub;
+
+            throw new UnauthorizedAccessException("User id claim is missing.");
+        }
+
+        [HttpPost("avatar")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded");
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(file.ContentType))
+                return BadRequest("Only JPEG, PNG and WebP are allowed");
+
+            if (file.Length > 2 * 1024 * 1024)
+                return BadRequest("File size cannot exceed 2MB");
+
+            var userId = GetAuthenticatedUserId();
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = $"avatars/user/{userId}/{Guid.NewGuid()}{extension}";
+
+            var url = await _blobService.UploadImageAsync(file, fileName);
+            await _userService.UpdateAvatarAsync(userId, url);
+
+            return Ok(new { avatarUrl = url });
         }
     }
 }

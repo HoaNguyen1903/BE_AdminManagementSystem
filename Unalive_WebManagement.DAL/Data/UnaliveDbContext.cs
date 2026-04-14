@@ -51,6 +51,7 @@ public partial class UnaliveDbContext : DbContext
             entity.Property(e => e.Password).IsRequired().HasMaxLength(255);
             entity.Property(e => e.FirstName).HasMaxLength(100);
             entity.Property(e => e.LastName).HasMaxLength(100);
+            entity.Property(e => e.LastOnline).HasColumnType("datetime2");
             entity.Property(e => e.Banned)
                 .HasComputedColumnSql("CASE WHEN [BannedUntil] > GETUTCDATE() THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END");
         });

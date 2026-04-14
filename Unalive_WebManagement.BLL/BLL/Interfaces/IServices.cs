@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Unalive_WebManagement.DTOs;
 
 namespace Unalive_WebManagement.BLL.Interfaces
@@ -77,7 +78,11 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<UserDto> CreateUserAsync(CreateUserDto dto);
         Task UpdateUserAsync(int id, UpdateUserDto dto);
         Task BanUserAsync(int id, BanUserRequest dto, int staffId);
-        
+        Task UpdateUserLastOnlineAsync(int userId);
+        Task<UserStatusDto?> GetUserStatusAsync(int userId, int onlineThresholdSeconds);
+        Task UpdateAvatarAsync(int userId, string avatarUrl);
+
+
         Task<IEnumerable<UserBanLogDto>> GetAllUserBanLogsAsync(QueryParameters query);
         Task<IEnumerable<UserBanLogDto>> GetUserBanLogsByUserIdAsync(int userId, QueryParameters query);
         Task<UserBanLogDto> CreateUserBanLogAsync(CreateUserBanLogDto dto, int staffId);
@@ -107,5 +112,11 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<ReportDto?> GetReportByIdAsync(int id);
         Task<ReportDto> CreateReportAsync(CreateReportDto dto, int senderId);
         Task ApproveReportAsync(int id, int staffId);
+    }
+
+    public interface IBlobService
+    {
+        Task<string> UploadImageAsync(IFormFile file, string fileName);
+        Task DeleteImageAsync(string fileName);
     }
 }

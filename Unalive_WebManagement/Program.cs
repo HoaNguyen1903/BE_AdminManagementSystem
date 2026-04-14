@@ -39,6 +39,7 @@ builder.Services.AddScoped<IShopOrderDetailRepository, ShopOrderDetailRepository
 builder.Services.AddScoped<ITopUpHistoryRepository, TopUpHistoryRepository>();
 builder.Services.AddScoped<IUserBundleRepository, UserBundleRepository>();
 builder.Services.AddScoped<IUserBanLogRepository, UserBanLogRepository>();
+builder.Services.AddScoped<IBlobService, BlobService>();
 
 // Register Services
 builder.Services.AddScoped<IItemService, ItemService>();

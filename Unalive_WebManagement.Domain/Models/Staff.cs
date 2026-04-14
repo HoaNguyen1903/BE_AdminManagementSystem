@@ -11,4 +11,6 @@ public partial class Staff
     public string Password { get; set; } = null!;
 
     public string Role { get; set; } = null!;
+
+    public string? AvatarUrl { get; set; }
 }

@@ -38,7 +38,8 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 Token = token,
                 Email = staff.Email,
-                Role = staff.Role
+                Role = staff.Role,
+                AvatarUrl = staff.AvatarUrl
             };
         }
 
@@ -51,6 +52,9 @@ namespace Unalive_WebManagement.BLL.Services
                 return null;
             }
 
+            user.LastOnline = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user);
+
             // Default role for players is "User"
             var token = GenerateJwtToken(user.UserId, user.Email, "User");
 
@@ -58,7 +62,8 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 Token = token,
                 Email = user.Email,
-                Role = "User"
+                Role = "User",
+                AvatarUrl = user.AvatarUrl
             };
         }
 
@@ -76,7 +81,8 @@ namespace Unalive_WebManagement.BLL.Services
                 Password = request.Password,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                BannedUntil = null
+                BannedUntil = null,
+                LastOnline = DateTime.UtcNow
             };
 
             var created = await _userRepository.AddAsync(user);
@@ -87,7 +93,8 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 Token = token,
                 Email = created.Email,
-                Role = "User"
+                Role = "User",
+                AvatarUrl = created.AvatarUrl
             };
         }
 

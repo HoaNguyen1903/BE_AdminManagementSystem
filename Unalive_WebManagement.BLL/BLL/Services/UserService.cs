@@ -40,7 +40,9 @@ namespace Unalive_WebManagement.BLL.Services
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Banned = isBanned,
-                    BannedUntil = isBanned ? u.BannedUntil : null
+                    BannedUntil = isBanned ? u.BannedUntil : null,
+                    LastOnline = u.LastOnline,
+                    AvatarUrl = u.AvatarUrl
                 };
             });
             
@@ -72,7 +74,9 @@ namespace Unalive_WebManagement.BLL.Services
                 FirstName = u.FirstName, 
                 LastName = u.LastName, 
                 Banned = isBanned, 
-                BannedUntil = isBanned ? u.BannedUntil : null 
+                BannedUntil = isBanned ? u.BannedUntil : null,
+                LastOnline = u.LastOnline,
+                AvatarUrl = u.AvatarUrl
             };
         }
 
@@ -90,7 +94,8 @@ namespace Unalive_WebManagement.BLL.Services
                 Password = dto.Password,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                BannedUntil = null // Default to not banned
+                BannedUntil = null,
+                LastOnline = DateTime.UtcNow
             };
             var created = await _userRepository.AddAsync(user);
             return new UserDto
@@ -100,7 +105,9 @@ namespace Unalive_WebManagement.BLL.Services
                 FirstName = created.FirstName,
                 LastName = created.LastName,
                 Banned = false,
-                BannedUntil = null
+                BannedUntil = null,
+                LastOnline = created.LastOnline,
+                AvatarUrl = created.AvatarUrl
             };
         }
 
@@ -123,6 +130,8 @@ namespace Unalive_WebManagement.BLL.Services
             user.Password = dto.Password;
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
+            user.LastOnline = dto.LastOnline;
+            user.AvatarUrl = dto.AvatarUrl;
             
             // Set to null if past date or null
             user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTime.UtcNow) 
@@ -153,6 +162,31 @@ namespace Unalive_WebManagement.BLL.Services
                 BannedBy = staffId
             };
             await _userBanLogRepository.AddAsync(log);
+        }
+
+        public async Task UpdateUserLastOnlineAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) throw new KeyNotFoundException();
+            user.LastOnline = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task<UserStatusDto?> GetUserStatusAsync(int userId, int onlineThresholdSeconds)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return null;
+
+            var now = DateTime.UtcNow;
+            var isOnline = user.LastOnline.HasValue &&
+                           user.LastOnline.Value >= now.AddSeconds(-onlineThresholdSeconds);
+
+            return new UserStatusDto
+            {
+                UserId = user.UserId,
+                IsOnline = isOnline,
+                LastOnline = user.LastOnline
+            };
         }
 
         // UserBanLog CRUD
@@ -322,6 +356,14 @@ namespace Unalive_WebManagement.BLL.Services
             var gemBundleIdNullable = gemBundleId == 0 ? null : (int?)gemBundleId;
             
             await _userBundleRepository.DeleteAsync(userId, skinBundleIdNullable, gemBundleIdNullable);
+        }
+
+        public async Task UpdateAvatarAsync(int userId, string avatarUrl)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return;
+            user.AvatarUrl = avatarUrl;
+            await _userRepository.UpdateAsync(user);
         }
     }
 }
