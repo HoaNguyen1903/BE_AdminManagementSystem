@@ -4,6 +4,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
+using Unalive_WebManagement.DTOs;
+using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.Controllers
 {
@@ -19,6 +21,43 @@ namespace Unalive_WebManagement.Controllers
         {
             _staffRepository = staffRepository;
             _blobService = blobService;
+        }
+
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateStaffProfileDto dto)
+        {
+            var staffId = GetAuthenticatedStaffId();
+            var staff = await _staffRepository.GetByIdAsync(staffId);
+
+            if (staff == null)
+            {
+                return NotFound("Staff member not found");
+            }
+
+            if (!string.IsNullOrEmpty(dto.Email))
+            {
+                var existingStaff = await _staffRepository.GetByEmailAsync(dto.Email);
+                if (existingStaff != null && existingStaff.StaffId != staffId)
+                {
+                    return Conflict("Email is already in use by another staff member");
+                }
+                staff.Email = dto.Email;
+            }
+
+            if (!string.IsNullOrEmpty(dto.Password))
+            {
+                staff.Password = dto.Password;
+            }
+
+            await _staffRepository.UpdateAsync(staff);
+
+            return Ok(new StaffDto
+            {
+                StaffId = staff.StaffId,
+                Email = staff.Email,
+                Role = staff.Role,
+                AvatarUrl = staff.AvatarUrl
+            });
         }
 
         [HttpPost("avatar")]
@@ -53,18 +92,34 @@ namespace Unalive_WebManagement.Controllers
             return Ok(new { avatarUrl = url });
         }
 
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var staffId = GetAuthenticatedStaffId();
+            var staff = await _staffRepository.GetByIdAsync(staffId);
+            if (staff == null) return NotFound("Staff member not found");
+
+            return Ok(new StaffDto
+            {
+                StaffId = staff.StaffId,
+                Email = staff.Email,
+                Role = staff.Role,
+                AvatarUrl = staff.AvatarUrl
+            });
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var staff = await _staffRepository.GetByIdAsync(id);
             if (staff == null) return NotFound();
 
-            return Ok(new 
+            return Ok(new StaffDto
             {
-                staff.StaffId,
-                staff.Email,
-                staff.Role,
-                staff.AvatarUrl
+                StaffId = staff.StaffId,
+                Email = staff.Email,
+                Role = staff.Role,
+                AvatarUrl = staff.AvatarUrl
             });
         }
 

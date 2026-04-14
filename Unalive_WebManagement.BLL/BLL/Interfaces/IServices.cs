@@ -119,4 +119,11 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<string> UploadImageAsync(IFormFile file, string fileName);
         Task DeleteImageAsync(string fileName);
     }
+
+    public interface IAnalyticsService
+    {
+        Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy);
+        Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top);
+        Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime start, DateTime end);
+    }
 }

@@ -6,6 +6,9 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IUserRepository : IRepository<User>
     {
         Task<User?> GetByEmailAsync(string email);
+        Task<int> CountOnlineUsersAsync(DateTime threshold);
+        Task<int> CountDailyActiveUsersAsync(DateTime date);
+        Task<int> CountBannedUsersAsync(DateTime? bannedUntilAfter = null);
     }
     public interface IUserItemRepository : IRepository<UserItem>
     {
@@ -25,11 +28,31 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface ICharacterPvPRepository : IRepository<CharacterPvP> { }
     public interface ICharacterSkillRepository : IRepository<CharacterSkill> { }
     public interface ICharacterStatRepository : IRepository<CharacterStat> { }
-    public interface IGemBundleRepository : IRepository<GemBundle> { }
-    public interface ISkinAndCharacterBundleRepository : IRepository<SkinAndCharacterBundle> { }
-    public interface IShopOrderRepository : IRepository<ShopOrder> { }
-    public interface IShopOrderDetailRepository : IRepository<ShopOrderDetail> { }
-    public interface ITopUpHistoryRepository : IRepository<TopUpHistory> { }
+    public interface IGemBundleRepository : IRepository<GemBundle>
+    {
+        Task<IEnumerable<GemBundle>> GetAllWithIdsAsync(IEnumerable<int> ids);
+    }
+    public interface ISkinAndCharacterBundleRepository : IRepository<SkinAndCharacterBundle>
+    {
+        Task<IEnumerable<SkinAndCharacterBundle>> GetAllWithIdsAsync(IEnumerable<int> ids);
+    }
+    public interface IShopOrderRepository : IRepository<ShopOrder>
+    {
+        Task<IEnumerable<ShopOrder>> GetCompletedOrdersByDateRangeAsync(DateTime start, DateTime end);
+    }
+    public interface IShopOrderDetailRepository : IRepository<ShopOrderDetail>
+    {
+        Task<IEnumerable<ShopOrderDetail>> GetDetailsByOrderIdsAsync(IEnumerable<int> orderIds);
+    }
+    public interface ITopUpHistoryRepository : IRepository<TopUpHistory>
+    {
+        Task<IEnumerable<TopUpHistory>> GetCompletedTopUpsByDateRangeAsync(DateTime start, DateTime end);
+    }
     public interface IUserBundleRepository : IRepository<UserBundle> { }
     public interface IUserBanLogRepository : IRepository<UserBanLog> { }
+    public interface IPlayerOnlineHistoryRepository : IRepository<PlayerOnlineHistory>
+    {
+        Task<PlayerOnlineHistory?> GetByDateAsync(DateTime date);
+        Task<IEnumerable<PlayerOnlineHistory>> GetByDateRangeAsync(DateTime start, DateTime end);
+    }
 }

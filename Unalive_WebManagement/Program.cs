@@ -39,6 +39,7 @@ builder.Services.AddScoped<IShopOrderDetailRepository, ShopOrderDetailRepository
 builder.Services.AddScoped<ITopUpHistoryRepository, TopUpHistoryRepository>();
 builder.Services.AddScoped<IUserBundleRepository, UserBundleRepository>();
 builder.Services.AddScoped<IUserBanLogRepository, UserBanLogRepository>();
+builder.Services.AddScoped<IPlayerOnlineHistoryRepository, PlayerOnlineHistoryRepository>();
 builder.Services.AddScoped<IBlobService, BlobService>();
 
 // Register Services
@@ -49,6 +50,10 @@ builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
+// Register Background Services
+builder.Services.AddHostedService<PlayerOnlineTrackerService>();
 
 // Configure JWT authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");

@@ -29,6 +29,7 @@ public partial class UnaliveDbContext : DbContext
     public virtual DbSet<UserBundle> UserBundles { get; set; }
     public virtual DbSet<UserItem> UserItems { get; set; }
     public virtual DbSet<UserBanLog> UserBanLogs { get; set; }
+    public virtual DbSet<PlayerOnlineHistory> PlayerOnlineHistories { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -177,6 +178,12 @@ public partial class UnaliveDbContext : DbContext
         modelBuilder.Entity<CharacterAttack>(entity =>
         {
             entity.HasKey(e => e.CharacterAttackId);
+        });
+
+        modelBuilder.Entity<PlayerOnlineHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Date).IsRequired();
         });
 
         #endregion

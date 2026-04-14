@@ -20,6 +20,26 @@ namespace Unalive_WebManagement.DAL.Repositories
             var trimmedEmail = email.Trim();
             return await _dbSet.FirstOrDefaultAsync(u => u.Email.Trim() == trimmedEmail);
         }
+
+        public async Task<int> CountOnlineUsersAsync(DateTime threshold)
+        {
+            return await _dbSet.CountAsync(u => u.LastOnline >= threshold);
+        }
+
+        public async Task<int> CountDailyActiveUsersAsync(DateTime date)
+        {
+            var dateOnly = date.Date;
+            return await _dbSet.CountAsync(u => u.LastOnline >= dateOnly);
+        }
+
+        public async Task<int> CountBannedUsersAsync(DateTime? bannedUntilAfter = null)
+        {
+            if (bannedUntilAfter.HasValue)
+            {
+                return await _dbSet.CountAsync(u => u.BannedUntil > bannedUntilAfter.Value);
+            }
+            return await _dbSet.CountAsync(u => u.BannedUntil == null || u.BannedUntil > DateTime.UtcNow);
+        }
     }
 
     public class UserItemRepository : Repository<UserItem>, IUserItemRepository
@@ -97,26 +117,57 @@ namespace Unalive_WebManagement.DAL.Repositories
     public class GemBundleRepository : Repository<GemBundle>, IGemBundleRepository
     {
         public GemBundleRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<GemBundle>> GetAllWithIdsAsync(IEnumerable<int> ids)
+        {
+            var idList = ids.ToList();
+            return await _dbSet.Where(g => idList.Contains(g.GemBundleId)).ToListAsync();
+        }
     }
 
     public class SkinAndCharacterBundleRepository : Repository<SkinAndCharacterBundle>, ISkinAndCharacterBundleRepository
     {
         public SkinAndCharacterBundleRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<SkinAndCharacterBundle>> GetAllWithIdsAsync(IEnumerable<int> ids)
+        {
+            var idList = ids.ToList();
+            return await _dbSet.Where(s => idList.Contains(s.SkinAndCharacterBundleId)).ToListAsync();
+        }
     }
 
     public class ShopOrderRepository : Repository<ShopOrder>, IShopOrderRepository
     {
         public ShopOrderRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<ShopOrder>> GetCompletedOrdersByDateRangeAsync(DateTime start, DateTime end)
+        {
+            return await _dbSet.Where(o => o.Status == "Completed" && o.OrderDate >= start && o.OrderDate <= end)
+                               .ToListAsync();
+        }
     }
 
     public class ShopOrderDetailRepository : Repository<ShopOrderDetail>, IShopOrderDetailRepository
     {
         public ShopOrderDetailRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<ShopOrderDetail>> GetDetailsByOrderIdsAsync(IEnumerable<int> orderIds)
+        {
+            var idList = orderIds.ToList();
+            return await _dbSet.Where(d => idList.Contains(d.ShopOrderId))
+                               .ToListAsync();
+        }
     }
 
     public class TopUpHistoryRepository : Repository<TopUpHistory>, ITopUpHistoryRepository
     {
         public TopUpHistoryRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<TopUpHistory>> GetCompletedTopUpsByDateRangeAsync(DateTime start, DateTime end)
+        {
+            return await _dbSet.Where(t => t.Status == "Completed" && t.Date >= start && t.Date <= end)
+                               .ToListAsync();
+        }
     }
 
     public class UserBundleRepository : Repository<UserBundle>, IUserBundleRepository
@@ -127,5 +178,23 @@ namespace Unalive_WebManagement.DAL.Repositories
     public class UserBanLogRepository : Repository<UserBanLog>, IUserBanLogRepository
     {
         public UserBanLogRepository(UnaliveDbContext context) : base(context) { }
+    }
+
+    public class PlayerOnlineHistoryRepository : Repository<PlayerOnlineHistory>, IPlayerOnlineHistoryRepository
+    {
+        public PlayerOnlineHistoryRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<PlayerOnlineHistory?> GetByDateAsync(DateTime date)
+        {
+            var dateOnly = date.Date;
+            return await _dbSet.FirstOrDefaultAsync(h => h.Date.Date == dateOnly);
+        }
+
+        public async Task<IEnumerable<PlayerOnlineHistory>> GetByDateRangeAsync(DateTime start, DateTime end)
+        {
+            return await _dbSet.Where(h => h.Date >= start && h.Date <= end)
+                               .OrderBy(h => h.Date)
+                               .ToListAsync();
+        }
     }
 }
