@@ -61,9 +61,9 @@ namespace Unalive_WebManagement.Controllers
             var result = await _authService.VerifyEmailAsync(userId, token);
             if (!result)
             {
-                return BadRequest("Invalid or expired verification link");
+                return Redirect("/email-verification-failed.html");
             }
-            return Ok("Email verified successfully. You can now log in.");
+            return Redirect("/email-verified.html");
         }
     }
 }
