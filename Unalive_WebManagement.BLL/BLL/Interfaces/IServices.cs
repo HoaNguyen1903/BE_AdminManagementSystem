@@ -8,6 +8,13 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<LoginResponse?> LoginAsync(LoginRequest request);
         Task<LoginResponse?> LoginUserAsync(LoginRequest request);
         Task<LoginResponse?> RegisterUserAsync(RegisterRequest request);
+        Task<bool> VerifyEmailAsync(int userId, string token);
+    }
+
+    public interface IEmailService
+    {
+        Task SendEmailAsync(string to, string subject, string body);
+        Task SendVerificationEmailAsync(string to, string userName, string verificationLink);
     }
 
     public interface IItemService
@@ -67,7 +74,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<IEnumerable<AnnouncementDto>> GetAllAnnouncementsAsync(QueryParameters query);
         Task<AnnouncementDto?> GetAnnouncementByIdAsync(int id);
         Task<AnnouncementDto> CreateAnnouncementAsync(CreateAnnouncementDto dto, int staffId);
-        Task UpdateAnnouncementAsync(int id, UpdateAnnouncementDto dto, int staffId);
+        Task<AnnouncementDto> UpdateAnnouncementAsync(int id, UpdateAnnouncementDto dto, int staffId);
         Task DeleteAnnouncementAsync(int id);
     }
 

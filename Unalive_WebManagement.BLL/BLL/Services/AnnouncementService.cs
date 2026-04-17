@@ -72,7 +72,7 @@ namespace Unalive_WebManagement.BLL.Services
             return await GetAnnouncementByIdAsync(created.AnnouncementId) ?? throw new Exception("Failed to create announcement");
         }
 
-        public async Task UpdateAnnouncementAsync(int id, UpdateAnnouncementDto dto, int staffId)
+        public async Task<AnnouncementDto> UpdateAnnouncementAsync(int id, UpdateAnnouncementDto dto, int staffId)
         {
             var a = await _announcementRepository.GetByIdAsync(id);
             if (a == null) throw new KeyNotFoundException();
@@ -85,6 +85,7 @@ namespace Unalive_WebManagement.BLL.Services
             a.UpdatedBy = staffId;
             a.UpdatedAt = DateTime.UtcNow;
             await _announcementRepository.UpdateAsync(a);
+            return await GetAnnouncementByIdAsync(id) ?? throw new Exception("Failed to get updated announcement");
         }
 
         public async Task DeleteAnnouncementAsync(int id) => await _announcementRepository.DeleteAsync(id);

@@ -142,7 +142,7 @@ namespace Unalive_WebManagement.DAL.Repositories
 
         public async Task<IEnumerable<ShopOrder>> GetCompletedOrdersByDateRangeAsync(DateTime start, DateTime end)
         {
-            return await _dbSet.Where(o => o.Status == "Completed" && o.OrderDate >= start && o.OrderDate <= end)
+            return await _dbSet.Where(o => o.OrderDate >= start && o.OrderDate <= end)
                                .ToListAsync();
         }
     }

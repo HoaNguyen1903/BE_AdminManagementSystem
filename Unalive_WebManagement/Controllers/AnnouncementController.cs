@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DTOs;
+using Unalive_WebManagement.Hubs;
 
 namespace Unalive_WebManagement.Controllers
 {
@@ -12,10 +14,12 @@ namespace Unalive_WebManagement.Controllers
     public class AnnouncementController : ControllerBase
     {
         private readonly IAnnouncementService _announcementService;
+        private readonly IHubContext<AnnouncementHub> _hubContext;
 
-        public AnnouncementController(IAnnouncementService announcementService)
+        public AnnouncementController(IAnnouncementService announcementService, IHubContext<AnnouncementHub> hubContext)
         {
             _announcementService = announcementService;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -37,6 +41,7 @@ namespace Unalive_WebManagement.Controllers
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             var created = await _announcementService.CreateAnnouncementAsync(dto, staffId);
+            await _hubContext.Clients.Group("announcements").SendAsync("AnnouncementCreated", created);
             return CreatedAtAction(nameof(GetById), new { id = created.AnnouncementId }, created);
         }
 
@@ -46,7 +51,8 @@ namespace Unalive_WebManagement.Controllers
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             try
             {
-                await _announcementService.UpdateAnnouncementAsync(id, dto, staffId);
+                var updated = await _announcementService.UpdateAnnouncementAsync(id, dto, staffId);
+                await _hubContext.Clients.Group("announcements").SendAsync("AnnouncementUpdated", updated);
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -59,6 +65,7 @@ namespace Unalive_WebManagement.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await _announcementService.DeleteAnnouncementAsync(id);
+            await _hubContext.Clients.Group("announcements").SendAsync("AnnouncementDeleted", id);
             return NoContent();
         }
     }

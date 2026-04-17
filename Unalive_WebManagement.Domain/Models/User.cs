@@ -21,4 +21,10 @@ public partial class User
     public DateTime? LastOnline { get; set; }
 
     public string? AvatarUrl { get; set; }
+
+    public bool IsEmailVerified { get; set; }
+
+    public string? EmailVerificationToken { get; set; }
+
+    public DateTime? EmailVerificationTokenExpiry { get; set; }
 }

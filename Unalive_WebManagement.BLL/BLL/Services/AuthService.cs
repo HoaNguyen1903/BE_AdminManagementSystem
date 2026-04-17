@@ -15,12 +15,14 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IStaffRepository _staffRepository;
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public AuthService(IStaffRepository staffRepository, IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IStaffRepository staffRepository, IUserRepository userRepository, IConfiguration configuration, IEmailService emailService)
         {
             _staffRepository = staffRepository;
             _userRepository = userRepository;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
@@ -52,6 +54,11 @@ namespace Unalive_WebManagement.BLL.Services
                 return null;
             }
 
+            if (!user.IsEmailVerified)
+            {
+                throw new InvalidOperationException("Email is not verified.");
+            }
+
             user.LastOnline = DateTime.UtcNow;
             await _userRepository.UpdateAsync(user);
 
@@ -75,6 +82,7 @@ namespace Unalive_WebManagement.BLL.Services
                 return null;
             }
 
+            var verificationToken = Guid.NewGuid().ToString();
             var user = new User
             {
                 Email = request.Email,
@@ -82,10 +90,18 @@ namespace Unalive_WebManagement.BLL.Services
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 BannedUntil = null,
-                LastOnline = DateTime.UtcNow
+                LastOnline = DateTime.UtcNow,
+                IsEmailVerified = false,
+                EmailVerificationToken = verificationToken,
+                EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24)
             };
 
             var created = await _userRepository.AddAsync(user);
+
+            // Send verification email
+            var apiBaseUrl = _configuration["ApiBaseUrl"] ?? "https://localhost:7270";
+            var verificationLink = $"{apiBaseUrl}/api/auth/verify-email?userId={created.UserId}&token={verificationToken}";
+            await _emailService.SendVerificationEmailAsync(created.Email, created.FirstName, verificationLink);
 
             var token = GenerateJwtToken(created.UserId, created.Email, "User");
 
@@ -96,6 +112,22 @@ namespace Unalive_WebManagement.BLL.Services
                 Role = "User",
                 AvatarUrl = created.AvatarUrl
             };
+        }
+
+        public async Task<bool> VerifyEmailAsync(int userId, string token)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || user.IsEmailVerified || user.EmailVerificationToken != token || (user.EmailVerificationTokenExpiry.HasValue && user.EmailVerificationTokenExpiry.Value < DateTime.UtcNow))
+            {
+                return false;
+            }
+
+            user.IsEmailVerified = true;
+            user.EmailVerificationToken = null;
+            user.EmailVerificationTokenExpiry = null;
+            await _userRepository.UpdateAsync(user);
+
+            return true;
         }
 
         private string GenerateJwtToken(int staffId, string email, string role)

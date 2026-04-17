@@ -29,12 +29,19 @@ namespace Unalive_WebManagement.Controllers
         [HttpPost("login-user")]
         public async Task<ActionResult<LoginResponse>> LoginUser([FromBody] LoginRequest request)
         {
-            var response = await _authService.LoginUserAsync(request);
-            if (response == null)
+            try
             {
-                return Unauthorized("Invalid credentials");
+                var response = await _authService.LoginUserAsync(request);
+                if (response == null)
+                {
+                    return Unauthorized("Invalid credentials");
+                }
+                return Ok(response);
             }
-            return Ok(response);
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("register")]
@@ -46,6 +53,17 @@ namespace Unalive_WebManagement.Controllers
                 return Conflict("Email already exists");
             }
             return Ok(response);
+        }
+
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] int userId, [FromQuery] string token)
+        {
+            var result = await _authService.VerifyEmailAsync(userId, token);
+            if (!result)
+            {
+                return BadRequest("Invalid or expired verification link");
+            }
+            return Ok("Email verified successfully. You can now log in.");
         }
     }
 }

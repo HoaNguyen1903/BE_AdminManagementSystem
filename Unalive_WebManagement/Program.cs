@@ -8,6 +8,7 @@ using Unalive_WebManagement.BLL.Services;
 using Unalive_WebManagement.DAL.Interfaces;
 using Unalive_WebManagement.DAL.Repositories;
 using Unalive_WebManagement.Data;
+using Unalive_WebManagement.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IUserBundleRepository, UserBundleRepository>();
 builder.Services.AddScoped<IUserBanLogRepository, UserBanLogRepository>();
 builder.Services.AddScoped<IPlayerOnlineHistoryRepository, PlayerOnlineHistoryRepository>();
 builder.Services.AddScoped<IBlobService, BlobService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Register Services
 builder.Services.AddScoped<IItemService, ItemService>();
@@ -112,6 +114,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddSignalR();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -141,5 +145,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<AnnouncementHub>("/hubs/announcement");
 
 app.Run();
