@@ -197,4 +197,9 @@ namespace Unalive_WebManagement.DAL.Repositories
                                .ToListAsync();
         }
     }
+
+    public class OrderTransactionRepository : Repository<OrderTransaction>, IOrderTransactionRepository
+    {
+        public OrderTransactionRepository(UnaliveDbContext context) : base(context) { }
+    }
 }

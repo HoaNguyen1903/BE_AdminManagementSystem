@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unalive_WebManagement.Data;
 
@@ -11,9 +12,11 @@ using Unalive_WebManagement.Data;
 namespace Unalive_WebManagement.DAL.Migrations
 {
     [DbContext(typeof(UnaliveDbContext))]
-    partial class UnaliveDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419144752_PaymentOrderModels")]
+    partial class PaymentOrderModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -331,65 +334,6 @@ namespace Unalive_WebManagement.DAL.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("Unalive_WebManagement.Models.OrderTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("Amount")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("CounterAccountBankId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CounterAccountBankName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CounterAccountName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CounterAccountNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("OrderCode")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PaymentLinkId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("TransactionDateTime")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("VirtualAccountName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VirtualAccountNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OrderTransactions");
-                });
-
             modelBuilder.Entity("Unalive_WebManagement.Models.PlayerOnlineHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -464,29 +408,8 @@ namespace Unalive_WebManagement.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShopOrderId"));
 
-                    b.Property<string>("AccountName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AccountNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("Amount")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("AmountPaid")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("AmountRemaining")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Bin")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CancelUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("CanceledAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("CancellationReason")
                         .HasColumnType("nvarchar(max)");
@@ -494,20 +417,8 @@ namespace Unalive_WebManagement.DAL.Migrations
                     b.Property<string>("CheckoutUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("Currency")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("ExpiredAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("LastTransactionUpdate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<long>("OrderCode")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("OrderDate")
                         .HasColumnType("datetimeoffset");

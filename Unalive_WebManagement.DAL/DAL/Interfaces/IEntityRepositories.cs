@@ -55,4 +55,6 @@ namespace Unalive_WebManagement.DAL.Interfaces
         Task<PlayerOnlineHistory?> GetByDateAsync(DateTime date);
         Task<IEnumerable<PlayerOnlineHistory>> GetByDateRangeAsync(DateTime start, DateTime end);
     }
+    public interface IOrderTransactionRepository : IRepository<OrderTransaction> { }
+
 }

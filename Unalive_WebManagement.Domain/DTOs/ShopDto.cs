@@ -56,7 +56,7 @@ namespace Unalive_WebManagement.DTOs
         public int ShopOrderId { get; set; }
         public int UserId { get; set; }
         public float TotalAmount { get; set; }
-        public DateTime OrderDate { get; set; }
+        public DateTimeOffset OrderDate { get; set; }
     }
 
     public class ShopOrderDetailDto
@@ -64,6 +64,7 @@ namespace Unalive_WebManagement.DTOs
         public int ShopOrderDetailId { get; set; }
         public int ShopOrderId { get; set; }
         public int? SkinAndCharacterBundleId { get; set; }
+        public int? GemBundleId { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
         public float UnitPrice { get; set; }

@@ -10,6 +10,8 @@ public partial class ShopOrderDetail
 
     public int? SkinAndCharacterBundleId { get; set; }
 
+    public int? GemBundleId { get; set; }
+
     public int ItemId { get; set; }
 
     public int Quantity { get; set; }

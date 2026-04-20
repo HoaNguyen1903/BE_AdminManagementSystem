@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Unalive_WebManagement.DTOs;
+using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.BLL.Interfaces
 {
@@ -62,6 +63,13 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task DeleteBundleItemAsync(int bundleId, int itemId);
 
         Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query);
+        
+        Task<ShopOrder?> GetShopOrderByIdAsync(int id);
+        Task<ShopOrder?> GetShopOrderByPaymentLinkIdAsync(string paymentLinkId);
+        Task UpdateShopOrderAsync(int id, ShopOrder updatedOrder);
+        Task<ShopOrder> CreateShopOrderAsync(ShopOrder order);
+        Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode);
+
         Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId, QueryParameters query);
         Task<IEnumerable<TopUpHistoryDto>> GetAllTopUpHistoriesAsync(QueryParameters query);
 
@@ -132,5 +140,19 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy);
         Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top);
         Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime start, DateTime end);
+    }
+
+    public interface IOrderTransactionService
+    {
+        Task<IEnumerable<OrderTransaction>> GetAllTransactionsAsync();
+        Task<OrderTransaction?> GetTransactionByIdAsync(int id);
+        Task<IEnumerable<OrderTransaction>> GetTransactionsByOrderIdAsync(int orderId);
+        Task<IEnumerable<OrderTransaction>> GetTransactionsByOrderCodeAsync(long orderCode);
+        Task<IEnumerable<OrderTransaction>> GetTransactionsByPaymentLinkIdAsync(string paymentLinkId);
+        Task<OrderTransaction> CreateTransactionAsync(OrderTransaction transaction);
+        Task CreateTransactionsAsync(IEnumerable<OrderTransaction> transactions);
+        Task UpdateTransactionAsync(int id, OrderTransaction updatedTransaction);
+        Task DeleteTransactionAsync(int id);
+        Task DeleteTransactionsByOrderIdAsync(int orderId);
     }
 }

@@ -30,6 +30,7 @@ public partial class UnaliveDbContext : DbContext
     public virtual DbSet<UserItem> UserItems { get; set; }
     public virtual DbSet<UserBanLog> UserBanLogs { get; set; }
     public virtual DbSet<PlayerOnlineHistory> PlayerOnlineHistories { get; set; }
+    public virtual DbSet<OrderTransaction> OrderTransactions { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

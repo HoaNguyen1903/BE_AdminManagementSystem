@@ -148,22 +148,22 @@ namespace Unalive_WebManagement.Controllers
         }
 
         // Read Only History/Orders
-        [HttpGet("orders")]
-        public async Task<ActionResult<IEnumerable<ShopOrderDto>>> GetOrders([FromQuery] QueryParameters query)
-        {
-            return Ok(await _shopService.GetAllShopOrdersAsync(query));
-        }
+        //[HttpGet("orders")]
+        //public async Task<ActionResult<IEnumerable<ShopOrderDto>>> GetOrders([FromQuery] QueryParameters query)
+        //{
+        //    return Ok(await _shopService.GetAllShopOrdersAsync(query));
+        //}
 
-        [HttpGet("orders/{orderId}/details")]
-        public async Task<ActionResult<IEnumerable<ShopOrderDetailDto>>> GetOrderDetails(int orderId, [FromQuery] QueryParameters query)
-        {
-            return Ok(await _shopService.GetOrderDetailsByOrderIdAsync(orderId, query));
-        }
+        //[HttpGet("orders/{orderId}/details")]
+        //public async Task<ActionResult<IEnumerable<ShopOrderDetailDto>>> GetOrderDetails(int orderId, [FromQuery] QueryParameters query)
+        //{
+        //    return Ok(await _shopService.GetOrderDetailsByOrderIdAsync(orderId, query));
+        //}
 
-        [HttpGet("topup-history")]
-        public async Task<ActionResult<IEnumerable<TopUpHistoryDto>>> GetTopUpHistory([FromQuery] QueryParameters query)
-        {
-            return Ok(await _shopService.GetAllTopUpHistoriesAsync(query));
-        }
+        //[HttpGet("topup-history")]
+        //public async Task<ActionResult<IEnumerable<TopUpHistoryDto>>> GetTopUpHistory([FromQuery] QueryParameters query)
+        //{
+        //    return Ok(await _shopService.GetAllTopUpHistoriesAsync(query));
+        //}
     }
 }

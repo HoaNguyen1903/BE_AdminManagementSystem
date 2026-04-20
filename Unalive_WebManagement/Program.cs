@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PayOS;
 using System.Text;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.BLL.Services;
@@ -11,8 +12,6 @@ using Unalive_WebManagement.Data;
 using Unalive_WebManagement.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 // Add DbContext
 builder.Services.AddDbContext<UnaliveDbContext>(options =>
@@ -43,6 +42,7 @@ builder.Services.AddScoped<IUserBanLogRepository, UserBanLogRepository>();
 builder.Services.AddScoped<IPlayerOnlineHistoryRepository, PlayerOnlineHistoryRepository>();
 builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
 
 // Register Services
 builder.Services.AddScoped<IItemService, ItemService>();
@@ -53,6 +53,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IOrderTransactionService, OrderTransactionService>();
 
 // Register Background Services
 builder.Services.AddHostedService<PlayerOnlineTrackerService>();
@@ -80,6 +81,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -114,6 +116,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Configure payOS for order controller
+builder.Services.AddKeyedSingleton("OrderClient", (sp, key) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new PayOSClient(new PayOSOptions
+    {
+        ClientId = config["PayOS:ClientId"] ?? Environment.GetEnvironmentVariable("PAYOS_CLIENT_ID"),
+        ApiKey = config["PayOS:ApiKey"] ?? Environment.GetEnvironmentVariable("PAYOS_API_KEY"),
+        ChecksumKey = config["PayOS:ChecksumKey"] ?? Environment.GetEnvironmentVariable("PAYOS_CHECKSUM_KEY"),
+        LogLevel = LogLevel.Debug,
+    });
+});
+
 builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
@@ -128,6 +143,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 // Configure the HTTP request pipeline.
 app.UseStaticFiles();

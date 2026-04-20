@@ -211,7 +211,7 @@ namespace Unalive_WebManagement.BLL.Services
             await _bundleItemRepository.DeleteAsync(bundleId, itemId);
         }
 
-        // ShopOrder & Details & TopUp (Read Only)
+        // ShopOrder & Details & TopUp (Read Only / Management)
         public async Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query)
         {
             var orders = await _shopOrderRepository.GetAllAsync();
@@ -225,6 +225,57 @@ namespace Unalive_WebManagement.BLL.Services
             return dtos.ApplyQuery(query, (o, search) => o.UserId.ToString().Contains(search));
         }
 
+        public async Task<ShopOrder?> GetShopOrderByIdAsync(int id)
+        {
+            var orders = await _shopOrderRepository.GetAllAsync();
+            return orders.FirstOrDefault(o => o.ShopOrderId == id);
+        }
+
+        public async Task<ShopOrder?> GetShopOrderByPaymentLinkIdAsync(string paymentLinkId)
+        {
+            var orders = await _shopOrderRepository.GetAllAsync();
+            return orders.FirstOrDefault(o => o.PaymentLinkId == paymentLinkId);
+        }
+
+        public async Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode)
+        {
+            var orders = await _shopOrderRepository.GetAllAsync();
+            return orders.FirstOrDefault(o => o.OrderCode == orderCode);
+        }
+
+        public async Task UpdateShopOrderAsync(int id, ShopOrder updatedOrder)
+        {
+            var orders = await _shopOrderRepository.GetAllAsync();
+            var order = orders.FirstOrDefault(o => o.ShopOrderId == id);
+            
+            if (order == null) throw new KeyNotFoundException("ShopOrder not found");
+
+            // Basic order information
+            order.TotalAmount = updatedOrder.TotalAmount;
+            order.OrderDate = updatedOrder.OrderDate;
+            
+            // Customer information
+            order.PlayerEmail = updatedOrder.PlayerEmail;
+            order.PlayerUserName = updatedOrder.PlayerUserName;
+
+            // Payment link related properties
+            order.PaymentLinkId = updatedOrder.PaymentLinkId;
+            order.QrCode = updatedOrder.QrCode;
+            order.CheckoutUrl = updatedOrder.CheckoutUrl;
+            order.Status = updatedOrder.Status;
+            order.Currency = updatedOrder.Currency;
+
+            // URLs
+            order.ReturnUrl = updatedOrder.ReturnUrl;
+            order.CancelUrl = updatedOrder.CancelUrl;
+
+            // Cancellation
+            order.CancellationReason = updatedOrder.CancellationReason;
+            order.LastTransactionUpdate = updatedOrder.LastTransactionUpdate;
+
+            await _shopOrderRepository.UpdateAsync(order);
+        }
+
         public async Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId, QueryParameters query)
         {
             var details = await _shopOrderDetailRepository.GetAllAsync();
@@ -233,6 +284,7 @@ namespace Unalive_WebManagement.BLL.Services
                 ShopOrderDetailId = d.ShopOrderDetailId,
                 ShopOrderId = d.ShopOrderId,
                 SkinAndCharacterBundleId = d.SkinAndCharacterBundleId,
+                GemBundleId = d.GemBundleId,
                 ItemId = d.ItemId,
                 Quantity = d.Quantity,
                 UnitPrice = d.UnitPrice
@@ -264,12 +316,34 @@ namespace Unalive_WebManagement.BLL.Services
             var bundle = await _gemBundleRepository.GetByIdAsync(bundleId);
             if (bundle == null) throw new KeyNotFoundException("Gem bundle not found");
 
+            // Create ShopOrder for tracking the transaction natively
+            var order = new ShopOrder
+            {
+                UserId = userId,
+                TotalAmount = bundle.BundlePrice,
+                OrderDate = DateTimeOffset.UtcNow,
+                Status = PayOS.Models.V2.PaymentRequests.PaymentLinkStatus.Pending,
+                Currency = "VND"
+            };
+            var createdOrder = await _shopOrderRepository.AddAsync(order);
+
+            // Create ShopOrderDetail mapping to the GemBundle structure
+            var detail = new ShopOrderDetail
+            {
+                ShopOrderId = createdOrder.ShopOrderId,
+                GemBundleId = bundleId,
+                ItemId = bundle.ItemId,
+                Quantity = bundle.Quantity,
+                UnitPrice = bundle.BundlePrice
+            };
+            await _shopOrderDetailRepository.AddAsync(detail);
+
             // Create TopUpHistory
             var history = new TopUpHistory
             {
                 UserId = userId,
                 GemBundleId = bundleId,
-                GemsAmount = 0, // Should be defined in bundle but let's assume 0 for now
+                GemsAmount = bundle.Quantity, 
                 RealMoneyAmount = bundle.BundlePrice,
                 CurrencyCode = "USD",
                 PaymentGateway = "Simulator",
@@ -299,7 +373,9 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 UserId = userId,
                 TotalAmount = bundle.BundlePrice,
-                OrderDate = DateTime.UtcNow
+                OrderDate = DateTimeOffset.UtcNow,
+                Status = PayOS.Models.V2.PaymentRequests.PaymentLinkStatus.Pending,
+                Currency = "VND"
             };
             var createdOrder = await _shopOrderRepository.AddAsync(order);
 
@@ -332,11 +408,27 @@ namespace Unalive_WebManagement.BLL.Services
                 {
                     UserId = userId,
                     ItemId = bi.ItemId,
-                    Quantity = 1, // Assuming 1 for each item in bundle
+                    Quantity = bi.Quantity,
                     ShopOrderId = createdOrder.ShopOrderId
                 };
                 await _userItemRepository.AddAsync(userItem);
             }
+        }
+
+        public async Task<ShopOrder> CreateShopOrderAsync(ShopOrder order)
+        {
+            var createdOrder = await _shopOrderRepository.AddAsync(order);
+            
+            if (order.OrderDetails != null && order.OrderDetails.Any())
+            {
+                foreach (var detail in order.OrderDetails)
+                {
+                    detail.ShopOrderId = createdOrder.ShopOrderId;
+                    await _shopOrderDetailRepository.AddAsync(detail);
+                }
+            }
+
+            return createdOrder;
         }
     }
 }
