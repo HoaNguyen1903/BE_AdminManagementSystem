@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using PayOS.Models.V2.PaymentRequests;
 
@@ -48,6 +49,5 @@ public partial class ShopOrder
     // Cancellation
     public string? CancellationReason { get; set; }
 
-    [Required]
     public List<ShopOrderDetail> OrderDetails { get; set; } = new List<ShopOrderDetail>();
 }

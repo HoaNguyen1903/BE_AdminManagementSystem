@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PayOS;
 using PayOS.Models.V2.PaymentRequests;
@@ -8,6 +9,7 @@ using Unalive_WebManagement.Models;
 namespace Unalive_WebManagement.Controllers
 {
     [Route("api/[controller]")]
+    //[Authorize]
     [ApiController]
     public class OrderController(
         [FromKeyedServices("OrderClient")] PayOSClient client,
@@ -31,6 +33,8 @@ namespace Unalive_WebManagement.Controllers
             {
                 var paymentLink = await _client.PaymentRequests.GetAsync(order.PaymentLinkId);
 
+                bool justPaid = order.Status != PaymentLinkStatus.Paid && paymentLink.Status == PaymentLinkStatus.Paid;
+                
                 order.Status = paymentLink.Status;
                 order.Amount = paymentLink.Amount;
                 order.AmountPaid = paymentLink.AmountPaid;
@@ -66,6 +70,12 @@ namespace Unalive_WebManagement.Controllers
                 }
 
                 await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
+                
+                if (justPaid)
+                {
+                    await _shopService.ProcessSuccessfulOrderAsync(order.ShopOrderId);
+                }
+
                 return Ok(order);
             }
             catch (Exception ex)
@@ -90,6 +100,8 @@ namespace Unalive_WebManagement.Controllers
             var orderCode = DateTimeOffset.Now.ToUnixTimeSeconds();
             var callbackReturnUrl = request.ReturnUrl ?? "https://your-domain.com/success";
             var callbackCancelUrl = request.CancelUrl ?? "https://your-domain.com/cancel";
+            
+            var expirationTime = DateTimeOffset.Now.AddMinutes(15);
 
             try
             {
@@ -104,7 +116,7 @@ namespace Unalive_WebManagement.Controllers
                     CancelUrl = callbackCancelUrl,
                     BuyerEmail = request.PlayerEmail,
                     BuyerName = request.PlayerUserName,
-                    ExpiredAt = request.ExpiredAt?.ToUnixTimeSeconds(),
+                    ExpiredAt = expirationTime.ToUnixTimeSeconds(),
                     Items = [.. request.Items.Select(i => new PaymentLinkItem 
                     { 
                         Name = i.BundleName ?? i.ItemName ?? "", 
@@ -137,13 +149,19 @@ namespace Unalive_WebManagement.Controllers
                     ReturnUrl = callbackReturnUrl,
                     CancelUrl = callbackCancelUrl,
                     CreatedAt = DateTimeOffset.Now,
-                    ExpiredAt = request.ExpiredAt,
-                    OrderDetails = [.. request.Items.Select(i => new ShopOrderDetail
-                    {
-                        Quantity = i.Quantity,
-                        UnitPrice = i.Price
-                    })]
+                    ExpiredAt = expirationTime,
+                    OrderDetails = new List<ShopOrderDetail>() 
                 };
+
+                var detailsToInsert = request.Items.Select(i => new ShopOrderDetail
+                {
+                    Quantity = i.Quantity,
+                    UnitPrice = i.Price,
+                    GemBundleId = i.BundleId,
+                    ItemId = 4
+                }).ToList();
+
+                order.OrderDetails = detailsToInsert;
 
                 var createdOrder = await _shopService.CreateShopOrderAsync(order);
 

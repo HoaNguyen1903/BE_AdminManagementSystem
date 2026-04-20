@@ -30,5 +30,8 @@ public class OrderItemCreateRequest
     [Required]
     public long Price { get; set; }
 
-    // public int BundleId { get; set; } --> Map back to Bundle if needed down the road
+    [Required]
+    public int BundleId { get; set; }
+    public int? ItemId { get; set; }
+
 }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Unalive_WebManagement.Models;
 
@@ -12,9 +13,12 @@ public partial class ShopOrderDetail
 
     public int? GemBundleId { get; set; }
 
-    public int ItemId { get; set; }
+    public int ItemId { get; set; } = 4;
 
     public int Quantity { get; set; }
 
     public float UnitPrice { get; set; }
+
+    [ForeignKey(nameof(ShopOrderId))]
+    public ShopOrder? ShopOrder { get; set; }
 }

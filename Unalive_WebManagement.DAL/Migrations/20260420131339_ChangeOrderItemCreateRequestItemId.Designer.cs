@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unalive_WebManagement.Data;
 
@@ -11,9 +12,11 @@ using Unalive_WebManagement.Data;
 namespace Unalive_WebManagement.DAL.Migrations
 {
     [DbContext(typeof(UnaliveDbContext))]
-    partial class UnaliveDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260420131339_ChangeOrderItemCreateRequestItemId")]
+    partial class ChangeOrderItemCreateRequestItemId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -946,15 +949,13 @@ namespace Unalive_WebManagement.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Unalive_WebManagement.Models.ShopOrder", "ShopOrder")
+                    b.HasOne("Unalive_WebManagement.Models.ShopOrder", null)
                         .WithMany("OrderDetails")
                         .HasForeignKey("ShopOrderId1");
 
                     b.HasOne("Unalive_WebManagement.Models.SkinAndCharacterBundle", null)
                         .WithMany()
                         .HasForeignKey("SkinAndCharacterBundleId");
-
-                    b.Navigation("ShopOrder");
                 });
 
             modelBuilder.Entity("Unalive_WebManagement.Models.TopUpHistory", b =>

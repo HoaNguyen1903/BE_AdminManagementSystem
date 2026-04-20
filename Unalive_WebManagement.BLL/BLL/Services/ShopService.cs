@@ -3,6 +3,7 @@ using Unalive_WebManagement.DAL.Interfaces;
 using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
 using Unalive_WebManagement.BLL.Helpers;
+using PayOS.Models.V2.PaymentRequests;
 
 namespace Unalive_WebManagement.BLL.Services
 {
@@ -417,18 +418,77 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<ShopOrder> CreateShopOrderAsync(ShopOrder order)
         {
+            var detailsToInsert = order.OrderDetails?.ToList() ?? new List<ShopOrderDetail>();
+            order.OrderDetails = new List<ShopOrderDetail>();
+
             var createdOrder = await _shopOrderRepository.AddAsync(order);
             
-            if (order.OrderDetails != null && order.OrderDetails.Any())
+            if (detailsToInsert.Any())
             {
-                foreach (var detail in order.OrderDetails)
+                foreach (var detail in detailsToInsert)
                 {
                     detail.ShopOrderId = createdOrder.ShopOrderId;
                     await _shopOrderDetailRepository.AddAsync(detail);
                 }
             }
 
+            createdOrder.OrderDetails = detailsToInsert;
             return createdOrder;
+        }
+
+        public async Task ProcessSuccessfulOrderAsync(int shopOrderId)
+        {
+            var orders = await _shopOrderRepository.GetAllAsync();
+            var order = orders.FirstOrDefault(o => o.ShopOrderId == shopOrderId);
+            
+            if (order == null || order.Status != PaymentLinkStatus.Paid) 
+                return;
+
+            var orderDetails = await _shopOrderDetailRepository.GetAllAsync();
+            var detailsForOrder = orderDetails.Where(d => d.ShopOrderId == shopOrderId).ToList();
+
+            foreach (var detail in detailsForOrder)
+            {
+                if (detail.GemBundleId.HasValue)
+                {
+                    var bundle = await _gemBundleRepository.GetByIdAsync(detail.GemBundleId.Value);
+                    if (bundle != null)
+                    {
+                        int totalGems = bundle.Quantity * detail.Quantity;
+
+                        var userItem = new UserItem
+                        {
+                            UserId = order.UserId,
+                            ItemId = bundle.ItemId,
+                            Quantity = totalGems,
+                            ShopOrderId = order.ShopOrderId
+                        };
+                        await _userItemRepository.AddAsync(userItem);
+
+                        var history = new TopUpHistory
+                        {
+                            UserId = order.UserId,
+                            GemBundleId = bundle.GemBundleId,
+                            GemsAmount = totalGems,
+                            RealMoneyAmount = bundle.BundlePrice * detail.Quantity,
+                            CurrencyCode = order.Currency ?? "VND",
+                            PaymentGateway = "PayOS",
+                            TransactionId = order.PaymentLinkId ?? order.OrderCode.ToString(),
+                            Status = "Success",
+                            Date = DateTime.UtcNow
+                        };
+                        await _topUpHistoryRepository.AddAsync(history);
+                        
+                        var userBundle = new UserBundle
+                        {
+                            UserId = order.UserId,
+                            GemBundleId = bundle.GemBundleId,
+                            Remaining = detail.Quantity
+                        };
+                        await _userBundleRepository.AddAsync(userBundle);
+                    }
+                }
+            }
         }
     }
 }
