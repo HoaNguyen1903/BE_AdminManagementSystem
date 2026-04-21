@@ -106,7 +106,40 @@ namespace Unalive_WebManagement.Controllers
 
             try
             {
-                int paymentAmount = (int)Math.Round(request.TotalAmount);
+                var detailsToInsert = new List<ShopOrderDetail>();
+                var paymentLinkItems = new List<PaymentLinkItem>();
+                int calculatedTotalAmount = 0;
+
+                foreach (var i in request.Items)
+                {
+                    var bundle = await _shopService.GetGemBundleByIdAsync(i.BundleId);
+                    float realUnitPrice = bundle != null ? bundle.BundlePrice : i.Price;
+                    int priceInt = (int)Math.Round(realUnitPrice);
+
+                    detailsToInsert.Add(new ShopOrderDetail
+                    {
+                        Quantity = i.Quantity,
+                        UnitPrice = realUnitPrice,
+                        GemBundleId = i.BundleId,
+                        ItemId = 4
+                    });
+
+                    paymentLinkItems.Add(new PaymentLinkItem 
+                    { 
+                        Name = bundle?.BundleName ?? i.BundleName ?? i.ItemName ?? "Unknown Item", 
+                        Quantity = i.Quantity, 
+                        Price = priceInt 
+                    });
+
+                    calculatedTotalAmount += priceInt * i.Quantity;
+                }
+
+                int paymentAmount = calculatedTotalAmount > 0 ? calculatedTotalAmount : (int)Math.Round(request.TotalAmount);
+
+                if (paymentAmount <= 0)
+                {
+                    return BadRequest("Order total amount must be greater than 0.");
+                }
 
                 var paymentRequest = new CreatePaymentLinkRequest
                 {
@@ -118,12 +151,7 @@ namespace Unalive_WebManagement.Controllers
                     BuyerEmail = request.PlayerEmail,
                     BuyerName = request.PlayerUserName,
                     ExpiredAt = expirationTime.ToUnixTimeSeconds(),
-                    Items = [.. request.Items.Select(i => new PaymentLinkItem 
-                    { 
-                        Name = i.BundleName ?? i.ItemName ?? "", 
-                        Quantity = i.Quantity, 
-                        Price = (int)i.Price 
-                    })]
+                    Items = paymentLinkItems
                 };
 
                 var paymentResponse = await _client.PaymentRequests.CreateAsync(paymentRequest);
@@ -133,7 +161,7 @@ namespace Unalive_WebManagement.Controllers
                     UserId = request.UserId > 0 ? request.UserId : 1,
                     PlayerEmail = request.PlayerEmail,
                     PlayerUserName = request.PlayerUserName,
-                    TotalAmount = request.TotalAmount,
+                    TotalAmount = paymentAmount,
                     OrderCode = orderCode,
                     OrderDate = DateTimeOffset.Now,
                     PaymentLinkId = paymentResponse.PaymentLinkId,
@@ -151,25 +179,8 @@ namespace Unalive_WebManagement.Controllers
                     CancelUrl = callbackCancelUrl,
                     CreatedAt = DateTimeOffset.Now,
                     ExpiredAt = expirationTime,
-                    OrderDetails = new List<ShopOrderDetail>() 
+                    OrderDetails = detailsToInsert
                 };
-
-                var detailsToInsert = new List<ShopOrderDetail>();
-
-                foreach (var i in request.Items)
-                {
-                    var bundle = await _shopService.GetGemBundleByIdAsync(i.BundleId);
-                    
-                    detailsToInsert.Add(new ShopOrderDetail
-                    {
-                        Quantity = i.Quantity,
-                        UnitPrice = bundle != null ? bundle.BundlePrice : i.Price,
-                        GemBundleId = i.BundleId,
-                        ItemId = 4
-                    });
-                }
-
-                order.OrderDetails = detailsToInsert;
 
                 var createdOrder = await _shopService.CreateShopOrderAsync(order);
 
