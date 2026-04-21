@@ -60,7 +60,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var b = await _gemBundleRepository.GetByIdAsync(id);
             if (b == null) return null;
-            return new GemBundleDto { GemBundleId = b.GemBundleId, BundleName = b.BundleName, BundlePrice = b.BundlePrice, ItemId = b.ItemId, Quantity = b.Quantity };
+            return new GemBundleDto { GemBundleId = b.GemBundleId, BundleName = b.BundleName, BundlePrice = b.BundlePrice };
         }
 
         public async Task<GemBundleDto> CreateGemBundleAsync(CreateGemBundleDto dto)
@@ -434,79 +434,56 @@ namespace Unalive_WebManagement.BLL.Services
             return createdOrder;
         }
 
+        public async Task<UserItem?> GetUserItemAsync(int userId, int itemId)
+        {
+            var items = await _userItemRepository.GetAllAsync();
+            return items.FirstOrDefault(ui => ui.UserId == userId && ui.ItemId == itemId);
+        }
+
+        public async Task CreateUserItemAsync(UserItem userItem)
+        {
+            await _userItemRepository.AddAsync(userItem);
+        }
+
+        public async Task UpdateUserItemAsync(UserItem userItem)
+        {
+            await _userItemRepository.UpdateAsync(userItem);
+        }
+
         public async Task ProcessSuccessfulOrderAsync(int shopOrderId)
         {
-            var orders = await _shopOrderRepository.GetAllAsync();
-            var order = orders.FirstOrDefault(o => o.ShopOrderId == shopOrderId);
-            
-            if (order == null || order.Status != PaymentLinkStatus.Paid) 
-                return;
+            var order = await _shopOrderRepository.GetByIdAsync(shopOrderId);
+            if (order == null || order.Status != PaymentLinkStatus.Paid) return;
 
-            var orderDetails = await _shopOrderDetailRepository.GetAllAsync();
-            var detailsForOrder = orderDetails.Where(d => d.ShopOrderId == shopOrderId).ToList();
+            var details = await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(new[] { shopOrderId });
 
-            foreach (var detail in detailsForOrder)
+            foreach (var detail in details)
             {
                 if (detail.GemBundleId.HasValue)
                 {
                     var bundle = await _gemBundleRepository.GetByIdAsync(detail.GemBundleId.Value);
-                    if (bundle != null)
+                    if (bundle == null) continue;
+
+                    int totalGemsToAdd = bundle.Quantity * detail.Quantity;
+
+                    var userInventory = await _userItemRepository.GetByUserIdAsync(order.UserId);
+                    var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == bundle.ItemId);
+
+                    if (existingGems != null)
                     {
-                        int totalGems = bundle.Quantity * detail.Quantity;
-
-                        var userItem = new UserItem
-                        {
-                            UserId = order.UserId,
-                            ItemId = bundle.ItemId,
-                            Quantity = totalGems,
-                            ShopOrderId = order.ShopOrderId
-                        };
-                        await _userItemRepository.AddAsync(userItem);
-
-                        var history = new TopUpHistory
-                        {
-                            UserId = order.UserId,
-                            GemBundleId = bundle.GemBundleId,
-                            GemsAmount = totalGems,
-                            RealMoneyAmount = bundle.BundlePrice * detail.Quantity,
-                            CurrencyCode = order.Currency ?? "VND",
-                            PaymentGateway = "PayOS",
-                            TransactionId = order.PaymentLinkId ?? order.OrderCode.ToString(),
-                            Status = "Success",
-                            Date = DateTime.UtcNow
-                        };
-                        await _topUpHistoryRepository.AddAsync(history);
-                        
-                        var userBundle = new UserBundle
-                        {
-                            UserId = order.UserId,
-                            GemBundleId = bundle.GemBundleId,
-                            Remaining = detail.Quantity
-                        };
-                        await _userBundleRepository.AddAsync(userBundle);
+                        existingGems.Quantity += totalGemsToAdd;
+                        existingGems.ShopOrderId = shopOrderId;
+                        await _userItemRepository.UpdateAsync(existingGems);
                     }
-                }
-                else if (detail.SkinAndCharacterBundleId.HasValue)
-                {
-                    var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(detail.SkinAndCharacterBundleId.Value);
-                    if (bundle != null)
+                    else
                     {
-                        var userItem = new UserItem
+                        await _userItemRepository.AddAsync(new UserItem
                         {
                             UserId = order.UserId,
                             ItemId = bundle.ItemId,
-                            Quantity = bundle.Quantity * detail.Quantity,
-                            ShopOrderId = order.ShopOrderId
-                        };
-                        await _userItemRepository.AddAsync(userItem);
-
-                        var userBundle = new UserBundle
-                        {
-                            UserId = order.UserId,
-                            SkinAndCharacterBundleId = bundle.SkinAndCharacterBundleId,
-                            Remaining = detail.Quantity
-                        };
-                        await _userBundleRepository.AddAsync(userBundle);
+                            Quantity = totalGemsToAdd,
+                            ShopOrderId = shopOrderId
+                        });
                     }
                 }
             }

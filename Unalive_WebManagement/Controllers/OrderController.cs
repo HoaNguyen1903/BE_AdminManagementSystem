@@ -260,5 +260,21 @@ namespace Unalive_WebManagement.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"Failed to cancel order {orderId}", error = ex.Message });
             }
         }
+
+        [HttpPost("debug/force-success/{orderId}")]
+        public async Task<IActionResult> ForceSuccess(int orderId)
+        {
+            var order = await _shopService.GetShopOrderByIdAsync(orderId);
+            if (order == null) return NotFound("Order not found");
+
+            // Force the status to Paid in the DB
+            order.Status = PaymentLinkStatus.Paid;
+            await _shopService.UpdateShopOrderAsync(orderId, order);
+
+            // Manually trigger the gem delivery
+            await _shopService.ProcessSuccessfulOrderAsync(orderId);
+
+            return Ok("Gems processed. Check the UserItem table for UserId: " + order.UserId);
+        }
     }
 }
