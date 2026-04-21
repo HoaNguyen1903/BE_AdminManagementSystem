@@ -98,6 +98,11 @@ namespace Unalive_WebManagement.Controllers
                     order.LastTransactionUpdate = DateTimeOffset.Now;
 
                     await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
+
+                    if (order.Status == PaymentLinkStatus.Paid)
+                    {
+                        await _shopService.ProcessSuccessfulOrderAsync(order.ShopOrderId);
+                    }
                 }
 
                 return Ok(new { message = "Webhook processed successfully", orderCode = webhookData.OrderCode });

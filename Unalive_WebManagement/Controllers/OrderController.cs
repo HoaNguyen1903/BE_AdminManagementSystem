@@ -71,10 +71,11 @@ namespace Unalive_WebManagement.Controllers
 
                 await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
                 
-                if (justPaid)
-                {
-                    await _shopService.ProcessSuccessfulOrderAsync(order.ShopOrderId);
-                }
+                // Incase webhook has problem, use this
+                //if (justPaid)
+                //{
+                //    await _shopService.ProcessSuccessfulOrderAsync(order.ShopOrderId);
+                //}
 
                 return Ok(order);
             }
