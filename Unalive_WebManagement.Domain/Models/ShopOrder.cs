@@ -1,7 +1,8 @@
+using PayOS.Models.V2.PaymentRequests;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using PayOS.Models.V2.PaymentRequests;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Unalive_WebManagement.Models;
 
@@ -50,4 +51,7 @@ public partial class ShopOrder
     public string? CancellationReason { get; set; }
 
     public List<ShopOrderDetail> OrderDetails { get; set; } = new List<ShopOrderDetail>();
+
+    [NotMapped]
+    public bool IsSuccess => Status == PaymentLinkStatus.Paid;
 }
