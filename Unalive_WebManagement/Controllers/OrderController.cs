@@ -154,13 +154,20 @@ namespace Unalive_WebManagement.Controllers
                     OrderDetails = new List<ShopOrderDetail>() 
                 };
 
-                var detailsToInsert = request.Items.Select(i => new ShopOrderDetail
+                var detailsToInsert = new List<ShopOrderDetail>();
+
+                foreach (var i in request.Items)
                 {
-                    Quantity = i.Quantity,
-                    UnitPrice = i.Price,
-                    GemBundleId = i.BundleId,
-                    ItemId = 4
-                }).ToList();
+                    var bundle = await _shopService.GetGemBundleByIdAsync(i.BundleId);
+                    
+                    detailsToInsert.Add(new ShopOrderDetail
+                    {
+                        Quantity = i.Quantity,
+                        UnitPrice = bundle != null ? bundle.BundlePrice : i.Price,
+                        GemBundleId = i.BundleId,
+                        ItemId = 4
+                    });
+                }
 
                 order.OrderDetails = detailsToInsert;
 
