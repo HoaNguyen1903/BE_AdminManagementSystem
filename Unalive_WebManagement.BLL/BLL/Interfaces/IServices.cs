@@ -50,17 +50,12 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task UpdateGemBundleAsync(int id, UpdateGemBundleDto dto);
         Task DeleteGemBundleAsync(int id);
 
+
         Task<IEnumerable<SkinAndCharacterBundleDto>> GetAllSkinAndCharacterBundlesAsync(QueryParameters query);
         Task<SkinAndCharacterBundleDto?> GetSkinAndCharacterBundleByIdAsync(int id);
         Task<SkinAndCharacterBundleDto> CreateSkinAndCharacterBundleAsync(CreateSkinAndCharacterBundleDto dto, int staffId);
         Task UpdateSkinAndCharacterBundleAsync(int id, UpdateSkinAndCharacterBundleDto dto);
         Task DeleteSkinAndCharacterBundleAsync(int id);
-
-        Task<IEnumerable<BundleItemDto>> GetAllBundleItemsAsync(QueryParameters query);
-        Task<IEnumerable<BundleItemDto>> GetItemsByBundleIdAsync(int bundleId);
-        Task<BundleItemDto> CreateBundleItemAsync(CreateBundleItemDto dto);
-        Task UpdateBundleItemAsync(int bundleId, int itemId, UpdateBundleItemDto dto);
-        Task DeleteBundleItemAsync(int bundleId, int itemId);
 
         Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query);
         

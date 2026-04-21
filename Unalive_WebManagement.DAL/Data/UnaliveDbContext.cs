@@ -10,7 +10,6 @@ public partial class UnaliveDbContext : DbContext
     #region DbSets
     public virtual DbSet<AbilitiesSet> AbilitiesSets { get; set; }
     public virtual DbSet<Announcement> Announcements { get; set; }
-    public virtual DbSet<BundleItem> BundleItems { get; set; }
     public virtual DbSet<CharacterAttack> CharacterAttacks { get; set; }
     public virtual DbSet<CharacterPassive> CharacterPassives { get; set; }
     public virtual DbSet<CharacterPvP> CharacterPvPs { get; set; }
@@ -140,13 +139,6 @@ public partial class UnaliveDbContext : DbContext
             entity.HasOne<User>().WithMany().HasForeignKey(e => e.UserId);
             entity.HasOne<SkinAndCharacterBundle>().WithMany().HasForeignKey(e => e.SkinAndCharacterBundleId).IsRequired(false);
             entity.HasOne<GemBundle>().WithMany().HasForeignKey(e => e.GemBundleId).IsRequired(false);
-        });
-
-        modelBuilder.Entity<BundleItem>(entity =>
-        {
-            entity.HasKey(e => new { e.SkinAndCharacterBundleId, e.ItemId });
-            entity.HasOne<SkinAndCharacterBundle>().WithMany().HasForeignKey(e => e.SkinAndCharacterBundleId);
-            entity.HasOne<Item>().WithMany().HasForeignKey(e => e.ItemId);
         });
 
         modelBuilder.Entity<CharacterStat>(entity =>

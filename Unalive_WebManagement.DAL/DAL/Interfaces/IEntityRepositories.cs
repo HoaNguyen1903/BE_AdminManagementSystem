@@ -22,7 +22,6 @@ namespace Unalive_WebManagement.DAL.Interfaces
     }
     public interface IAbilitiesSetRepository : IRepository<AbilitiesSet> { }
     public interface IAnnouncementRepository : IRepository<Announcement> { }
-    public interface IBundleItemRepository : IRepository<BundleItem> { }
     public interface ICharacterAttackRepository : IRepository<CharacterAttack> { }
     public interface ICharacterPassiveRepository : IRepository<CharacterPassive> { }
     public interface ICharacterPvPRepository : IRepository<CharacterPvP> { }

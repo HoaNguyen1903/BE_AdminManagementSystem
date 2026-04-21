@@ -29,9 +29,8 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var users = await _userRepository.GetAllAsync();
             var now = DateTime.UtcNow;
-            
+
             var dtos = users.Select(u => {
-                // Return null if ban has expired or is null
                 var isBanned = u.BannedUntil.HasValue && u.BannedUntil > now;
                 return new UserDto
                 {
@@ -39,17 +38,19 @@ namespace Unalive_WebManagement.BLL.Services
                     Email = u.Email,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
+                    UserName = u.UserName,
                     Banned = isBanned,
                     BannedUntil = isBanned ? u.BannedUntil : null,
                     LastOnline = u.LastOnline,
                     AvatarUrl = u.AvatarUrl
                 };
             });
-            
-            return dtos.ApplyQuery(query, (u, search) => 
-                u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) || 
-                u.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) || 
-                u.LastName.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            return dtos.ApplyQuery(query, (u, search) =>
+                u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                u.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                u.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                u.UserName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<UserDto?> GetUserByIdAsync(int id)
@@ -67,13 +68,14 @@ namespace Unalive_WebManagement.BLL.Services
                 await _userRepository.UpdateAsync(u);
             }
 
-            return new UserDto 
-            { 
-                UserId = u.UserId, 
-                Email = u.Email, 
-                FirstName = u.FirstName, 
-                LastName = u.LastName, 
-                Banned = isBanned, 
+            return new UserDto
+            {
+                UserId = u.UserId,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                UserName = u.UserName,
+                Banned = isBanned,
                 BannedUntil = isBanned ? u.BannedUntil : null,
                 LastOnline = u.LastOnline,
                 AvatarUrl = u.AvatarUrl
@@ -94,6 +96,7 @@ namespace Unalive_WebManagement.BLL.Services
                 Password = dto.Password,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
+                UserName = dto.UserName,
                 BannedUntil = null,
                 LastOnline = DateTime.UtcNow
             };
@@ -104,6 +107,7 @@ namespace Unalive_WebManagement.BLL.Services
                 Email = created.Email,
                 FirstName = created.FirstName,
                 LastName = created.LastName,
+                UserName = created.UserName,
                 Banned = false,
                 BannedUntil = null,
                 LastOnline = created.LastOnline,
@@ -130,6 +134,7 @@ namespace Unalive_WebManagement.BLL.Services
             user.Password = dto.Password;
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
+            user.UserName = dto.UserName;
             user.LastOnline = dto.LastOnline;
             user.AvatarUrl = dto.AvatarUrl;
             

@@ -9,4 +9,8 @@ public partial class SkinAndCharacterBundle
     public string BundleName { get; set; } = null!;
 
     public float BundlePrice { get; set; }
+
+    public int ItemId { get; set; }
+
+    public int Quantity { get; set; }
 }

@@ -26,7 +26,6 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<IAbilitiesSetRepository, AbilitiesSetRepository>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
-builder.Services.AddScoped<IBundleItemRepository, BundleItemRepository>();
 builder.Services.AddScoped<ICharacterAttackRepository, CharacterAttackRepository>();
 builder.Services.AddScoped<ICharacterPassiveRepository, CharacterPassiveRepository>();
 builder.Services.AddScoped<ICharacterPvPRepository, CharacterPvPRepository>();

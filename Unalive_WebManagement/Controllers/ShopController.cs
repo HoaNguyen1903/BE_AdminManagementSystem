@@ -34,14 +34,16 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("gem-bundles")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult<GemBundleDto>> CreateGemBundle([FromBody] CreateGemBundleDto dto)
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var created = await _shopService.CreateGemBundleAsync(dto, staffId);
-            return CreatedAtAction(nameof(GetGemBundleById), new { id = created.GemBundleId }, created);
+            var createdBundle = await _shopService.CreateGemBundleAsync(dto, staffId);
+            return CreatedAtAction(nameof(GetGemBundleById), new { id = createdBundle.GemBundleId }, createdBundle);
         }
 
         [HttpPut("gem-bundles/{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateGemBundle(int id, [FromBody] UpdateGemBundleDto dto)
         {
             try
@@ -56,10 +58,18 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpDelete("gem-bundles/{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteGemBundle(int id)
         {
-            await _shopService.DeleteGemBundleAsync(id);
-            return NoContent();
+            try
+            {
+                await _shopService.DeleteGemBundleAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         // SkinAndCharacterBundle Endpoints
@@ -106,48 +116,7 @@ namespace Unalive_WebManagement.Controllers
             return NoContent();
         }
 
-        // BundleItem Endpoints
-        [HttpGet("bundle-items")]
-        public async Task<ActionResult<IEnumerable<BundleItemDto>>> GetAllBundleItems([FromQuery] QueryParameters query)
-        {
-            return Ok(await _shopService.GetAllBundleItemsAsync(query));
-        }
-
-        [HttpGet("bundle-items/{bundleId}")]
-        public async Task<ActionResult<IEnumerable<BundleItemDto>>> GetItemsByBundleId(int bundleId)
-        {
-            return Ok(await _shopService.GetItemsByBundleIdAsync(bundleId));
-        }
-
-        [HttpPost("bundle-items")]
-        public async Task<ActionResult<BundleItemDto>> CreateBundleItem([FromBody] CreateBundleItemDto dto)
-        {
-            var created = await _shopService.CreateBundleItemAsync(dto);
-            return Ok(created);
-        }
-
-        [HttpPut("bundle-items/{bundleId}/item/{itemId}")]
-        public async Task<IActionResult> UpdateBundleItem(int bundleId, int itemId, [FromBody] UpdateBundleItemDto dto)
-        {
-            try
-            {
-                await _shopService.UpdateBundleItemAsync(bundleId, itemId, dto);
-                return NoContent();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-        }
-
-        [HttpDelete("bundle-items/{bundleId}/item/{itemId}")]
-        public async Task<IActionResult> DeleteBundleItem(int bundleId, int itemId)
-        {
-            await _shopService.DeleteBundleItemAsync(bundleId, itemId);
-            return NoContent();
-        }
-
-        // Read Only History/Orders
+        // ShopOrder & Details & TopUp Endpoints
         //[HttpGet("orders")]
         //public async Task<ActionResult<IEnumerable<ShopOrderDto>>> GetOrders([FromQuery] QueryParameters query)
         //{

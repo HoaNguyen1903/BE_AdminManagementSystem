@@ -14,7 +14,6 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IShopOrderRepository _shopOrderRepository;
         private readonly IShopOrderDetailRepository _shopOrderDetailRepository;
         private readonly ITopUpHistoryRepository _topUpHistoryRepository;
-        private readonly IBundleItemRepository _bundleItemRepository;
         private readonly IAnnouncementRepository _announcementRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IUserBundleRepository _userBundleRepository;
@@ -26,7 +25,6 @@ namespace Unalive_WebManagement.BLL.Services
             IShopOrderRepository shopOrderRepository,
             IShopOrderDetailRepository shopOrderDetailRepository,
             ITopUpHistoryRepository topUpHistoryRepository,
-            IBundleItemRepository bundleItemRepository,
             IAnnouncementRepository announcementRepository,
             INotificationRepository notificationRepository,
             IUserBundleRepository userBundleRepository,
@@ -37,7 +35,6 @@ namespace Unalive_WebManagement.BLL.Services
             _shopOrderRepository = shopOrderRepository;
             _shopOrderDetailRepository = shopOrderDetailRepository;
             _topUpHistoryRepository = topUpHistoryRepository;
-            _bundleItemRepository = bundleItemRepository;
             _announcementRepository = announcementRepository;
             _notificationRepository = notificationRepository;
             _userBundleRepository = userBundleRepository;
@@ -52,7 +49,9 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 GemBundleId = b.GemBundleId,
                 BundleName = b.BundleName,
-                BundlePrice = b.BundlePrice
+                BundlePrice = b.BundlePrice,
+                ItemId = b.ItemId,
+                Quantity = b.Quantity
             });
             return dtos.ApplyQuery(query, (b, search) => b.BundleName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -61,13 +60,32 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var b = await _gemBundleRepository.GetByIdAsync(id);
             if (b == null) return null;
-            return new GemBundleDto { GemBundleId = b.GemBundleId, BundleName = b.BundleName, BundlePrice = b.BundlePrice };
+            return new GemBundleDto { GemBundleId = b.GemBundleId, BundleName = b.BundleName, BundlePrice = b.BundlePrice, ItemId = b.ItemId, Quantity = b.Quantity };
+        }
+
+        public async Task<GemBundleDto> CreateGemBundleAsync(CreateGemBundleDto dto)
+        {
+            var bundle = new GemBundle
+            {
+                BundleName = dto.BundleName,
+                BundlePrice = dto.BundlePrice,
+                ItemId = dto.ItemId,
+                Quantity = dto.Quantity
+            };
+            var created = await _gemBundleRepository.AddAsync(bundle);
+            return new GemBundleDto
+            {
+                GemBundleId = created.GemBundleId,
+                BundleName = created.BundleName,
+                BundlePrice = created.BundlePrice,
+                ItemId = created.ItemId,
+                Quantity = created.Quantity
+            };
         }
 
         public async Task<GemBundleDto> CreateGemBundleAsync(CreateGemBundleDto dto, int staffId)
         {
-            var bundle = new GemBundle { BundleName = dto.BundleName, BundlePrice = dto.BundlePrice };
-            var created = await _gemBundleRepository.AddAsync(bundle);
+            var created = await CreateGemBundleAsync(dto);
 
             // Create automatic announcement
             var announcement = new Announcement
@@ -92,15 +110,19 @@ namespace Unalive_WebManagement.BLL.Services
             };
             await _notificationRepository.AddAsync(notification);
 
-            return new GemBundleDto { GemBundleId = created.GemBundleId, BundleName = created.BundleName, BundlePrice = created.BundlePrice };
+            return created;
         }
 
         public async Task UpdateGemBundleAsync(int id, UpdateGemBundleDto dto)
         {
             var bundle = await _gemBundleRepository.GetByIdAsync(id);
             if (bundle == null) throw new KeyNotFoundException();
-            bundle.BundleName = dto.BundleName;
-            bundle.BundlePrice = dto.BundlePrice;
+
+            if (dto.BundleName != null) bundle.BundleName = dto.BundleName;
+            if (dto.BundlePrice != null) bundle.BundlePrice = dto.BundlePrice.Value;
+            if (dto.ItemId != null) bundle.ItemId = dto.ItemId.Value;
+            if (dto.Quantity != null) bundle.Quantity = dto.Quantity.Value;
+
             await _gemBundleRepository.UpdateAsync(bundle);
         }
 
@@ -114,7 +136,9 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 SkinAndCharacterBundleId = b.SkinAndCharacterBundleId,
                 BundleName = b.BundleName,
-                BundlePrice = b.BundlePrice
+                BundlePrice = b.BundlePrice,
+                ItemId = b.ItemId,
+                Quantity = b.Quantity
             });
             return dtos.ApplyQuery(query, (b, search) => b.BundleName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -123,12 +147,25 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var b = await _skinAndCharacterBundleRepository.GetByIdAsync(id);
             if (b == null) return null;
-            return new SkinAndCharacterBundleDto { SkinAndCharacterBundleId = b.SkinAndCharacterBundleId, BundleName = b.BundleName, BundlePrice = b.BundlePrice };
+            return new SkinAndCharacterBundleDto
+            {
+                SkinAndCharacterBundleId = b.SkinAndCharacterBundleId,
+                BundleName = b.BundleName,
+                BundlePrice = b.BundlePrice,
+                ItemId = b.ItemId,
+                Quantity = b.Quantity
+            };
         }
 
         public async Task<SkinAndCharacterBundleDto> CreateSkinAndCharacterBundleAsync(CreateSkinAndCharacterBundleDto dto, int staffId)
         {
-            var bundle = new SkinAndCharacterBundle { BundleName = dto.BundleName, BundlePrice = dto.BundlePrice };
+            var bundle = new SkinAndCharacterBundle
+            {
+                BundleName = dto.BundleName,
+                BundlePrice = dto.BundlePrice,
+                ItemId = dto.ItemId,
+                Quantity = dto.Quantity
+            };
             var created = await _skinAndCharacterBundleRepository.AddAsync(bundle);
 
             // Create automatic announcement
@@ -154,63 +191,30 @@ namespace Unalive_WebManagement.BLL.Services
             };
             await _notificationRepository.AddAsync(notification);
 
-            return new SkinAndCharacterBundleDto { SkinAndCharacterBundleId = created.SkinAndCharacterBundleId, BundleName = created.BundleName, BundlePrice = created.BundlePrice };
+            return new SkinAndCharacterBundleDto
+            {
+                SkinAndCharacterBundleId = created.SkinAndCharacterBundleId,
+                BundleName = created.BundleName,
+                BundlePrice = created.BundlePrice,
+                ItemId = created.ItemId,
+                Quantity = created.Quantity
+            };
         }
 
         public async Task UpdateSkinAndCharacterBundleAsync(int id, UpdateSkinAndCharacterBundleDto dto)
         {
             var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(id);
             if (bundle == null) throw new KeyNotFoundException();
-            bundle.BundleName = dto.BundleName;
-            bundle.BundlePrice = dto.BundlePrice;
+
+            if (dto.BundleName != null) bundle.BundleName = dto.BundleName;
+            if (dto.BundlePrice != null) bundle.BundlePrice = dto.BundlePrice.Value;
+            if (dto.ItemId != null) bundle.ItemId = dto.ItemId.Value;
+            if (dto.Quantity != null) bundle.Quantity = dto.Quantity.Value;
+
             await _skinAndCharacterBundleRepository.UpdateAsync(bundle);
         }
 
         public async Task DeleteSkinAndCharacterBundleAsync(int id) => await _skinAndCharacterBundleRepository.DeleteAsync(id);
-
-        // BundleItem CRUD
-        public async Task<IEnumerable<BundleItemDto>> GetAllBundleItemsAsync(QueryParameters query)
-        {
-            var items = await _bundleItemRepository.GetAllAsync();
-            var dtos = items.Select(i => new BundleItemDto
-            {
-                SkinAndCharacterBundleId = i.SkinAndCharacterBundleId,
-                ItemId = i.ItemId,
-                Quantity = i.Quantity
-            });
-            return dtos.ApplyQuery(query, (i, search) => i.SkinAndCharacterBundleId.ToString().Contains(search) || i.ItemId.ToString().Contains(search));
-        }
-
-        public async Task<IEnumerable<BundleItemDto>> GetItemsByBundleIdAsync(int bundleId)
-        {
-            var items = await _bundleItemRepository.GetAllAsync();
-            return items.Where(i => i.SkinAndCharacterBundleId == bundleId).Select(i => new BundleItemDto
-            {
-                SkinAndCharacterBundleId = i.SkinAndCharacterBundleId,
-                ItemId = i.ItemId,
-                Quantity = i.Quantity
-            });
-        }
-
-        public async Task<BundleItemDto> CreateBundleItemAsync(CreateBundleItemDto dto)
-        {
-            var item = new BundleItem { SkinAndCharacterBundleId = dto.SkinAndCharacterBundleId, ItemId = dto.ItemId, Quantity = dto.Quantity };
-            var created = await _bundleItemRepository.AddAsync(item);
-            return new BundleItemDto { SkinAndCharacterBundleId = created.SkinAndCharacterBundleId, ItemId = created.ItemId, Quantity = created.Quantity };
-        }
-
-        public async Task UpdateBundleItemAsync(int bundleId, int itemId, UpdateBundleItemDto dto)
-        {
-            var item = await _bundleItemRepository.GetByIdAsync(bundleId, itemId);
-            if (item == null) throw new KeyNotFoundException();
-            item.Quantity = dto.Quantity;
-            await _bundleItemRepository.UpdateAsync(item);
-        }
-
-        public async Task DeleteBundleItemAsync(int bundleId, int itemId)
-        {
-            await _bundleItemRepository.DeleteAsync(bundleId, itemId);
-        }
 
         // ShopOrder & Details & TopUp (Read Only / Management)
         public async Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query)
@@ -400,20 +404,14 @@ namespace Unalive_WebManagement.BLL.Services
             await _userBundleRepository.AddAsync(userBundle);
 
             // Add items from bundle to UserItem
-            var bundleItems = await _bundleItemRepository.GetAllAsync();
-            var itemsToAdd = bundleItems.Where(bi => bi.SkinAndCharacterBundleId == bundleId);
-
-            foreach (var bi in itemsToAdd)
+            var userItem = new UserItem
             {
-                var userItem = new UserItem
-                {
-                    UserId = userId,
-                    ItemId = bi.ItemId,
-                    Quantity = bi.Quantity,
-                    ShopOrderId = createdOrder.ShopOrderId
-                };
-                await _userItemRepository.AddAsync(userItem);
-            }
+                UserId = userId,
+                ItemId = bundle.ItemId,
+                Quantity = bundle.Quantity,
+                ShopOrderId = createdOrder.ShopOrderId
+            };
+            await _userItemRepository.AddAsync(userItem);
         }
 
         public async Task<ShopOrder> CreateShopOrderAsync(ShopOrder order)
@@ -483,6 +481,29 @@ namespace Unalive_WebManagement.BLL.Services
                         {
                             UserId = order.UserId,
                             GemBundleId = bundle.GemBundleId,
+                            Remaining = detail.Quantity
+                        };
+                        await _userBundleRepository.AddAsync(userBundle);
+                    }
+                }
+                else if (detail.SkinAndCharacterBundleId.HasValue)
+                {
+                    var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(detail.SkinAndCharacterBundleId.Value);
+                    if (bundle != null)
+                    {
+                        var userItem = new UserItem
+                        {
+                            UserId = order.UserId,
+                            ItemId = bundle.ItemId,
+                            Quantity = bundle.Quantity * detail.Quantity,
+                            ShopOrderId = order.ShopOrderId
+                        };
+                        await _userItemRepository.AddAsync(userItem);
+
+                        var userBundle = new UserBundle
+                        {
+                            UserId = order.UserId,
+                            SkinAndCharacterBundleId = bundle.SkinAndCharacterBundleId,
                             Remaining = detail.Quantity
                         };
                         await _userBundleRepository.AddAsync(userBundle);

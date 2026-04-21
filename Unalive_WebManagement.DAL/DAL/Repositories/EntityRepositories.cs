@@ -84,11 +84,6 @@ namespace Unalive_WebManagement.DAL.Repositories
         public AnnouncementRepository(UnaliveDbContext context) : base(context) { }
     }
 
-    public class BundleItemRepository : Repository<BundleItem>, IBundleItemRepository
-    {
-        public BundleItemRepository(UnaliveDbContext context) : base(context) { }
-    }
-
     public class CharacterAttackRepository : Repository<CharacterAttack>, ICharacterAttackRepository
     {
         public CharacterAttackRepository(UnaliveDbContext context) : base(context) { }

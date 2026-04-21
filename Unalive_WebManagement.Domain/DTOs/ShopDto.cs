@@ -7,48 +7,49 @@ namespace Unalive_WebManagement.DTOs
         public int GemBundleId { get; set; }
         public string BundleName { get; set; } = null!;
         public float BundlePrice { get; set; }
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
     }
 
     public class CreateGemBundleDto
     {
         public string BundleName { get; set; } = null!;
         public float BundlePrice { get; set; }
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
     }
 
-    public class UpdateGemBundleDto : CreateGemBundleDto { }
+    public class UpdateGemBundleDto
+    {
+        public string? BundleName { get; set; }
+        public float? BundlePrice { get; set; }
+        public int? ItemId { get; set; }
+        public int? Quantity { get; set; }
+    }
 
     public class SkinAndCharacterBundleDto
     {
         public int SkinAndCharacterBundleId { get; set; }
         public string BundleName { get; set; } = null!;
         public float BundlePrice { get; set; }
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
     }
 
     public class CreateSkinAndCharacterBundleDto
     {
         public string BundleName { get; set; } = null!;
         public float BundlePrice { get; set; }
-    }
-
-    public class UpdateSkinAndCharacterBundleDto : CreateSkinAndCharacterBundleDto { }
-
-    public class BundleItemDto
-    {
-        public int SkinAndCharacterBundleId { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
     }
 
-    public class CreateBundleItemDto
+    public class UpdateSkinAndCharacterBundleDto
     {
-        public int SkinAndCharacterBundleId { get; set; }
-        public int ItemId { get; set; }
-        public int Quantity { get; set; }
-    }
-
-    public class UpdateBundleItemDto
-    {
-        public int Quantity { get; set; }
+        public string? BundleName { get; set; }
+        public float? BundlePrice { get; set; }
+        public int? ItemId { get; set; }
+        public int? Quantity { get; set; }
     }
 
     public class ShopOrderDto

@@ -69,6 +69,7 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 Token = token,
                 Email = user.Email,
+                UserName = user.UserName,
                 Role = "User",
                 AvatarUrl = user.AvatarUrl
             };
@@ -89,6 +90,7 @@ namespace Unalive_WebManagement.BLL.Services
                 Password = request.Password,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                UserName = request.UserName,
                 BannedUntil = null,
                 LastOnline = DateTime.UtcNow,
                 IsEmailVerified = false,
@@ -109,6 +111,7 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 Token = token,
                 Email = created.Email,
+                UserName = created.UserName,
                 Role = "User",
                 AvatarUrl = created.AvatarUrl
             };
