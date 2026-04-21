@@ -6,7 +6,7 @@ namespace Unalive_WebManagement.Models;
 public class OrderCreateRequest
 {
     public int UserId { get; set; }
-    public float TotalAmount { get; set; }
+    public float TotalAmount { get; set; } 
     public string? ReturnUrl { get; set; }
     public string? CancelUrl { get; set; }
     public string? PlayerEmail { get; set; }
@@ -20,18 +20,8 @@ public class OrderCreateRequest
 public class OrderItemCreateRequest
 {
     [Required]
-    public string? BundleName { get; set; }
-    public string? ItemName { get; set; }
-
-    [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
-    public int Quantity { get; set; }
-
-    [Required]
-    public long Price { get; set; }
-
-    [Required]
     public int BundleId { get; set; }
-    public int? ItemId { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+    public int BundleBuyQuantity { get; set; } = 1;
 }
