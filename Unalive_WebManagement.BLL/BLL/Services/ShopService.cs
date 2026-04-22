@@ -450,12 +450,12 @@ namespace Unalive_WebManagement.BLL.Services
             await _userItemRepository.UpdateAsync(userItem);
         }
 
-        public async Task ProcessSuccessfulOrderAsync(int shopOrderId)
+        public async Task ProcessSuccessfulOrderAsync(ShopOrder order)
         {
-            var order = await _shopOrderRepository.GetByIdAsync(shopOrderId);
-            if (order == null || order.Status != PaymentLinkStatus.Paid) return;
+            //var order = await _shopOrderRepository.GetByIdAsync(order.ShopOrderId);
+            if (order == null) return;
 
-            var details = await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(new[] { shopOrderId });
+            var details = await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(new[] { order.ShopOrderId });
 
             foreach (var detail in details)
             {
@@ -467,12 +467,12 @@ namespace Unalive_WebManagement.BLL.Services
                     int totalGemsToAdd = bundle.Quantity * detail.Quantity;
 
                     var userInventory = await _userItemRepository.GetByUserIdAsync(order.UserId);
-                    var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == bundle.ItemId);
+                    var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == 4);
 
                     if (existingGems != null)
                     {
                         existingGems.Quantity += totalGemsToAdd;
-                        existingGems.ShopOrderId = shopOrderId;
+                        existingGems.ShopOrderId = order.ShopOrderId;
                         await _userItemRepository.UpdateAsync(existingGems);
                     }
                     else
@@ -482,7 +482,7 @@ namespace Unalive_WebManagement.BLL.Services
                             UserId = order.UserId,
                             ItemId = bundle.ItemId,
                             Quantity = totalGemsToAdd,
-                            ShopOrderId = shopOrderId
+                            ShopOrderId = order.ShopOrderId
                         });
                     }
                 }

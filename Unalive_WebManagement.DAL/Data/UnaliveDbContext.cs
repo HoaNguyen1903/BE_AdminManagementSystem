@@ -137,13 +137,20 @@ public partial class UnaliveDbContext : DbContext
         {
             entity.HasKey(e => e.UserBundleId);
 
-            entity.HasOne<User>().WithMany().HasForeignKey(e => e.UserId);
+            entity.HasOne(d => d.User)
+                  .WithMany()
+                  .HasForeignKey(d => d.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne<SkinAndCharacterBundle>().WithMany()
-                  .HasForeignKey(e => e.SkinAndCharacterBundleId).IsRequired(false);
+            entity.HasOne(d => d.SkinAndCharacterBundle)
+                  .WithMany()
+                  .HasForeignKey(d => d.SkinAndCharacterBundleId)
+                  .IsRequired(false);
 
-            entity.HasOne<GemBundle>().WithMany()
-                  .HasForeignKey(e => e.GemBundleId).IsRequired(false);
+            entity.HasOne(d => d.GemBundle)
+                  .WithMany()
+                  .HasForeignKey(d => d.GemBundleId)
+                  .IsRequired(false);
         });
 
         modelBuilder.Entity<CharacterStat>(entity =>

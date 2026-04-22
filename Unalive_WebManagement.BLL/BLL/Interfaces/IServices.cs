@@ -70,7 +70,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
         Task PurchaseGemBundleAsync(int userId, int bundleId);
         Task PurchaseSkinBundleAsync(int userId, int bundleId);
-        Task ProcessSuccessfulOrderAsync(int shopOrderId);
+        Task ProcessSuccessfulOrderAsync(ShopOrder order);
     }
 
     public interface IAnnouncementService

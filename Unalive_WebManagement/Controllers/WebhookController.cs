@@ -101,7 +101,7 @@ namespace Unalive_WebManagement.Controllers
 
                     if (order.Status == PaymentLinkStatus.Paid)
                     {
-                        await _shopService.ProcessSuccessfulOrderAsync(order.ShopOrderId);
+                        await _shopService.ProcessSuccessfulOrderAsync(order);
                     }
                 }
 
