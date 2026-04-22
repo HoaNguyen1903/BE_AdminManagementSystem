@@ -99,7 +99,12 @@ namespace Unalive_WebManagement.Controllers
 
                     await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
 
-                    await _shopService.ProcessSuccessfulOrderAsync(order);
+                    Console.WriteLine($"Payment Paid: {PaymentLinkStatus.Paid}");
+                    if (order.Status == PaymentLinkStatus.Paid)
+                    {
+                        await _shopService.ProcessSuccessfulOrderAsync(order);
+                        Console.WriteLine($"Method can run");
+                    }
                 }
 
                 return Ok(new { message = "Webhook processed successfully", orderCode = webhookData.OrderCode });
