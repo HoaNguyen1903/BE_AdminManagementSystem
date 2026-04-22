@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unalive_WebManagement.Data;
 
@@ -11,9 +12,11 @@ using Unalive_WebManagement.Data;
 namespace Unalive_WebManagement.DAL.Migrations
 {
     [DbContext(typeof(UnaliveDbContext))]
-    partial class UnaliveDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422043541_UpdateUserBundleKey")]
+    partial class UpdateUserBundleKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -775,46 +778,23 @@ namespace Unalive_WebManagement.DAL.Migrations
 
             modelBuilder.Entity("Unalive_WebManagement.Models.UserBundle", b =>
                 {
-                    b.Property<int>("UserBundleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserBundleId"));
-
-                    b.Property<int?>("GemBundleId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("GemBundleId1")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Remaining")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<int?>("SkinAndCharacterBundleId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SkinAndCharacterBundleId1")
+                    b.Property<int?>("GemBundleId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("Remaining")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserBundleId");
+                    b.HasKey("UserId", "SkinAndCharacterBundleId", "GemBundleId");
 
                     b.HasIndex("GemBundleId");
 
-                    b.HasIndex("GemBundleId1");
-
                     b.HasIndex("SkinAndCharacterBundleId");
-
-                    b.HasIndex("SkinAndCharacterBundleId1");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("UserBundles");
                 });
@@ -993,33 +973,15 @@ namespace Unalive_WebManagement.DAL.Migrations
                         .WithMany()
                         .HasForeignKey("GemBundleId");
 
-                    b.HasOne("Unalive_WebManagement.Models.GemBundle", "GemBundle")
-                        .WithMany()
-                        .HasForeignKey("GemBundleId1");
-
                     b.HasOne("Unalive_WebManagement.Models.SkinAndCharacterBundle", null)
                         .WithMany()
                         .HasForeignKey("SkinAndCharacterBundleId");
-
-                    b.HasOne("Unalive_WebManagement.Models.SkinAndCharacterBundle", "SkinAndCharacterBundle")
-                        .WithMany()
-                        .HasForeignKey("SkinAndCharacterBundleId1");
 
                     b.HasOne("Unalive_WebManagement.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Unalive_WebManagement.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1");
-
-                    b.Navigation("GemBundle");
-
-                    b.Navigation("SkinAndCharacterBundle");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Unalive_WebManagement.Models.UserItem", b =>

@@ -135,10 +135,15 @@ public partial class UnaliveDbContext : DbContext
 
         modelBuilder.Entity<UserBundle>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.SkinAndCharacterBundleId, e.GemBundleId });
+            entity.HasKey(e => e.UserBundleId);
+
             entity.HasOne<User>().WithMany().HasForeignKey(e => e.UserId);
-            entity.HasOne<SkinAndCharacterBundle>().WithMany().HasForeignKey(e => e.SkinAndCharacterBundleId).IsRequired(false);
-            entity.HasOne<GemBundle>().WithMany().HasForeignKey(e => e.GemBundleId).IsRequired(false);
+
+            entity.HasOne<SkinAndCharacterBundle>().WithMany()
+                  .HasForeignKey(e => e.SkinAndCharacterBundleId).IsRequired(false);
+
+            entity.HasOne<GemBundle>().WithMany()
+                  .HasForeignKey(e => e.GemBundleId).IsRequired(false);
         });
 
         modelBuilder.Entity<CharacterStat>(entity =>
