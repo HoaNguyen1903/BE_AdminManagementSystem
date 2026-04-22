@@ -452,10 +452,10 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task ProcessSuccessfulOrderAsync(ShopOrder order)
         {
-            //var order = await _shopOrderRepository.GetByIdAsync(order.ShopOrderId);
             if (order == null) return;
 
-            var details = await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(new[] { order.ShopOrderId });
+            var allDetails = await _shopOrderDetailRepository.GetAllAsync();
+            var details = allDetails.Where(d => d.ShopOrderId == order.ShopOrderId).ToList();
 
             foreach (var detail in details)
             {
@@ -464,7 +464,7 @@ namespace Unalive_WebManagement.BLL.Services
                     var bundle = await _gemBundleRepository.GetByIdAsync(detail.GemBundleId.Value);
                     if (bundle == null) continue;
 
-                    int totalGemsToAdd = bundle.Quantity * detail.Quantity;
+                    int totalGemsToAdd = bundle.Quantity; 
 
                     var userInventory = await _userItemRepository.GetByUserIdAsync(order.UserId);
                     var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == 4);
