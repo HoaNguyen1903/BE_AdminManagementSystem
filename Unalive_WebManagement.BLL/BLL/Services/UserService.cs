@@ -339,9 +339,23 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<UserBundleDto> CreateUserBundleAsync(CreateUserBundleDto dto)
         {
-            var bundle = new UserBundle { UserId = dto.UserId, SkinAndCharacterBundleId = dto.SkinAndCharacterBundleId, GemBundleId = dto.GemBundleId, Remaining = dto.Remaining };
+            var bundle = new UserBundle
+            {
+                UserId = dto.UserId,
+                SkinAndCharacterBundleId = dto.SkinAndCharacterBundleId > 0 ? dto.SkinAndCharacterBundleId : null,
+                GemBundleId = dto.GemBundleId > 0 ? dto.GemBundleId : null,
+                Remaining = dto.Remaining
+            };
+
             var created = await _userBundleRepository.AddAsync(bundle);
-            return new UserBundleDto { UserId = created.UserId, SkinAndCharacterBundleId = created.SkinAndCharacterBundleId, GemBundleId = created.GemBundleId, Remaining = created.Remaining };
+
+            return new UserBundleDto
+            {
+                UserId = created.UserId,
+                SkinAndCharacterBundleId = created.SkinAndCharacterBundleId,
+                GemBundleId = created.GemBundleId,
+                Remaining = created.Remaining
+            };
         }
 
         public async Task UpdateUserBundleAsync(int userId, int skinBundleId, int gemBundleId, UpdateUserBundleDto dto)

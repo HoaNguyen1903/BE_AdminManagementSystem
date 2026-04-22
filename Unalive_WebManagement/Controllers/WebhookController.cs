@@ -55,10 +55,10 @@ namespace Unalive_WebManagement.Controllers
             try
             {
                 var webhookData = await _client.Webhooks.VerifyAsync(webhook);
-                if (webhookData.OrderCode == 123 && webhookData.Description == "VQRIO123" && webhookData.AccountNumber == "12345678")
-                {
-                    return Ok(new { message = "Webhook processed successfully" });
-                }
+                //if (webhookData.OrderCode == 123 && webhookData.Description == "VQRIO123" && webhookData.AccountNumber == "12345678")
+                //{
+                //    return Ok(new { message = "Webhook processed successfully" });
+                //}
 
                 var order = await _shopService.GetShopOrderByOrderCodeAsync(webhookData.OrderCode);
 
