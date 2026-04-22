@@ -455,12 +455,12 @@ namespace Unalive_WebManagement.BLL.Services
             await _userItemRepository.UpdateAsync(userItem);
         }
 
-        public async Task ProcessSuccessfulOrderAsync(int shopOrderId)
+        public async Task ProcessSuccessfulOrderAsync(ShopOrder order)
         {
-            var order = await _shopOrderRepository.GetByIdAsync(shopOrderId);
-            if (order == null || order.Status != PaymentLinkStatus.Paid) return;
+            if (order == null) return;
 
-            var details = await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(new[] { shopOrderId });
+            var allDetails = await _shopOrderDetailRepository.GetAllAsync();
+            var details = allDetails.Where(d => d.ShopOrderId == order.ShopOrderId).ToList();
 
             foreach (var detail in details)
             {
@@ -469,15 +469,15 @@ namespace Unalive_WebManagement.BLL.Services
                     var bundle = await _gemBundleRepository.GetByIdAsync(detail.GemBundleId.Value);
                     if (bundle == null) continue;
 
-                    int totalGemsToAdd = bundle.Quantity * detail.Quantity;
+                    int totalGemsToAdd = bundle.Quantity; 
 
                     var userInventory = await _userItemRepository.GetByUserIdAsync(order.UserId);
-                    var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == bundle.ItemId);
+                    var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == 4);
 
                     if (existingGems != null)
                     {
                         existingGems.Quantity += totalGemsToAdd;
-                        existingGems.ShopOrderId = shopOrderId;
+                        existingGems.ShopOrderId = order.ShopOrderId;
                         await _userItemRepository.UpdateAsync(existingGems);
                     }
                     else
@@ -487,7 +487,7 @@ namespace Unalive_WebManagement.BLL.Services
                             UserId = order.UserId,
                             ItemId = bundle.ItemId,
                             Quantity = totalGemsToAdd,
-                            ShopOrderId = shopOrderId
+                            ShopOrderId = order.ShopOrderId
                         });
                     }
                 }

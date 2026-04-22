@@ -280,7 +280,7 @@ namespace Unalive_WebManagement.Controllers
             await _shopService.UpdateShopOrderAsync(orderId, order);
 
             // Manually trigger the gem delivery
-            await _shopService.ProcessSuccessfulOrderAsync(orderId);
+            await _shopService.ProcessSuccessfulOrderAsync(order);
 
             return Ok("Gems processed. Check the UserItem table for UserId: " + order.UserId);
         }
