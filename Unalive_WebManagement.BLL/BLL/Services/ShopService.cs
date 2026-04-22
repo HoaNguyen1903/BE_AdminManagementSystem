@@ -225,9 +225,14 @@ namespace Unalive_WebManagement.BLL.Services
                 ShopOrderId = o.ShopOrderId,
                 UserId = o.UserId,
                 TotalAmount = o.TotalAmount,
-                OrderDate = o.OrderDate
+                OrderDate = o.OrderDate,
+                Status = o.Status.ToString(),
+                PlayerEmail = o.PlayerEmail,
+                PlayerUserName = o.PlayerUserName,
+                OrderCode = o.OrderCode,
+                Currency = o.Currency ?? string.Empty
             });
-            return dtos.ApplyQuery(query, (o, search) => o.UserId.ToString().Contains(search));
+            return dtos.ApplyQuery(query, (o, search) => o.UserId.ToString().Contains(search) || (o.PlayerUserName != null && o.PlayerUserName.Contains(search, StringComparison.OrdinalIgnoreCase)) || (o.PlayerEmail != null && o.PlayerEmail.Contains(search, StringComparison.OrdinalIgnoreCase)));
         }
 
         public async Task<ShopOrder?> GetShopOrderByIdAsync(int id)

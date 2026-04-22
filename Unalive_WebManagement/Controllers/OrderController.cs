@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PayOS;
 using PayOS.Models.V2.PaymentRequests;
 using Unalive_WebManagement.BLL.Interfaces;
+using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.Controllers
@@ -259,6 +260,13 @@ namespace Unalive_WebManagement.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"Failed to cancel order {orderId}", error = ex.Message });
             }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ShopOrderDto>>> GetAllOrders([FromQuery] QueryParameters query)
+        {
+            return Ok(await _shopService.GetAllShopOrdersAsync(query));
         }
 
         [HttpPost("debug/force-success/{orderId}")]

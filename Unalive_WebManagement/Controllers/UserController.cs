@@ -36,6 +36,12 @@ namespace Unalive_WebManagement.Controllers
             return Ok(user);
         }
 
+        [HttpGet("{id}/items")]
+        public async Task<ActionResult<IEnumerable<UserItemWithNameDto>>> GetUserItems(int id, [FromQuery] QueryParameters query)
+        {
+            return Ok(await _userService.GetUserItemsWithNamesByUserIdAsync(id, query));
+        }
+
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto dto)
         {

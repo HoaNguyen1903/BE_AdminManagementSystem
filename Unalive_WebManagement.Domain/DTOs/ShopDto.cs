@@ -58,6 +58,11 @@ namespace Unalive_WebManagement.DTOs
         public int UserId { get; set; }
         public float TotalAmount { get; set; }
         public DateTimeOffset OrderDate { get; set; }
+        public string Status { get; set; } = null!;
+        public string? PlayerEmail { get; set; }
+        public string? PlayerUserName { get; set; }
+        public long OrderCode { get; set; }
+        public string Currency { get; set; } = null!;
     }
 
     public class ShopOrderDetailDto

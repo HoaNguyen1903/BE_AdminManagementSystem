@@ -56,6 +56,15 @@ namespace Unalive_WebManagement.DTOs
         public int ShopOrderId { get; set; }
     }
 
+    public class UserItemWithNameDto
+    {
+        public int UserId { get; set; }
+        public string UserName { get; set; } = null!;
+        public int ItemId { get; set; }
+        public string ItemName { get; set; } = null!;
+        public int Quantity { get; set; }
+    }
+
     public class CreateUserItemDto
     {
         public int UserId { get; set; }

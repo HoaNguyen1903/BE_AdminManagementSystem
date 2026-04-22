@@ -113,9 +113,9 @@ public partial class UnaliveDbContext : DbContext
         modelBuilder.Entity<UserItem>(entity =>
         {
             entity.HasKey(e => new { e.UserId, e.ItemId });
-            entity.HasOne<User>().WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<Item>().WithMany().HasForeignKey(e => e.ItemId);
-            entity.HasOne<ShopOrder>().WithMany().HasForeignKey(e => e.ShopOrderId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(d => d.Item).WithMany().HasForeignKey(e => e.ItemId);
+            entity.HasOne(d => d.ShopOrder).WithMany().HasForeignKey(e => e.ShopOrderId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Item>(entity =>

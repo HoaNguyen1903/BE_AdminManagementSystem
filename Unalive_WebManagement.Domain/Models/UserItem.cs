@@ -11,4 +11,9 @@ public partial class UserItem
     public int Quantity { get; set; }
 
     public int ShopOrderId { get; set; }
+
+    // Navigation properties
+    public virtual User? User { get; set; }
+    public virtual Item? Item { get; set; }
+    public virtual ShopOrder? ShopOrder { get; set; }
 }

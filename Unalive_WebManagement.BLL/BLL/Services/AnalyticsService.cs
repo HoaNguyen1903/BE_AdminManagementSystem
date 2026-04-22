@@ -7,7 +7,7 @@ namespace Unalive_WebManagement.BLL.Services
 {
     public class AnalyticsService : IAnalyticsService
     {
-        private readonly IShopOrderRepository _shopOrderRepository;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
         private readonly IShopOrderDetailRepository _shopOrderDetailRepository;
         private readonly ITopUpHistoryRepository _topUpHistoryRepository;
         private readonly IGemBundleRepository _gemBundleRepository;
@@ -15,14 +15,14 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IUserRepository _userRepository;
 
         public AnalyticsService(
-            IShopOrderRepository shopOrderRepository,
+            IOrderTransactionRepository orderTransactionRepository,
             IShopOrderDetailRepository shopOrderDetailRepository,
             ITopUpHistoryRepository topUpHistoryRepository,
             IGemBundleRepository gemBundleRepository,
             ISkinAndCharacterBundleRepository skinBundleRepository,
             IUserRepository userRepository)
         {
-            _shopOrderRepository = shopOrderRepository;
+            _orderTransactionRepository = orderTransactionRepository;
             _shopOrderDetailRepository = shopOrderDetailRepository;
             _topUpHistoryRepository = topUpHistoryRepository;
             _gemBundleRepository = gemBundleRepository;
@@ -32,33 +32,20 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy)
         {
-            var orders = await _shopOrderRepository.GetCompletedOrdersByDateRangeAsync(start, end);
-            var topUps = await _topUpHistoryRepository.GetCompletedTopUpsByDateRangeAsync(start, end);
+            var transactions = await _orderTransactionRepository.GetByDateRangeAsync(start, end);
 
             var dailyRevenue = new Dictionary<string, decimal>();
 
-            foreach (var order in orders)
+            foreach (var transaction in transactions)
             {
                 var key = groupBy == "month"
-                    ? order.OrderDate.ToString("yyyy-MM")
-                    : order.OrderDate.ToString("yyyy-MM-dd");
+                    ? transaction.TransactionDateTime.ToString("yyyy-MM")
+                    : transaction.TransactionDateTime.ToString("yyyy-MM-dd");
 
                 if (!dailyRevenue.ContainsKey(key))
                     dailyRevenue[key] = 0;
 
-                dailyRevenue[key] += (decimal)order.TotalAmount;
-            }
-
-            foreach (var topUp in topUps)
-            {
-                var key = groupBy == "month"
-                    ? topUp.Date.ToString("yyyy-MM")
-                    : topUp.Date.ToString("yyyy-MM-dd");
-
-                if (!dailyRevenue.ContainsKey(key))
-                    dailyRevenue[key] = 0;
-
-                dailyRevenue[key] += (decimal)topUp.RealMoneyAmount;
+                dailyRevenue[key] += (decimal)transaction.Amount;
             }
 
             return dailyRevenue
@@ -69,15 +56,16 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top)
         {
-            var orders = await _shopOrderRepository.GetCompletedOrdersByDateRangeAsync(start, end);
-            var topUps = await _topUpHistoryRepository.GetCompletedTopUpsByDateRangeAsync(start, end);
+            var transactions = await _orderTransactionRepository.GetByDateRangeAsync(start, end);
 
-            var gemBundleIds = topUps.Select(t => t.GemBundleId).Distinct().ToList();
+            var orderIds = transactions.Select(t => t.OrderId).Distinct().ToList();
+            var details = (await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(orderIds)).ToList();
+
+            var gemBundleIds = details.Where(d => d.GemBundleId.HasValue)
+                .Select(d => d.GemBundleId!.Value).Distinct().ToList();
             var gemBundles = (await _gemBundleRepository.GetAllWithIdsAsync(gemBundleIds))
                 .ToDictionary(g => g.GemBundleId, g => g.BundleName);
 
-            var orderIds = orders.Select(o => o.ShopOrderId).ToList();
-            var details = (await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(orderIds)).ToList();
             var skinBundleIds = details.Where(d => d.SkinAndCharacterBundleId.HasValue)
                 .Select(d => d.SkinAndCharacterBundleId!.Value).Distinct().ToList();
             var skinBundles = (await _skinBundleRepository.GetAllWithIdsAsync(skinBundleIds))
@@ -86,33 +74,28 @@ namespace Unalive_WebManagement.BLL.Services
             var gemRevenue = new Dictionary<int, (string Name, decimal Revenue, int Count)>();
             var skinRevenue = new Dictionary<int, (string Name, decimal Revenue, int Count)>();
 
-            foreach (var topUp in topUps)
-            {
-                var bundleName = gemBundles.ContainsKey(topUp.GemBundleId)
-                    ? gemBundles[topUp.GemBundleId]
-                    : topUp.GemBundleId.ToString();
-
-                if (!gemRevenue.ContainsKey(topUp.GemBundleId))
-                {
-                    gemRevenue[topUp.GemBundleId] = (bundleName, 0, 0);
-                }
-                var current = gemRevenue[topUp.GemBundleId];
-                gemRevenue[topUp.GemBundleId] = (current.Name, current.Revenue + (decimal)topUp.RealMoneyAmount, current.Count + 1);
-            }
-
             foreach (var detail in details)
             {
+                if (detail.GemBundleId.HasValue)
+                {
+                    var bundleId = detail.GemBundleId.Value;
+                    var bundleName = gemBundles.ContainsKey(bundleId) ? gemBundles[bundleId] : bundleId.ToString();
+
+                    if (!gemRevenue.ContainsKey(bundleId))
+                        gemRevenue[bundleId] = (bundleName, 0, 0);
+
+                    var current = gemRevenue[bundleId];
+                    gemRevenue[bundleId] = (current.Name, current.Revenue + (decimal)(detail.UnitPrice * detail.Quantity), current.Count + detail.Quantity);
+                }
+
                 if (detail.SkinAndCharacterBundleId.HasValue)
                 {
                     var bundleId = detail.SkinAndCharacterBundleId.Value;
-                    var bundleName = skinBundles.ContainsKey(bundleId)
-                        ? skinBundles[bundleId]
-                        : bundleId.ToString();
+                    var bundleName = skinBundles.ContainsKey(bundleId) ? skinBundles[bundleId] : bundleId.ToString();
 
                     if (!skinRevenue.ContainsKey(bundleId))
-                    {
                         skinRevenue[bundleId] = (bundleName, 0, 0);
-                    }
+
                     var current = skinRevenue[bundleId];
                     skinRevenue[bundleId] = (current.Name, current.Revenue + (decimal)(detail.UnitPrice * detail.Quantity), current.Count + detail.Quantity);
                 }

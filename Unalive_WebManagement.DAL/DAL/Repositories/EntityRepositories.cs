@@ -50,6 +50,14 @@ namespace Unalive_WebManagement.DAL.Repositories
         {
             return await _dbSet.Where(ui => ui.UserId == userId).ToListAsync();
         }
+
+        public async Task<IEnumerable<UserItem>> GetByUserIdWithNamesAsync(int userId)
+        {
+            return await _dbSet.Where(ui => ui.UserId == userId)
+                               .Include(ui => ui.User)
+                               .Include(ui => ui.Item)
+                               .ToListAsync();
+        }
     }
 
     public class NotificationRepository : Repository<Notification>, INotificationRepository
@@ -196,5 +204,11 @@ namespace Unalive_WebManagement.DAL.Repositories
     public class OrderTransactionRepository : Repository<OrderTransaction>, IOrderTransactionRepository
     {
         public OrderTransactionRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<OrderTransaction>> GetByDateRangeAsync(DateTime start, DateTime end)
+        {
+            return await _dbSet.Where(t => t.TransactionDateTime >= start && t.TransactionDateTime <= end)
+                               .ToListAsync();
+        }
     }
 }

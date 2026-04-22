@@ -102,6 +102,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
         Task<IEnumerable<UserItemDto>> GetAllUserItemsAsync(QueryParameters query);
         Task<IEnumerable<UserItemDto>> GetUserItemsByUserIdAsync(int userId, QueryParameters query);
+        Task<IEnumerable<UserItemWithNameDto>> GetUserItemsWithNamesByUserIdAsync(int userId, QueryParameters query);
         Task<UserItemDto> CreateUserItemAsync(CreateUserItemDto dto);
         Task UpdateUserItemAsync(int userId, int itemId, UpdateUserItemDto dto);
         Task DeleteUserItemAsync(int userId, int itemId);

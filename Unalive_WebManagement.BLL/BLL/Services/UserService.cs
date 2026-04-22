@@ -288,6 +288,22 @@ namespace Unalive_WebManagement.BLL.Services
             return dtos.ApplyQuery(query, (i, search) => i.ItemId.ToString().Contains(search));
         }
 
+        public async Task<IEnumerable<UserItemWithNameDto>> GetUserItemsWithNamesByUserIdAsync(int userId, QueryParameters query)
+        {
+            var items = await _userItemRepository.GetByUserIdWithNamesAsync(userId);
+            var dtos = items.Select(i => new UserItemWithNameDto
+            {
+                UserId = i.UserId,
+                UserName = i.User?.UserName ?? "Unknown",
+                ItemId = i.ItemId,
+                ItemName = i.Item?.ItemName ?? "Unknown",
+                Quantity = i.Quantity
+            });
+            return dtos.ApplyQuery(query, (i, search) => 
+                i.ItemName.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+                i.ItemId.ToString().Contains(search));
+        }
+
         public async Task<UserItemDto> CreateUserItemAsync(CreateUserItemDto dto)
         {
             var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity, ShopOrderId = dto.ShopOrderId };

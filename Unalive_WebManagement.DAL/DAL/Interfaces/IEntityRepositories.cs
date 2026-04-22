@@ -13,6 +13,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IUserItemRepository : IRepository<UserItem>
     {
         Task<IEnumerable<UserItem>> GetByUserIdAsync(int userId);
+        Task<IEnumerable<UserItem>> GetByUserIdWithNamesAsync(int userId);
     }
     public interface INotificationRepository : IRepository<Notification> { }
     public interface IReportRepository : IRepository<Report> { }
@@ -54,6 +55,9 @@ namespace Unalive_WebManagement.DAL.Interfaces
         Task<PlayerOnlineHistory?> GetByDateAsync(DateTime date);
         Task<IEnumerable<PlayerOnlineHistory>> GetByDateRangeAsync(DateTime start, DateTime end);
     }
-    public interface IOrderTransactionRepository : IRepository<OrderTransaction> { }
+    public interface IOrderTransactionRepository : IRepository<OrderTransaction>
+    {
+        Task<IEnumerable<OrderTransaction>> GetByDateRangeAsync(DateTime start, DateTime end);
+    }
 
 }
