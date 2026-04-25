@@ -39,6 +39,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IShopOrderRepository : IRepository<ShopOrder>
     {
         Task<IEnumerable<ShopOrder>> GetCompletedOrdersByDateRangeAsync(DateTime start, DateTime end);
+        Task<ShopOrder?> GetByOrderCodeAsync(long orderCode);
     }
     public interface IShopOrderDetailRepository : IRepository<ShopOrderDetail>
     {

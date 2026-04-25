@@ -143,6 +143,13 @@ namespace Unalive_WebManagement.DAL.Repositories
     {
         public ShopOrderRepository(UnaliveDbContext context) : base(context) { }
 
+        public async Task<ShopOrder?> GetByOrderCodeAsync(long orderCode)
+        {
+            return await _dbSet
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+        }
+
         public async Task<IEnumerable<ShopOrder>> GetCompletedOrdersByDateRangeAsync(DateTime start, DateTime end)
         {
             return await _dbSet.Where(o => o.OrderDate >= start && o.OrderDate <= end)

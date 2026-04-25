@@ -249,8 +249,7 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode)
         {
-            var orders = await _shopOrderRepository.GetAllAsync();
-            return orders.FirstOrDefault(o => o.OrderCode == orderCode);
+            return await _shopOrderRepository.GetByOrderCodeAsync(orderCode);
         }
 
         public async Task UpdateShopOrderAsync(int id, ShopOrder updatedOrder)
@@ -459,8 +458,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             if (order == null) return;
 
-            var allDetails = await _shopOrderDetailRepository.GetAllAsync();
-            var details = allDetails.Where(d => d.ShopOrderId == order.ShopOrderId).ToList();
+            var details = await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(new[] { order.ShopOrderId });
 
             foreach (var detail in details)
             {
@@ -469,7 +467,7 @@ namespace Unalive_WebManagement.BLL.Services
                     var bundle = await _gemBundleRepository.GetByIdAsync(detail.GemBundleId.Value);
                     if (bundle == null) continue;
 
-                    int totalGemsToAdd = bundle.Quantity; 
+                    int totalGemsToAdd = bundle.Quantity;
 
                     var userInventory = await _userItemRepository.GetByUserIdAsync(order.UserId);
                     var existingGems = userInventory.FirstOrDefault(ui => ui.ItemId == 4);
@@ -485,7 +483,7 @@ namespace Unalive_WebManagement.BLL.Services
                         await _userItemRepository.AddAsync(new UserItem
                         {
                             UserId = order.UserId,
-                            ItemId = bundle.ItemId,
+                            ItemId = 4,
                             Quantity = totalGemsToAdd,
                             ShopOrderId = order.ShopOrderId
                         });
