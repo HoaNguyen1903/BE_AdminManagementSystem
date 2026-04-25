@@ -2,6 +2,7 @@ namespace Unalive_WebManagement.DTOs
 {
     public class LoginResponse
     {
+        public int Id { get; set; }
         public string Token { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string? UserName { get; set; }

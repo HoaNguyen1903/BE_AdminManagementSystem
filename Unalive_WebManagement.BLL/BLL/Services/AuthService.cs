@@ -67,6 +67,7 @@ namespace Unalive_WebManagement.BLL.Services
 
             return new LoginResponse
             {
+                Id = user.UserId,
                 Token = token,
                 Email = user.Email,
                 UserName = user.UserName,
