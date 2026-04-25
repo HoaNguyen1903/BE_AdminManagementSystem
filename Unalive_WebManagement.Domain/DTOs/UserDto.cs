@@ -10,6 +10,7 @@ namespace Unalive_WebManagement.DTOs
         public bool Banned { get; set; }
         public DateTime? BannedUntil { get; set; } = null!;
         public DateTime? LastOnline { get; set; }
+        public bool IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
     }
 
@@ -32,6 +33,7 @@ namespace Unalive_WebManagement.DTOs
         public bool Banned { get; set; }
         public DateTime? BannedUntil { get; set; }
         public DateTime? LastOnline { get; set; }
+        public bool IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
     }
 
@@ -121,5 +123,13 @@ namespace Unalive_WebManagement.DTOs
     {
         public string BanReason { get; set; } = null!;
         public DateTime? BannedUntil { get; set; }
+    }
+
+    public class UserFilterParameters : QueryParameters
+    {
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
+        public bool? IsOnline { get; set; }
+        public bool? IsEmailVerified { get; set; }
     }
 }

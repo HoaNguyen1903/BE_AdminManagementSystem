@@ -9,6 +9,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
         Task<int> CountOnlineUsersAsync(DateTime threshold);
         Task<int> CountDailyActiveUsersAsync(DateTime date);
         Task<int> CountBannedUsersAsync(DateTime? bannedUntilAfter = null);
+        Task SetInactiveUsersOfflineAsync(DateTime threshold);
     }
     public interface IUserItemRepository : IRepository<UserItem>
     {

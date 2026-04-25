@@ -28,6 +28,12 @@ namespace Unalive_WebManagement.Controllers
             return Ok(await _userService.GetAllUsersAsync(query));
         }
 
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetFiltered([FromQuery] UserFilterParameters filter)
+        {
+            return Ok(await _userService.GetUsersFilteredAsync(filter));
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetById(int id)
         {
@@ -103,14 +109,14 @@ namespace Unalive_WebManagement.Controllers
         public async Task<IActionResult> Logout()
         {
             var userId = GetAuthenticatedUserId();
-            await _userService.UpdateUserLastOnlineAsync(userId);
+            await _userService.SetUserOfflineAsync(userId);
             return NoContent();
         }
 
         [HttpGet("{id}/status")]
-        public async Task<ActionResult<UserStatusDto>> GetStatus(int id, [FromQuery] int onlineThresholdSeconds = 60)
+        public async Task<ActionResult<UserStatusDto>> GetStatus(int id, [FromQuery] int onlineThresholdSeconds = 120)
         {
-            if (onlineThresholdSeconds <= 0) onlineThresholdSeconds = 60;
+            if (onlineThresholdSeconds <= 0) onlineThresholdSeconds = 120;
 
             if (User.IsInRole("User"))
             {

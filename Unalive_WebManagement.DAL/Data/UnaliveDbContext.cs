@@ -56,6 +56,7 @@ public partial class UnaliveDbContext : DbContext
             entity.Property(e => e.Banned)
                 .HasComputedColumnSql("CASE WHEN [BannedUntil] > GETUTCDATE() THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END");
             entity.Property(e => e.IsEmailVerified).HasDefaultValue(false);
+            entity.Property(e => e.IsOnline).HasDefaultValue(false);
             entity.Property(e => e.EmailVerificationToken).HasMaxLength(255);
             entity.Property(e => e.EmailVerificationTokenExpiry).HasColumnType("datetime2");
         });

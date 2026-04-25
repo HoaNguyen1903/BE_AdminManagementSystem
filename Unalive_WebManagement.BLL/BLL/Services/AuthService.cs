@@ -60,6 +60,7 @@ namespace Unalive_WebManagement.BLL.Services
             }
 
             user.LastOnline = DateTime.UtcNow;
+            user.IsOnline = true;
             await _userRepository.UpdateAsync(user);
 
             // Default role for players is "User"

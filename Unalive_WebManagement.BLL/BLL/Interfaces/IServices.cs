@@ -85,11 +85,13 @@ namespace Unalive_WebManagement.BLL.Interfaces
     public interface IUserService
     {
         Task<IEnumerable<UserDto>> GetAllUsersAsync(QueryParameters query);
+        Task<IEnumerable<UserDto>> GetUsersFilteredAsync(UserFilterParameters filter);
         Task<UserDto?> GetUserByIdAsync(int id);
         Task<UserDto> CreateUserAsync(CreateUserDto dto);
         Task UpdateUserAsync(int id, UpdateUserDto dto);
         Task BanUserAsync(int id, BanUserRequest dto, int staffId);
         Task UpdateUserLastOnlineAsync(int userId);
+        Task SetUserOfflineAsync(int userId);
         Task<UserStatusDto?> GetUserStatusAsync(int userId, int onlineThresholdSeconds);
         Task UpdateAvatarAsync(int userId, string avatarUrl);
 

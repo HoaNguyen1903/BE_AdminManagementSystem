@@ -10,7 +10,7 @@ public class PlayerOnlineTrackerService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<PlayerOnlineTrackerService> _logger;
-    private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1);
 
     public PlayerOnlineTrackerService(IServiceProvider serviceProvider, ILogger<PlayerOnlineTrackerService> logger)
     {
@@ -48,7 +48,11 @@ public class PlayerOnlineTrackerService : BackgroundService
         var now = DateTime.UtcNow;
         var today = now.Date;
 
-        // Current Online: Users active in the last 5 minutes
+        // Automatically set users offline if they haven't sent a heartbeat in the last 2 minutes
+        var offlineThreshold = now.AddMinutes(-2);
+        await userRepository.SetInactiveUsersOfflineAsync(offlineThreshold);
+
+        // Current Online: Users active in the last 5 minutes (now using the IsOnline flag)
         var onlineThreshold = now.AddMinutes(-5);
         var currentOnlineCount = await userRepository.CountOnlineUsersAsync(onlineThreshold);
         

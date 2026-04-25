@@ -17,7 +17,7 @@ public partial class User
     public bool Banned { get; set; }
 
     public DateTime? BannedUntil { get; set; }
-
+    public bool IsOnline { get; set; }
     public DateTime? LastOnline { get; set; }
 
     public string? AvatarUrl { get; set; }

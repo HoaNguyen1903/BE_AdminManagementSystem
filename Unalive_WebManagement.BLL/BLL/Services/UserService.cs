@@ -42,11 +42,62 @@ namespace Unalive_WebManagement.BLL.Services
                     Banned = isBanned,
                     BannedUntil = isBanned ? u.BannedUntil : null,
                     LastOnline = u.LastOnline,
+                    IsOnline = u.IsOnline,
                     AvatarUrl = u.AvatarUrl
                 };
             });
 
             return dtos.ApplyQuery(query, (u, search) =>
+                u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                u.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                u.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                u.UserName.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<IEnumerable<UserDto>> GetUsersFilteredAsync(UserFilterParameters filter)
+        {
+            var users = await _userRepository.GetAllAsync();
+            var now = DateTime.UtcNow;
+
+            var query = users.AsQueryable();
+
+            // Apply filters (AND logic)
+            if (!string.IsNullOrWhiteSpace(filter.UserName))
+            {
+                query = query.Where(u => u.UserName.Contains(filter.UserName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Email))
+            {
+                query = query.Where(u => u.Email.Contains(filter.Email, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filter.IsOnline.HasValue)
+            {
+                query = query.Where(u => u.IsOnline == filter.IsOnline.Value);
+            }
+
+            if (filter.IsEmailVerified.HasValue)
+            {
+                query = query.Where(u => u.IsEmailVerified == filter.IsEmailVerified.Value);
+            }
+
+            var dtos = query.Select(u => new UserDto
+            {
+                UserId = u.UserId,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                UserName = u.UserName,
+                Banned = u.BannedUntil.HasValue && u.BannedUntil > now,
+                BannedUntil = u.BannedUntil.HasValue && u.BannedUntil > now ? u.BannedUntil : null,
+                LastOnline = u.LastOnline,
+                IsOnline = u.IsOnline,
+                AvatarUrl = u.AvatarUrl
+            }).ToList();
+
+            // Apply common query parameters (Search, SortBy, IsDescending)
+            return dtos.ApplyQuery(filter, (u, search) =>
                 u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 u.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 u.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
@@ -78,6 +129,7 @@ namespace Unalive_WebManagement.BLL.Services
                 Banned = isBanned,
                 BannedUntil = isBanned ? u.BannedUntil : null,
                 LastOnline = u.LastOnline,
+                IsOnline = u.IsOnline,
                 AvatarUrl = u.AvatarUrl
             };
         }
@@ -111,6 +163,7 @@ namespace Unalive_WebManagement.BLL.Services
                 Banned = false,
                 BannedUntil = null,
                 LastOnline = created.LastOnline,
+                IsOnline = created.IsOnline,
                 AvatarUrl = created.AvatarUrl
             };
         }
@@ -136,6 +189,7 @@ namespace Unalive_WebManagement.BLL.Services
             user.LastName = dto.LastName;
             user.UserName = dto.UserName;
             user.LastOnline = dto.LastOnline;
+            user.IsOnline = dto.IsOnline;
             user.AvatarUrl = dto.AvatarUrl;
             
             // Set to null if past date or null
@@ -174,6 +228,15 @@ namespace Unalive_WebManagement.BLL.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) throw new KeyNotFoundException();
             user.LastOnline = DateTime.UtcNow;
+            user.IsOnline = true;
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task SetUserOfflineAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) throw new KeyNotFoundException();
+            user.IsOnline = false;
             await _userRepository.UpdateAsync(user);
         }
 
@@ -182,14 +245,11 @@ namespace Unalive_WebManagement.BLL.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return null;
 
-            var now = DateTime.UtcNow;
-            var isOnline = user.LastOnline.HasValue &&
-                           user.LastOnline.Value >= now.AddSeconds(-onlineThresholdSeconds);
-
+            // Use the new IsOnline field directly
             return new UserStatusDto
             {
                 UserId = user.UserId,
-                IsOnline = isOnline,
+                IsOnline = user.IsOnline,
                 LastOnline = user.LastOnline
             };
         }

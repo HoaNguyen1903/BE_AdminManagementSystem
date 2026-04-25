@@ -23,7 +23,7 @@ namespace Unalive_WebManagement.DAL.Repositories
 
         public async Task<int> CountOnlineUsersAsync(DateTime threshold)
         {
-            return await _dbSet.CountAsync(u => u.LastOnline >= threshold);
+            return await _dbSet.CountAsync(u => u.IsOnline);
         }
 
         public async Task<int> CountDailyActiveUsersAsync(DateTime date)
@@ -39,6 +39,22 @@ namespace Unalive_WebManagement.DAL.Repositories
                 return await _dbSet.CountAsync(u => u.BannedUntil > bannedUntilAfter.Value);
             }
             return await _dbSet.CountAsync(u => u.BannedUntil == null || u.BannedUntil > DateTime.UtcNow);
+        }
+
+        public async Task SetInactiveUsersOfflineAsync(DateTime threshold)
+        {
+            var inactiveUsers = await _dbSet
+                .Where(u => u.IsOnline && (!u.LastOnline.HasValue || u.LastOnline < threshold))
+                .ToListAsync();
+
+            if (inactiveUsers.Any())
+            {
+                foreach (var user in inactiveUsers)
+                {
+                    user.IsOnline = false;
+                }
+                await _context.SaveChangesAsync();
+            }
         }
     }
 
