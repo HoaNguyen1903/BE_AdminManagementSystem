@@ -52,13 +52,11 @@ public partial class UnaliveDbContext : DbContext
             entity.Property(e => e.Password).IsRequired().HasMaxLength(255);
             entity.Property(e => e.FirstName).HasMaxLength(100);
             entity.Property(e => e.LastName).HasMaxLength(100);
-            entity.Property(e => e.LastOnline).HasColumnType("datetime2");
-            entity.Property(e => e.Banned)
-                .HasComputedColumnSql("CASE WHEN [BannedUntil] > GETUTCDATE() THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END");
+            entity.Property(e => e.Banned).HasDefaultValue(false);
+
             entity.Property(e => e.IsEmailVerified).HasDefaultValue(false);
             entity.Property(e => e.IsOnline).HasDefaultValue(false);
             entity.Property(e => e.EmailVerificationToken).HasMaxLength(255);
-            entity.Property(e => e.EmailVerificationTokenExpiry).HasColumnType("datetime2");
         });
 
         modelBuilder.Entity<Staff>(entity =>
@@ -106,9 +104,20 @@ public partial class UnaliveDbContext : DbContext
         modelBuilder.Entity<ShopOrderDetail>(entity =>
         {
             entity.HasKey(e => e.ShopOrderDetailId);
-            entity.HasOne<ShopOrder>().WithMany().HasForeignKey(e => e.ShopOrderId).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<SkinAndCharacterBundle>().WithMany().HasForeignKey(e => e.SkinAndCharacterBundleId).IsRequired(false);
-            entity.HasOne<Item>().WithMany().HasForeignKey(e => e.ItemId);
+
+            entity.HasOne(d => d.ShopOrder)
+                  .WithMany(p => p.OrderDetails)
+                  .HasForeignKey(d => d.ShopOrderId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne<SkinAndCharacterBundle>()
+                  .WithMany()
+                  .HasForeignKey(e => e.SkinAndCharacterBundleId)
+                  .IsRequired(false);
+
+            entity.HasOne<Item>()
+                  .WithMany()
+                  .HasForeignKey(e => e.ItemId);
         });
 
         modelBuilder.Entity<UserItem>(entity =>

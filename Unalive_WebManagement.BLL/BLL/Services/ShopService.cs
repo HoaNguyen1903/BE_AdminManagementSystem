@@ -106,7 +106,7 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 NotificationMessage = "There's an announcement waiting to be edited or published.",
                 ReceiverId = staffId,
-                Read = false
+                Read = 0
             };
             await _notificationRepository.AddAsync(notification);
 
@@ -187,7 +187,7 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 NotificationMessage = "There's an announcement waiting to be edited or published.",
                 ReceiverId = staffId,
-                Read = false
+                Read = 0
             };
             await _notificationRepository.AddAsync(notification);
 

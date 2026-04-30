@@ -23,15 +23,9 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAll([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<UserDto>>> Get([FromQuery] UserFilterParameters filter)
         {
-            return Ok(await _userService.GetAllUsersAsync(query));
-        }
-
-        [HttpGet("filter")]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetFiltered([FromQuery] UserFilterParameters filter)
-        {
-            return Ok(await _userService.GetUsersFilteredAsync(filter));
+            return Ok(await _userService.GetUsersAsync(filter));
         }
 
         [HttpGet("{id}")]

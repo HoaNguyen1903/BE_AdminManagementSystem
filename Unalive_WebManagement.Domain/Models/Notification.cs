@@ -10,5 +10,5 @@ public partial class Notification
 
     public int ReceiverId { get; set; }
 
-    public bool Read { get; set; }
+    public short Read { get; set; }
 }

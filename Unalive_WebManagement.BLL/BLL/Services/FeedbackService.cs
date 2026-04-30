@@ -47,7 +47,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var n = await _notificationRepository.GetByIdAsync(id);
             if (n == null) throw new KeyNotFoundException();
-            n.Read = true;
+            n.Read = 1;
             await _notificationRepository.UpdateAsync(n);
         }
 
@@ -55,7 +55,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var n = await _notificationRepository.GetByIdAsync(id);
             if (n == null) throw new KeyNotFoundException();
-            n.Read = false;
+            n.Read = 0;
             await _notificationRepository.UpdateAsync(n);
         }
 
@@ -104,7 +104,7 @@ namespace Unalive_WebManagement.BLL.Services
                 Reason = dto.Reason,
                 AdditionalInfo = dto.AdditionalInfo,
                 SendDate = DateTime.UtcNow,
-                Approved = false
+                Approved = 0
             };
             var created = await _reportRepository.AddAsync(r);
             return new ReportDto
@@ -123,7 +123,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var r = await _reportRepository.GetByIdAsync(id);
             if (r == null) throw new KeyNotFoundException();
-            r.Approved = true;
+            r.Approved = 1;
             r.ApprovedDate = DateTime.UtcNow;
             r.ApprovedBy = staffId;
             await _reportRepository.UpdateAsync(r);

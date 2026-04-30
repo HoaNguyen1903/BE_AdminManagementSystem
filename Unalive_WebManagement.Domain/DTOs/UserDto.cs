@@ -7,10 +7,10 @@ namespace Unalive_WebManagement.DTOs
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string UserName { get; set; } = null!;
-        public bool Banned { get; set; }
-        public DateTime? BannedUntil { get; set; } = null!;
-        public DateTime? LastOnline { get; set; }
-        public bool IsOnline { get; set; }
+        public short Banned { get; set; }
+        public DateTimeOffset? BannedUntil { get; set; } = null!;
+        public DateTimeOffset? LastOnline { get; set; }
+        public short IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
     }
 
@@ -30,24 +30,24 @@ namespace Unalive_WebManagement.DTOs
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string UserName { get; set; } = null!;
-        public bool Banned { get; set; }
-        public DateTime? BannedUntil { get; set; }
-        public DateTime? LastOnline { get; set; }
-        public bool IsOnline { get; set; }
+        public short Banned { get; set; }
+        public DateTimeOffset? BannedUntil { get; set; }
+        public DateTimeOffset? LastOnline { get; set; }
+        public short IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
     }
 
     public class UserStatusDto
     {
         public int UserId { get; set; }
-        public bool IsOnline { get; set; }
-        public DateTime? LastOnline { get; set; }
+        public short IsOnline { get; set; }
+        public DateTimeOffset? LastOnline { get; set; }
     }
 
     public class BanUserRequest
     {
         public string BanReason { get; set; } = null!;
-        public DateTime? BannedUntil { get; set; }
+        public DateTimeOffset? BannedUntil { get; set; }
     }
 
     public class UserItemDto
@@ -107,8 +107,8 @@ namespace Unalive_WebManagement.DTOs
         public int UserBanLogId { get; set; }
         public int UserId { get; set; }
         public string BanReason { get; set; } = null!;
-        public DateTime BannedDate { get; set; }
-        public DateTime? BannedUntil { get; set; }
+        public DateTimeOffset BannedDate { get; set; }
+        public DateTimeOffset? BannedUntil { get; set; }
         public int BannedBy { get; set; }
     }
 
@@ -116,20 +116,20 @@ namespace Unalive_WebManagement.DTOs
     {
         public int UserId { get; set; }
         public string BanReason { get; set; } = null!;
-        public DateTime? BannedUntil { get; set; }
+        public DateTimeOffset? BannedUntil { get; set; }
     }
 
     public class UpdateUserBanLogDto
     {
         public string BanReason { get; set; } = null!;
-        public DateTime? BannedUntil { get; set; }
+        public DateTimeOffset? BannedUntil { get; set; }
     }
 
     public class UserFilterParameters : QueryParameters
     {
         public string? UserName { get; set; }
         public string? Email { get; set; }
-        public bool? IsOnline { get; set; }
-        public bool? IsEmailVerified { get; set; }
+        public short? IsOnline { get; set; }
+        public short? IsEmailVerified { get; set; }
     }
 }

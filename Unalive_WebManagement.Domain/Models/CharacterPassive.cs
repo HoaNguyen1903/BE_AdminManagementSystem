@@ -10,5 +10,5 @@ public partial class CharacterPassive
 
     public string Description { get; set; } = null!;
 
-    public bool LockedState { get; set; }
+    public short LockedState { get; set; }
 }

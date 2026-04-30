@@ -25,43 +25,14 @@ namespace Unalive_WebManagement.BLL.Services
             _userBanLogRepository = userBanLogRepository;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync(QueryParameters query)
+        public async Task<IEnumerable<UserDto>> GetUsersAsync(UserFilterParameters filter)
         {
             var users = await _userRepository.GetAllAsync();
-            var now = DateTime.UtcNow;
-
-            var dtos = users.Select(u => {
-                var isBanned = u.BannedUntil.HasValue && u.BannedUntil > now;
-                return new UserDto
-                {
-                    UserId = u.UserId,
-                    Email = u.Email,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    UserName = u.UserName,
-                    Banned = isBanned,
-                    BannedUntil = isBanned ? u.BannedUntil : null,
-                    LastOnline = u.LastOnline,
-                    IsOnline = u.IsOnline,
-                    AvatarUrl = u.AvatarUrl
-                };
-            });
-
-            return dtos.ApplyQuery(query, (u, search) =>
-                u.Email.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                u.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                u.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                u.UserName.Contains(search, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public async Task<IEnumerable<UserDto>> GetUsersFilteredAsync(UserFilterParameters filter)
-        {
-            var users = await _userRepository.GetAllAsync();
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
 
             var query = users.AsQueryable();
 
-            // Apply filters (AND logic)
+            // Apply specific filters (AND logic)
             if (!string.IsNullOrWhiteSpace(filter.UserName))
             {
                 query = query.Where(u => u.UserName.Contains(filter.UserName, StringComparison.OrdinalIgnoreCase));
@@ -82,19 +53,7 @@ namespace Unalive_WebManagement.BLL.Services
                 query = query.Where(u => u.IsEmailVerified == filter.IsEmailVerified.Value);
             }
 
-            var dtos = query.Select(u => new UserDto
-            {
-                UserId = u.UserId,
-                Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                UserName = u.UserName,
-                Banned = u.BannedUntil.HasValue && u.BannedUntil > now,
-                BannedUntil = u.BannedUntil.HasValue && u.BannedUntil > now ? u.BannedUntil : null,
-                LastOnline = u.LastOnline,
-                IsOnline = u.IsOnline,
-                AvatarUrl = u.AvatarUrl
-            }).ToList();
+            var dtos = query.Select(u => MapToUserDto(u, now)).ToList();
 
             // Apply common query parameters (Search, SortBy, IsDescending)
             return dtos.ApplyQuery(filter, (u, search) =>
@@ -108,30 +67,15 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var u = await _userRepository.GetByIdAsync(id);
             if (u == null) return null;
-            
-            var now = DateTime.UtcNow;
-            var isBanned = u.BannedUntil.HasValue && u.BannedUntil > now;
-            
-            // If ban has expired, update database to null
-            if (u.BannedUntil.HasValue && !isBanned)
+
+            var now = DateTimeOffset.UtcNow;
+            if (u.BannedUntil.HasValue && u.BannedUntil <= now)
             {
                 u.BannedUntil = null;
                 await _userRepository.UpdateAsync(u);
             }
 
-            return new UserDto
-            {
-                UserId = u.UserId,
-                Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                UserName = u.UserName,
-                Banned = isBanned,
-                BannedUntil = isBanned ? u.BannedUntil : null,
-                LastOnline = u.LastOnline,
-                IsOnline = u.IsOnline,
-                AvatarUrl = u.AvatarUrl
-            };
+            return MapToUserDto(u, now);
         }
 
         public async Task<UserDto> CreateUserAsync(CreateUserDto dto)
@@ -150,21 +94,28 @@ namespace Unalive_WebManagement.BLL.Services
                 LastName = dto.LastName,
                 UserName = dto.UserName,
                 BannedUntil = null,
-                LastOnline = DateTime.UtcNow
+                LastOnline = DateTimeOffset.UtcNow,
+                IsOnline = 0
             };
             var created = await _userRepository.AddAsync(user);
+            return MapToUserDto(created, DateTimeOffset.UtcNow);
+        }
+
+        private static UserDto MapToUserDto(User u, DateTimeOffset now)
+        {
+            var isBanned = u.BannedUntil.HasValue && u.BannedUntil > now;
             return new UserDto
             {
-                UserId = created.UserId,
-                Email = created.Email,
-                FirstName = created.FirstName,
-                LastName = created.LastName,
-                UserName = created.UserName,
-                Banned = false,
-                BannedUntil = null,
-                LastOnline = created.LastOnline,
-                IsOnline = created.IsOnline,
-                AvatarUrl = created.AvatarUrl
+                UserId = u.UserId,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                UserName = u.UserName,
+                Banned = isBanned ? (short)1 : (short)0,
+                BannedUntil = isBanned ? u.BannedUntil : null,
+                LastOnline = u.LastOnline,
+                IsOnline = u.IsOnline,
+                AvatarUrl = u.AvatarUrl
             };
         }
 
@@ -191,12 +142,13 @@ namespace Unalive_WebManagement.BLL.Services
             user.LastOnline = dto.LastOnline;
             user.IsOnline = dto.IsOnline;
             user.AvatarUrl = dto.AvatarUrl;
-            
+
             // Set to null if past date or null
-            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTime.UtcNow) 
-                ? dto.BannedUntil 
+            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTimeOffset.UtcNow)
+                            ? dto.BannedUntil 
                 : null;
-                
+            user.Banned = user.BannedUntil.HasValue ? (short)1 : (short)0;
+
             await _userRepository.UpdateAsync(user);
         }
 
@@ -206,9 +158,10 @@ namespace Unalive_WebManagement.BLL.Services
             if (user == null) throw new KeyNotFoundException();
 
             // Set to null if past date or null
-            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTime.UtcNow) 
-                ? dto.BannedUntil 
+            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTimeOffset.UtcNow)
+                            ? dto.BannedUntil 
                 : null;
+            user.Banned = user.BannedUntil.HasValue ? (short)1 : (short)0;
 
             await _userRepository.UpdateAsync(user);
 
@@ -216,7 +169,7 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 UserId = id,
                 BanReason = dto.BanReason,
-                BannedDate = DateTime.UtcNow,
+                BannedDate = DateTimeOffset.UtcNow,
                 BannedUntil = user.BannedUntil, // Log what was actually set
                 BannedBy = staffId
             };
@@ -227,8 +180,8 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) throw new KeyNotFoundException();
-            user.LastOnline = DateTime.UtcNow;
-            user.IsOnline = true;
+            user.LastOnline = DateTimeOffset.UtcNow;
+            user.IsOnline = 1;
             await _userRepository.UpdateAsync(user);
         }
 
@@ -236,7 +189,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) throw new KeyNotFoundException();
-            user.IsOnline = false;
+            user.IsOnline = 0;
             await _userRepository.UpdateAsync(user);
         }
 
@@ -258,30 +211,14 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<IEnumerable<UserBanLogDto>> GetAllUserBanLogsAsync(QueryParameters query)
         {
             var logs = await _userBanLogRepository.GetAllAsync();
-            var dtos = logs.Select(l => new UserBanLogDto
-            {
-                UserBanLogId = l.UserBanLogId,
-                UserId = l.UserId,
-                BanReason = l.BanReason,
-                BannedDate = l.BannedDate,
-                BannedUntil = l.BannedUntil,
-                BannedBy = l.BannedBy
-            });
+            var dtos = logs.Select(MapToUserBanLogDto);
             return dtos.ApplyQuery(query, (l, search) => l.BanReason.Contains(search, StringComparison.OrdinalIgnoreCase) || l.UserId.ToString().Contains(search));
         }
 
         public async Task<IEnumerable<UserBanLogDto>> GetUserBanLogsByUserIdAsync(int userId, QueryParameters query)
         {
             var logs = await _userBanLogRepository.GetAllAsync();
-            var dtos = logs.Where(l => l.UserId == userId).Select(l => new UserBanLogDto
-            {
-                UserBanLogId = l.UserBanLogId,
-                UserId = l.UserId,
-                BanReason = l.BanReason,
-                BannedDate = l.BannedDate,
-                BannedUntil = l.BannedUntil,
-                BannedBy = l.BannedBy
-            });
+            var dtos = logs.Where(l => l.UserId == userId).Select(MapToUserBanLogDto);
             return dtos.ApplyQuery(query, (l, search) => l.BanReason.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -291,19 +228,24 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 UserId = dto.UserId,
                 BanReason = dto.BanReason,
-                BannedDate = DateTime.UtcNow,
+                BannedDate = DateTimeOffset.UtcNow,
                 BannedUntil = dto.BannedUntil,
                 BannedBy = staffId
             };
             var created = await _userBanLogRepository.AddAsync(log);
+            return MapToUserBanLogDto(created);
+        }
+
+        private static UserBanLogDto MapToUserBanLogDto(UserBanLog l)
+        {
             return new UserBanLogDto
             {
-                UserBanLogId = created.UserBanLogId,
-                UserId = created.UserId,
-                BanReason = created.BanReason,
-                BannedDate = created.BannedDate,
-                BannedUntil = created.BannedUntil,
-                BannedBy = created.BannedBy
+                UserBanLogId = l.UserBanLogId,
+                UserId = l.UserId,
+                BanReason = l.BanReason,
+                BannedDate = l.BannedDate,
+                BannedUntil = l.BannedUntil,
+                BannedBy = l.BannedBy
             };
         }
 
@@ -325,27 +267,26 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<IEnumerable<UserItemDto>> GetAllUserItemsAsync(QueryParameters query)
         {
             var items = await _userItemRepository.GetAllAsync();
-            var dtos = items.Select(i => new UserItemDto
-            {
-                UserId = i.UserId,
-                ItemId = i.ItemId,
-                Quantity = i.Quantity,
-                ShopOrderId = i.ShopOrderId
-            });
+            var dtos = items.Select(MapToUserItemDto);
             return dtos.ApplyQuery(query, (i, search) => i.UserId.ToString().Contains(search) || i.ItemId.ToString().Contains(search));
         }
 
         public async Task<IEnumerable<UserItemDto>> GetUserItemsByUserIdAsync(int userId, QueryParameters query)
         {
             var items = await _userItemRepository.GetByUserIdAsync(userId);
-            var dtos = items.Select(i => new UserItemDto
+            var dtos = items.Select(MapToUserItemDto);
+            return dtos.ApplyQuery(query, (i, search) => i.ItemId.ToString().Contains(search));
+        }
+
+        private static UserItemDto MapToUserItemDto(UserItem i)
+        {
+            return new UserItemDto
             {
                 UserId = i.UserId,
                 ItemId = i.ItemId,
                 Quantity = i.Quantity,
                 ShopOrderId = i.ShopOrderId
-            });
-            return dtos.ApplyQuery(query, (i, search) => i.ItemId.ToString().Contains(search));
+            };
         }
 
         public async Task<IEnumerable<UserItemWithNameDto>> GetUserItemsWithNamesByUserIdAsync(int userId, QueryParameters query)
@@ -368,13 +309,12 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity, ShopOrderId = dto.ShopOrderId };
             var created = await _userItemRepository.AddAsync(item);
-            return new UserItemDto { UserId = created.UserId, ItemId = created.ItemId, Quantity = created.Quantity, ShopOrderId = created.ShopOrderId };
+            return MapToUserItemDto(created);
         }
 
         public async Task UpdateUserItemAsync(int userId, int itemId, UpdateUserItemDto dto)
         {
-            var items = await _userItemRepository.GetAllAsync();
-            var item = items.FirstOrDefault(i => i.UserId == userId && i.ItemId == itemId);
+            var item = await _userItemRepository.GetByIdAsync(userId, itemId);
             if (item == null) throw new KeyNotFoundException();
             item.Quantity = dto.Quantity;
             item.ShopOrderId = dto.ShopOrderId;
@@ -390,27 +330,26 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<IEnumerable<UserBundleDto>> GetAllUserBundlesAsync(QueryParameters query)
         {
             var bundles = await _userBundleRepository.GetAllAsync();
-            var dtos = bundles.Select(b => new UserBundleDto
-            {
-                UserId = b.UserId,
-                SkinAndCharacterBundleId = b.SkinAndCharacterBundleId,
-                GemBundleId = b.GemBundleId,
-                Remaining = b.Remaining
-            });
+            var dtos = bundles.Select(MapToUserBundleDto);
             return dtos.ApplyQuery(query, (b, search) => b.UserId.ToString().Contains(search));
         }
 
         public async Task<IEnumerable<UserBundleDto>> GetUserBundlesByUserIdAsync(int userId, QueryParameters query)
         {
             var bundles = await _userBundleRepository.GetAllAsync();
-            var dtos = bundles.Where(b => b.UserId == userId).Select(b => new UserBundleDto
+            var dtos = bundles.Where(b => b.UserId == userId).Select(MapToUserBundleDto);
+            return dtos.ApplyQuery(query, (b, search) => b.SkinAndCharacterBundleId.ToString().Contains(search) || b.GemBundleId.ToString().Contains(search));
+        }
+
+        private static UserBundleDto MapToUserBundleDto(UserBundle b)
+        {
+            return new UserBundleDto
             {
                 UserId = b.UserId,
                 SkinAndCharacterBundleId = b.SkinAndCharacterBundleId,
                 GemBundleId = b.GemBundleId,
                 Remaining = b.Remaining
-            });
-            return dtos.ApplyQuery(query, (b, search) => b.SkinAndCharacterBundleId.ToString().Contains(search) || b.GemBundleId.ToString().Contains(search));
+            };
         }
 
         public async Task<UserBundleDto> CreateUserBundleAsync(CreateUserBundleDto dto)
@@ -424,14 +363,7 @@ namespace Unalive_WebManagement.BLL.Services
             };
 
             var created = await _userBundleRepository.AddAsync(bundle);
-
-            return new UserBundleDto
-            {
-                UserId = created.UserId,
-                SkinAndCharacterBundleId = created.SkinAndCharacterBundleId,
-                GemBundleId = created.GemBundleId,
-                Remaining = created.Remaining
-            };
+            return MapToUserBundleDto(created);
         }
 
         public async Task UpdateUserBundleAsync(int userId, int skinBundleId, int gemBundleId, UpdateUserBundleDto dto)

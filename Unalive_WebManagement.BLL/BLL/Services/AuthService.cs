@@ -54,13 +54,13 @@ namespace Unalive_WebManagement.BLL.Services
                 return null;
             }
 
-            if (!user.IsEmailVerified)
+            if (user.IsEmailVerified == 0)
             {
                 throw new InvalidOperationException("Email is not verified.");
             }
 
             user.LastOnline = DateTime.UtcNow;
-            user.IsOnline = true;
+            user.IsOnline = 1;
             await _userRepository.UpdateAsync(user);
 
             // Default role for players is "User"
@@ -95,7 +95,7 @@ namespace Unalive_WebManagement.BLL.Services
                 UserName = request.UserName,
                 BannedUntil = null,
                 LastOnline = DateTime.UtcNow,
-                IsEmailVerified = false,
+                IsEmailVerified = 0,
                 EmailVerificationToken = verificationToken,
                 EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24)
             };
@@ -122,12 +122,12 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<bool> VerifyEmailAsync(int userId, string token)
         {
             var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null || user.IsEmailVerified || user.EmailVerificationToken != token || (user.EmailVerificationTokenExpiry.HasValue && user.EmailVerificationTokenExpiry.Value < DateTime.UtcNow))
+            if (user == null || user.IsEmailVerified == 1 || user.EmailVerificationToken != token || (user.EmailVerificationTokenExpiry.HasValue && user.EmailVerificationTokenExpiry.Value < DateTime.UtcNow))
             {
                 return false;
             }
 
-            user.IsEmailVerified = true;
+            user.IsEmailVerified = 1;
             user.EmailVerificationToken = null;
             user.EmailVerificationTokenExpiry = null;
             await _userRepository.UpdateAsync(user);

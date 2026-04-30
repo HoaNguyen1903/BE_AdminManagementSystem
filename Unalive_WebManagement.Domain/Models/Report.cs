@@ -16,7 +16,7 @@ public partial class Report
 
     public DateTime SendDate { get; set; }
 
-    public bool Approved { get; set; }
+    public short Approved { get; set; }
 
     public DateTime? ApprovedDate { get; set; }
 

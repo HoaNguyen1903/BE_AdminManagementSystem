@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PayOS;
 using System.Text;
 using Unalive_WebManagement.BLL.Interfaces;
@@ -15,7 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add DbContext
 builder.Services.AddDbContext<UnaliveDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 
 // Register Repositories
 builder.Services.AddScoped<IItemRepository, ItemRepository>();

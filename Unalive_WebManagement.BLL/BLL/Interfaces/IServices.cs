@@ -84,8 +84,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
     public interface IUserService
     {
-        Task<IEnumerable<UserDto>> GetAllUsersAsync(QueryParameters query);
-        Task<IEnumerable<UserDto>> GetUsersFilteredAsync(UserFilterParameters filter);
+        Task<IEnumerable<UserDto>> GetUsersAsync(UserFilterParameters filter);
         Task<UserDto?> GetUserByIdAsync(int id);
         Task<UserDto> CreateUserAsync(CreateUserDto dto);
         Task UpdateUserAsync(int id, UpdateUserDto dto);

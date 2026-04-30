@@ -53,5 +53,5 @@ public partial class ShopOrder
     public List<ShopOrderDetail> OrderDetails { get; set; } = new List<ShopOrderDetail>();
 
     [NotMapped]
-    public bool IsSuccess => Status == PaymentLinkStatus.Paid;
+    public short IsSuccess => (short)(Status == PaymentLinkStatus.Paid ? 1 : 0);
 }

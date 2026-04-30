@@ -19,7 +19,7 @@ namespace Unalive_WebManagement.DTOs
         public int CharacterPassiveId { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public bool LockedState { get; set; }
+        public short LockedState { get; set; }
     }
 
     public class CharacterSkillDto
@@ -32,7 +32,7 @@ namespace Unalive_WebManagement.DTOs
         public int YuanPressure { get; set; }
         public int CritDmg { get; set; }
         public int CritRate { get; set; }
-        public bool LockedState { get; set; }
+        public short LockedState { get; set; }
     }
 
     public class CharacterAttackDto
@@ -45,7 +45,7 @@ namespace Unalive_WebManagement.DTOs
         public int YuanPressure { get; set; }
         public int CritDmg { get; set; }
         public int CritRate { get; set; }
-        public bool LockedState { get; set; }
+        public short LockedState { get; set; }
     }
 
     public class AbilitiesSetDto

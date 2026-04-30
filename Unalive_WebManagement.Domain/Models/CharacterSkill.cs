@@ -20,5 +20,5 @@ public partial class CharacterSkill
 
     public int CritRate { get; set; }
 
-    public bool LockedState { get; set; }
+    public short LockedState { get; set; }
 }

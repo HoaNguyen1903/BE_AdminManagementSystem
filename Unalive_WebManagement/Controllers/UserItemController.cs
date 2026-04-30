@@ -24,9 +24,9 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<ActionResult<IEnumerable<UserItemDto>>> GetByUserId(int userId, [FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<UserItemWithNameDto>>> GetByUserId(int userId, [FromQuery] QueryParameters query)
         {
-            return Ok(await _userService.GetUserItemsByUserIdAsync(userId, query));
+            return Ok(await _userService.GetUserItemsWithNamesByUserIdAsync(userId, query));
         }
 
         [HttpPost]

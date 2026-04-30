@@ -14,17 +14,17 @@ public partial class User
 
     public string LastName { get; set; } = null!;
 
-    public bool Banned { get; set; }
+    public short Banned { get; set; }
 
-    public DateTime? BannedUntil { get; set; }
-    public bool IsOnline { get; set; }
-    public DateTime? LastOnline { get; set; }
+    public DateTimeOffset? BannedUntil { get; set; }
+    public short IsOnline { get; set; }
+    public DateTimeOffset? LastOnline { get; set; }
 
     public string? AvatarUrl { get; set; }
 
-    public bool IsEmailVerified { get; set; }
+    public short IsEmailVerified { get; set; }
 
     public string? EmailVerificationToken { get; set; }
 
-    public DateTime? EmailVerificationTokenExpiry { get; set; }
+    public DateTimeOffset? EmailVerificationTokenExpiry { get; set; }
 }
