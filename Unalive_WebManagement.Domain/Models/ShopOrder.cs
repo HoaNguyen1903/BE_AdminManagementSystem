@@ -13,7 +13,7 @@ public partial class ShopOrder
     public float TotalAmount { get; set; }
     public long OrderCode { get; set; }
 
-    public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.UtcNow;
 
     // AMOUNT TRACKING
     public long Amount { get; set; }

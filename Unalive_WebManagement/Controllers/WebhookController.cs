@@ -41,7 +41,7 @@ namespace Unalive_WebManagement.Controllers
             }
 
             // Fallback to current time if parsing fails
-            return DateTimeOffset.Now;
+            return DateTimeOffset.UtcNow;
         }
 
         [HttpPost("payment")]
@@ -95,7 +95,7 @@ namespace Unalive_WebManagement.Controllers
 
                     var amountRemaining = (decimal)order.Amount - totalAmountPaid;
                     order.Status = amountRemaining > 0 ? PaymentLinkStatus.Underpaid : PaymentLinkStatus.Paid;
-                    order.LastTransactionUpdate = DateTimeOffset.Now;
+                    order.LastTransactionUpdate = DateTimeOffset.UtcNow;
 
                     await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
 

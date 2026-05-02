@@ -59,7 +59,7 @@ namespace Unalive_WebManagement.Controllers
                         Amount = t.Amount,
                         AccountNumber = t.AccountNumber,
                         Description = t.Description,
-                        TransactionDateTime = DateTimeOffset.TryParse(t.TransactionDateTime, out var transactionDateTime) ? transactionDateTime : DateTimeOffset.Now,
+                        TransactionDateTime = DateTimeOffset.TryParse(t.TransactionDateTime, out var transactionDateTime) ? transactionDateTime : DateTimeOffset.UtcNow,
                         VirtualAccountName = t.VirtualAccountName,
                         VirtualAccountNumber = t.VirtualAccountNumber,
                         CounterAccountBankId = t.CounterAccountBankId,
@@ -69,7 +69,7 @@ namespace Unalive_WebManagement.Controllers
                     }).ToList();
 
                     await _orderTransactionService.CreateTransactionsAsync(transactions);
-                    order.LastTransactionUpdate = DateTimeOffset.Now;
+                    order.LastTransactionUpdate = DateTimeOffset.UtcNow;
                 }
 
                 await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
@@ -111,11 +111,11 @@ namespace Unalive_WebManagement.Controllers
                 }
             }
 
-            var orderCode = DateTimeOffset.Now.ToUnixTimeSeconds();
+            var orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var callbackReturnUrl = request.ReturnUrl ?? "https://your-domain.com/success";
             var callbackCancelUrl = request.CancelUrl ?? "https://your-domain.com/cancel";
             
-            var expirationTime = DateTimeOffset.Now.AddMinutes(15);
+            var expirationTime = DateTimeOffset.UtcNow.AddMinutes(15);
 
             try
             {
@@ -178,7 +178,7 @@ namespace Unalive_WebManagement.Controllers
                     PlayerUserName = request.PlayerUserName,
                     TotalAmount = calculatedTotalAmount,
                     OrderCode = orderCode,
-                    OrderDate = DateTimeOffset.Now,
+                    OrderDate = DateTimeOffset.UtcNow,
                     PaymentLinkId = paymentResponse.PaymentLinkId,
                     QrCode = paymentResponse.QrCode,
                     CheckoutUrl = paymentResponse.CheckoutUrl,
@@ -192,7 +192,7 @@ namespace Unalive_WebManagement.Controllers
                     Currency = paymentResponse.Currency,
                     ReturnUrl = callbackReturnUrl,
                     CancelUrl = callbackCancelUrl,
-                    CreatedAt = DateTimeOffset.Now,
+                    CreatedAt = DateTimeOffset.UtcNow,
                     ExpiredAt = expirationTime,
                     OrderDetails = detailsToInsert 
                 };
@@ -240,7 +240,7 @@ namespace Unalive_WebManagement.Controllers
                         Amount = t.Amount,
                         AccountNumber = t.AccountNumber,
                         Description = t.Description,
-                        TransactionDateTime = DateTimeOffset.TryParse(t.TransactionDateTime, out var transactionDateTime) ? transactionDateTime : DateTimeOffset.Now,
+                        TransactionDateTime = DateTimeOffset.TryParse(t.TransactionDateTime, out var transactionDateTime) ? transactionDateTime : DateTimeOffset.UtcNow,
                         VirtualAccountName = t.VirtualAccountName,
                         VirtualAccountNumber = t.VirtualAccountNumber,
                         CounterAccountBankId = t.CounterAccountBankId,
@@ -250,7 +250,7 @@ namespace Unalive_WebManagement.Controllers
                     }).ToList();
 
                     await _orderTransactionService.CreateTransactionsAsync(transactions);
-                    order.LastTransactionUpdate = DateTimeOffset.Now;
+                    order.LastTransactionUpdate = DateTimeOffset.UtcNow;
                 }
 
                 await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
