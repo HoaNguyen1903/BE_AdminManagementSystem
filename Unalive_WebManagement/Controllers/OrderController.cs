@@ -90,6 +90,17 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
+        [HttpGet("{id}/details")]
+        public async Task<ActionResult<IEnumerable<ShopOrderDetailDto>>> GetDetails(int id)
+        {
+            var details = await _shopService.GetDetailedOrderDetailsByOrderIdAsync(id);
+            if (details == null || !details.Any())
+            {
+                return NotFound(new { message = $"No details found for order {id}" });
+            }
+            return Ok(details);
+        }
+
         [HttpPost]
         public async Task<ActionResult<ShopOrder>> CreatePayment([FromBody] OrderCreateRequest request)
         {
