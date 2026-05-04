@@ -12,8 +12,8 @@ using Unalive_WebManagement.Data;
 namespace Unalive_WebManagement.DAL.Migrations
 {
     [DbContext(typeof(UnaliveDbContext))]
-    [Migration("20260504122546_addPurchaseOrder")]
-    partial class addPurchaseOrder
+    [Migration("20260504130010_UpdatePurchaseOrder")]
+    partial class UpdatePurchaseOrder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -404,6 +404,39 @@ namespace Unalive_WebManagement.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PlayerOnlineHistories");
+                });
+
+            modelBuilder.Entity("Unalive_WebManagement.Models.PurchaseOrder", b =>
+                {
+                    b.Property<int>("PurchaseOrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PurchaseOrderId"));
+
+                    b.Property<float>("GemCost")
+                        .HasColumnType("real");
+
+                    b.Property<DateTimeOffset>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SkinAndCharacterBundleId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PurchaseOrderId");
+
+                    b.HasIndex("SkinAndCharacterBundleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PurchaseOrders");
                 });
 
             modelBuilder.Entity("Unalive_WebManagement.Models.Report", b =>
@@ -898,6 +931,25 @@ namespace Unalive_WebManagement.DAL.Migrations
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Unalive_WebManagement.Models.PurchaseOrder", b =>
+                {
+                    b.HasOne("Unalive_WebManagement.Models.SkinAndCharacterBundle", "Bundle")
+                        .WithMany()
+                        .HasForeignKey("SkinAndCharacterBundleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Unalive_WebManagement.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Bundle");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Unalive_WebManagement.Models.Report", b =>

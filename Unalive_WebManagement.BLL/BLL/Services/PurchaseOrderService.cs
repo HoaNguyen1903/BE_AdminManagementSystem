@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
-using Unalive_WebManagement.Domain.Models;
+using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.BLL.Services
 {

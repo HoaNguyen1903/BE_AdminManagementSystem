@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unalive_WebManagement.BLL.Interfaces;
-using Unalive_WebManagement.Domain.Models;
+using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.Controllers
 {

@@ -30,6 +30,7 @@ public partial class UnaliveDbContext : DbContext
     public virtual DbSet<UserBanLog> UserBanLogs { get; set; }
     public virtual DbSet<PlayerOnlineHistory> PlayerOnlineHistories { get; set; }
     public virtual DbSet<OrderTransaction> OrderTransactions { get; set; }
+    public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -202,6 +203,27 @@ public partial class UnaliveDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Date).IsRequired();
+        });
+
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.HasKey(e => e.PurchaseOrderId);
+
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Bundle)
+                  .WithMany()
+                  .HasForeignKey(e => e.SkinAndCharacterBundleId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.Property(e => e.Status)
+                  .HasConversion<string>();
+
+            entity.Property(e => e.PurchaseDate)
+                  .HasConversion(v => v.ToUniversalTime(), v => v);
         });
 
         #endregion

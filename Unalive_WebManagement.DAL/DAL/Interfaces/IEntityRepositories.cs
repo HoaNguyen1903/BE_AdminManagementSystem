@@ -1,5 +1,4 @@
-using Unalive_WebManagement.Domain.Models; // Make sure to include this for PurchaseOrder
-using Unalive_WebManagement.Models;
+using Unalive_WebManagement.Models; // Make sure to include this for PurchaseOrder
 
 namespace Unalive_WebManagement.DAL.Interfaces
 {
