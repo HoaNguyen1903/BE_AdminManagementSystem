@@ -1,3 +1,5 @@
+using Unalive_WebManagement.Models;
+
 namespace Unalive_WebManagement.DTOs
 {
     public class UserDto
@@ -100,6 +102,14 @@ namespace Unalive_WebManagement.DTOs
     public class UpdateUserBundleDto
     {
         public int Remaining { get; set; }
+    }
+
+    public class PlayerProfileDto
+    {
+        public UserDto User { get; set; } = null!;
+        public IEnumerable<UserItemWithNameDto> Inventory { get; set; } = null!;
+        public IEnumerable<ShopOrderDto> Orders { get; set; } = null!;
+        public IEnumerable<OrderTransaction> Transactions { get; set; } = null!;
     }
 
     public class UserBanLogDto

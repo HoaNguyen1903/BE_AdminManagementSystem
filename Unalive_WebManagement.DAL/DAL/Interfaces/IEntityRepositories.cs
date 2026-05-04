@@ -41,6 +41,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
     {
         Task<IEnumerable<ShopOrder>> GetCompletedOrdersByDateRangeAsync(DateTime start, DateTime end);
         Task<ShopOrder?> GetByOrderCodeAsync(long orderCode);
+        Task<IEnumerable<ShopOrder>> GetByUserIdAsync(int userId);
     }
     public interface IShopOrderDetailRepository : IRepository<ShopOrderDetail>
     {
@@ -60,6 +61,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IOrderTransactionRepository : IRepository<OrderTransaction>
     {
         Task<IEnumerable<OrderTransaction>> GetByDateRangeAsync(DateTime start, DateTime end);
+        Task<IEnumerable<OrderTransaction>> GetByOrderIdsAsync(IEnumerable<int> orderIds);
     }
 
 }

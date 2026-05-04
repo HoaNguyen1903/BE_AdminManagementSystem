@@ -171,6 +171,13 @@ namespace Unalive_WebManagement.DAL.Repositories
             return await _dbSet.Where(o => o.OrderDate >= start && o.OrderDate <= end)
                                .ToListAsync();
         }
+
+        public async Task<IEnumerable<ShopOrder>> GetByUserIdAsync(int userId)
+        {
+            return await _dbSet.Where(o => o.UserId == userId)
+                               .OrderByDescending(o => o.OrderDate)
+                               .ToListAsync();
+        }
     }
 
     public class ShopOrderDetailRepository : Repository<ShopOrderDetail>, IShopOrderDetailRepository
@@ -231,6 +238,14 @@ namespace Unalive_WebManagement.DAL.Repositories
         public async Task<IEnumerable<OrderTransaction>> GetByDateRangeAsync(DateTime start, DateTime end)
         {
             return await _dbSet.Where(t => t.TransactionDateTime >= start && t.TransactionDateTime <= end)
+                               .ToListAsync();
+        }
+
+        public async Task<IEnumerable<OrderTransaction>> GetByOrderIdsAsync(IEnumerable<int> orderIds)
+        {
+            var idList = orderIds.ToList();
+            return await _dbSet.Where(t => idList.Contains(t.OrderId))
+                               .OrderByDescending(t => t.TransactionDateTime)
                                .ToListAsync();
         }
     }
