@@ -136,10 +136,10 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
     public interface IAnalyticsService
     {
-        Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy);
-        Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top);
-        Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime start, DateTime end);
-        Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(int top);
+        Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime? start, DateTime? end, string groupBy);
+        Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime? start, DateTime? end, int top);
+        Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime? start, DateTime? end);
+        Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(DateTime? start, DateTime? end, int top);
     }
 
     public interface IOrderTransactionService

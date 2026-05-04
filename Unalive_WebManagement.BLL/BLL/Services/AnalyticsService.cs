@@ -33,9 +33,17 @@ namespace Unalive_WebManagement.BLL.Services
             _shopOrderRepository = shopOrderRepository;
         }
 
-        public async Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy)
+        public async Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime? start, DateTime? end, string groupBy)
         {
-            var transactions = await _orderTransactionRepository.GetByDateRangeAsync(start, end);
+            IEnumerable<OrderTransaction> transactions;
+            if (start.HasValue && end.HasValue)
+            {
+                transactions = await _orderTransactionRepository.GetByDateRangeAsync(start.Value, end.Value);
+            }
+            else
+            {
+                transactions = await _orderTransactionRepository.GetAllAsync();
+            }
 
             var dailyRevenue = new Dictionary<string, decimal>();
 
@@ -57,9 +65,17 @@ namespace Unalive_WebManagement.BLL.Services
                 .ToList();
         }
 
-        public async Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top)
+        public async Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime? start, DateTime? end, int top)
         {
-            var transactions = await _orderTransactionRepository.GetByDateRangeAsync(start, end);
+            IEnumerable<OrderTransaction> transactions;
+            if (start.HasValue && end.HasValue)
+            {
+                transactions = await _orderTransactionRepository.GetByDateRangeAsync(start.Value, end.Value);
+            }
+            else
+            {
+                transactions = await _orderTransactionRepository.GetAllAsync();
+            }
 
             var orderIds = transactions.Select(t => t.OrderId).Distinct().ToList();
             var details = (await _shopOrderDetailRepository.GetDetailsByOrderIdsAsync(orderIds)).ToList();
@@ -133,7 +149,7 @@ namespace Unalive_WebManagement.BLL.Services
             return result.OrderByDescending(x => x.Revenue).Take(top).ToList();
         }
 
-        public async Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime start, DateTime end)
+        public async Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime? start, DateTime? end)
         {
             var now = DateTime.UtcNow;
             var onlineThreshold = now.AddMinutes(-5);
@@ -151,10 +167,18 @@ namespace Unalive_WebManagement.BLL.Services
             };
         }
 
-        public async Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(int top)
+        public async Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(DateTime? start, DateTime? end, int top)
         {
-            // 1. Get all transactions
-            var transactions = await _orderTransactionRepository.GetAllAsync();
+            // 1. Get transactions (all or by date range)
+            IEnumerable<OrderTransaction> transactions;
+            if (start.HasValue && end.HasValue)
+            {
+                transactions = await _orderTransactionRepository.GetByDateRangeAsync(start.Value, end.Value);
+            }
+            else
+            {
+                transactions = await _orderTransactionRepository.GetAllAsync();
+            }
 
             // 2. Get associated orders to find user IDs
             var orderIds = transactions.Select(t => t.OrderId).Distinct().ToList();
