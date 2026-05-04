@@ -9,6 +9,7 @@ namespace Unalive_WebManagement.DTOs
         public float BundlePrice { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
+        public string? imageUrl { get; set; }
     }
 
     public class CreateGemBundleDto
@@ -17,6 +18,7 @@ namespace Unalive_WebManagement.DTOs
         public float BundlePrice { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
+        public string? imageUrl { get; set; }
     }
 
     public class UpdateGemBundleDto
@@ -25,6 +27,7 @@ namespace Unalive_WebManagement.DTOs
         public float? BundlePrice { get; set; }
         public int? ItemId { get; set; }
         public int? Quantity { get; set; }
+        public string? imageUrl { get; set; }
     }
 
     public class SkinAndCharacterBundleDto
@@ -34,6 +37,7 @@ namespace Unalive_WebManagement.DTOs
         public float BundlePrice { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
+        public string? imageUrl { get; set; }
     }
 
     public class CreateSkinAndCharacterBundleDto
@@ -42,6 +46,7 @@ namespace Unalive_WebManagement.DTOs
         public float BundlePrice { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
+        public string? imageUrl { get; set; }
     }
 
     public class UpdateSkinAndCharacterBundleDto
@@ -50,6 +55,7 @@ namespace Unalive_WebManagement.DTOs
         public float? BundlePrice { get; set; }
         public int? ItemId { get; set; }
         public int? Quantity { get; set; }
+        public string? imageUrl { get; set; }
     }
 
     public class ShopOrderDto

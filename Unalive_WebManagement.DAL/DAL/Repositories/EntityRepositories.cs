@@ -234,4 +234,25 @@ namespace Unalive_WebManagement.DAL.Repositories
                                .ToListAsync();
         }
     }
+
+    public class PurchaseOrderRepository : Repository<PurchaseOrder>, IPurchaseOrderRepository
+    {
+        public PurchaseOrderRepository(UnaliveDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<PurchaseOrder>> GetAllWithDetailsAsync()
+        {
+            return await _dbSet
+                .Include(p => p.Bundle)
+                .Include(p => p.User)
+                .ToListAsync();
+        }
+
+        public async Task<PurchaseOrder?> GetByIdWithDetailsAsync(int id)
+        {
+            return await _dbSet
+                .Include(p => p.Bundle)
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.PurchaseOrderId == id);
+        }
+    }
 }

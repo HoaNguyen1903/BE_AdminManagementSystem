@@ -13,7 +13,7 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly INotificationRepository _notificationRepository;
 
         public ItemService(
-            IItemRepository itemRepository, 
+            IItemRepository itemRepository,
             IAnnouncementRepository announcementRepository,
             INotificationRepository notificationRepository)
         {
@@ -30,11 +30,12 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemId = i.ItemId,
                 ItemName = i.ItemName,
                 ItemDescription = i.ItemDescription,
-                ItemType = i.ItemType
+                ItemType = i.ItemType,
+                ItemImageUrl = i.ItemImageUrl
             });
 
-            return dtos.ApplyQuery(query, (i, s) => 
-                i.ItemName.Contains(s, StringComparison.OrdinalIgnoreCase) || 
+            return dtos.ApplyQuery(query, (i, s) =>
+                i.ItemName.Contains(s, StringComparison.OrdinalIgnoreCase) ||
                 i.ItemDescription.Contains(s, StringComparison.OrdinalIgnoreCase) ||
                 i.ItemType.Contains(s, StringComparison.OrdinalIgnoreCase));
         }
@@ -49,7 +50,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 ItemDescription = item.ItemDescription,
-                ItemType = item.ItemType
+                ItemType = item.ItemType,
+                ItemImageUrl = item.ItemImageUrl
             };
         }
 
@@ -59,7 +61,8 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 ItemName = dto.ItemName,
                 ItemDescription = dto.ItemDescription,
-                ItemType = dto.ItemType
+                ItemType = dto.ItemType,
+                ItemImageUrl = dto.ItemImageUrl
             };
 
             var created = await _itemRepository.AddAsync(item);
@@ -92,7 +95,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemId = created.ItemId,
                 ItemName = created.ItemName,
                 ItemDescription = created.ItemDescription,
-                ItemType = created.ItemType
+                ItemType = created.ItemType,
+                ItemImageUrl = created.ItemImageUrl
             };
         }
 
@@ -104,6 +108,7 @@ namespace Unalive_WebManagement.BLL.Services
             item.ItemName = dto.ItemName;
             item.ItemDescription = dto.ItemDescription;
             item.ItemType = dto.ItemType;
+            item.ItemImageUrl = dto.ItemImageUrl;
 
             await _itemRepository.UpdateAsync(item);
         }

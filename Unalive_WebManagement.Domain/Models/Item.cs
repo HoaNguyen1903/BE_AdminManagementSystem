@@ -11,4 +11,5 @@ public partial class Item
     public string ItemDescription { get; set; } = null!;
 
     public string ItemType { get; set; } = null!;
+    public string? ItemImageUrl { get; set; }
 }

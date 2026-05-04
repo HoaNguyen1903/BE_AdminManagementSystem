@@ -51,7 +51,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = b.BundleName,
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
-                Quantity = b.Quantity
+                Quantity = b.Quantity,
+                imageUrl = b.imageUrl
             });
             return dtos.ApplyQuery(query, (b, search) => b.BundleName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -60,7 +61,15 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var b = await _gemBundleRepository.GetByIdAsync(id);
             if (b == null) return null;
-            return new GemBundleDto { GemBundleId = b.GemBundleId, BundleName = b.BundleName, BundlePrice = b.BundlePrice };
+            return new GemBundleDto
+            {
+                GemBundleId = b.GemBundleId,
+                BundleName = b.BundleName,
+                BundlePrice = b.BundlePrice,
+                ItemId = b.ItemId,
+                Quantity = b.Quantity,
+                imageUrl = b.imageUrl
+            };
         }
 
         public async Task<GemBundleDto> CreateGemBundleAsync(CreateGemBundleDto dto)
@@ -70,7 +79,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = dto.BundleName,
                 BundlePrice = dto.BundlePrice,
                 ItemId = dto.ItemId,
-                Quantity = dto.Quantity
+                Quantity = dto.Quantity,
+                imageUrl = dto.imageUrl
             };
             var created = await _gemBundleRepository.AddAsync(bundle);
             return new GemBundleDto
@@ -79,7 +89,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = created.BundleName,
                 BundlePrice = created.BundlePrice,
                 ItemId = created.ItemId,
-                Quantity = created.Quantity
+                Quantity = created.Quantity,
+                imageUrl = created.imageUrl
             };
         }
 
@@ -123,6 +134,8 @@ namespace Unalive_WebManagement.BLL.Services
             if (dto.ItemId != null) bundle.ItemId = dto.ItemId.Value;
             if (dto.Quantity != null) bundle.Quantity = dto.Quantity.Value;
 
+            bundle.imageUrl = dto.imageUrl;
+
             await _gemBundleRepository.UpdateAsync(bundle);
         }
 
@@ -138,7 +151,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = b.BundleName,
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
-                Quantity = b.Quantity
+                Quantity = b.Quantity,
+                imageUrl = b.imageUrl
             });
             return dtos.ApplyQuery(query, (b, search) => b.BundleName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -153,7 +167,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = b.BundleName,
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
-                Quantity = b.Quantity
+                Quantity = b.Quantity,
+                imageUrl = b.imageUrl
             };
         }
 
@@ -164,7 +179,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = dto.BundleName,
                 BundlePrice = dto.BundlePrice,
                 ItemId = dto.ItemId,
-                Quantity = dto.Quantity
+                Quantity = dto.Quantity,
+                imageUrl = dto.imageUrl
             };
             var created = await _skinAndCharacterBundleRepository.AddAsync(bundle);
 
@@ -197,7 +213,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundleName = created.BundleName,
                 BundlePrice = created.BundlePrice,
                 ItemId = created.ItemId,
-                Quantity = created.Quantity
+                Quantity = created.Quantity,
+                imageUrl = created.imageUrl
             };
         }
 
@@ -210,6 +227,8 @@ namespace Unalive_WebManagement.BLL.Services
             if (dto.BundlePrice != null) bundle.BundlePrice = dto.BundlePrice.Value;
             if (dto.ItemId != null) bundle.ItemId = dto.ItemId.Value;
             if (dto.Quantity != null) bundle.Quantity = dto.Quantity.Value;
+
+            bundle.imageUrl = dto.imageUrl;
 
             await _skinAndCharacterBundleRepository.UpdateAsync(bundle);
         }
@@ -256,13 +275,13 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var orders = await _shopOrderRepository.GetAllAsync();
             var order = orders.FirstOrDefault(o => o.ShopOrderId == id);
-            
+
             if (order == null) throw new KeyNotFoundException("ShopOrder not found");
 
             // Basic order information
             order.TotalAmount = updatedOrder.TotalAmount;
             order.OrderDate = updatedOrder.OrderDate;
-            
+
             // Customer information
             order.PlayerEmail = updatedOrder.PlayerEmail;
             order.PlayerUserName = updatedOrder.PlayerUserName;
@@ -352,7 +371,7 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 UserId = userId,
                 GemBundleId = bundleId,
-                GemsAmount = bundle.Quantity, 
+                GemsAmount = bundle.Quantity,
                 RealMoneyAmount = bundle.BundlePrice,
                 CurrencyCode = "USD",
                 PaymentGateway = "Simulator",
@@ -424,7 +443,7 @@ namespace Unalive_WebManagement.BLL.Services
             order.OrderDetails = new List<ShopOrderDetail>();
 
             var createdOrder = await _shopOrderRepository.AddAsync(order);
-            
+
             if (detailsToInsert.Any())
             {
                 foreach (var detail in detailsToInsert)

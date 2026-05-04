@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Unalive_WebManagement.Domain.Models;
 using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
 
@@ -152,5 +153,15 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task UpdateTransactionAsync(int id, OrderTransaction updatedTransaction);
         Task DeleteTransactionAsync(int id);
         Task DeleteTransactionsByOrderIdAsync(int orderId);
+    }
+
+    public interface IPurchaseOrderService
+    {
+        Task<IEnumerable<PurchaseOrder>> GetAllPurchaseOrdersAsync();
+        Task<PurchaseOrder?> GetPurchaseOrderByIdAsync(int id);
+
+        Task<PurchaseOrder> CreatePurchaseOrderAsync(PurchaseOrder order);
+        Task UpdatePurchaseOrderAsync(int id, PurchaseOrder updatedOrder);
+        Task DeletePurchaseOrderAsync(int id);
     }
 }

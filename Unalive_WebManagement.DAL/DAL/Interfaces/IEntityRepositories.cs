@@ -1,3 +1,4 @@
+using Unalive_WebManagement.Domain.Models; // Make sure to include this for PurchaseOrder
 using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.DAL.Interfaces
@@ -62,4 +63,9 @@ namespace Unalive_WebManagement.DAL.Interfaces
         Task<IEnumerable<OrderTransaction>> GetByDateRangeAsync(DateTime start, DateTime end);
     }
 
+    public interface IPurchaseOrderRepository : IRepository<PurchaseOrder>
+    {
+        Task<IEnumerable<PurchaseOrder>> GetAllWithDetailsAsync();
+        Task<PurchaseOrder?> GetByIdWithDetailsAsync(int id);
+    }
 }
