@@ -36,6 +36,14 @@ namespace Unalive_WebManagement.Controllers
             return Ok(user);
         }
 
+        [HttpGet("{id}/profile")]
+        public async Task<ActionResult<PlayerProfileDto>> GetProfile(int id)
+        {
+            var profile = await _userService.GetPlayerProfileAsync(id);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        }
+
         [HttpGet("{id}/items")]
         public async Task<ActionResult<IEnumerable<UserItemWithNameDto>>> GetUserItems(int id, [FromQuery] QueryParameters query)
         {

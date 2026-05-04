@@ -66,6 +66,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode);
 
         Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId, QueryParameters query);
+        Task<IEnumerable<ShopOrderDetailDto>> GetDetailedOrderDetailsByOrderIdAsync(int orderId);
         Task<IEnumerable<TopUpHistoryDto>> GetAllTopUpHistoriesAsync(QueryParameters query);
 
         Task PurchaseGemBundleAsync(int userId, int bundleId);
@@ -93,6 +94,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task SetUserOfflineAsync(int userId);
         Task<UserStatusDto?> GetUserStatusAsync(int userId, int onlineThresholdSeconds);
         Task UpdateAvatarAsync(int userId, string avatarUrl);
+        Task<PlayerProfileDto?> GetPlayerProfileAsync(int userId);
 
 
         Task<IEnumerable<UserBanLogDto>> GetAllUserBanLogsAsync(QueryParameters query);
@@ -135,9 +137,10 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
     public interface IAnalyticsService
     {
-        Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy);
-        Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top);
-        Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime start, DateTime end);
+        Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime? start, DateTime? end, string groupBy);
+        Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime? start, DateTime? end, int top);
+        Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime? start, DateTime? end);
+        Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(DateTime? start, DateTime? end, int top);
     }
 
     public interface IOrderTransactionService

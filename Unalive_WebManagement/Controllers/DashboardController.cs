@@ -31,15 +31,12 @@ namespace Unalive_WebManagement.Controllers
             [FromQuery] DateTime? end,
             [FromQuery] string groupBy = "day")
         {
-            var endDate = end ?? DateTime.UtcNow;
-            var startDate = start ?? endDate.AddDays(-30);
-
             if (groupBy != "day" && groupBy != "month")
             {
                 return BadRequest("groupBy must be 'day' or 'month'");
             }
 
-            var result = await _analyticsService.GetRevenueAnalyticsAsync(startDate, endDate, groupBy);
+            var result = await _analyticsService.GetRevenueAnalyticsAsync(start, end, groupBy);
             return Ok(result);
         }
 
@@ -49,10 +46,7 @@ namespace Unalive_WebManagement.Controllers
             [FromQuery] DateTime? end,
             [FromQuery] int top = 5)
         {
-            var endDate = end ?? DateTime.UtcNow;
-            var startDate = start ?? endDate.AddDays(-30);
-
-            var result = await _analyticsService.GetBundleRankingAsync(startDate, endDate, top);
+            var result = await _analyticsService.GetBundleRankingAsync(start, end, top);
             return Ok(result);
         }
 
@@ -61,10 +55,17 @@ namespace Unalive_WebManagement.Controllers
             [FromQuery] DateTime? start,
             [FromQuery] DateTime? end)
         {
-            var endDate = end ?? DateTime.UtcNow;
-            var startDate = start ?? endDate.AddDays(-30);
+            var result = await _analyticsService.GetPlayerStatsAsync(start, end);
+            return Ok(result);
+        }
 
-            var result = await _analyticsService.GetPlayerStatsAsync(startDate, endDate);
+        [HttpGet("top-spenders")]
+        public async Task<ActionResult<IEnumerable<TopSpenderDto>>> GetTopSpenders(
+            [FromQuery] DateTime? start,
+            [FromQuery] DateTime? end,
+            [FromQuery] int top = 10)
+        {
+            var result = await _analyticsService.GetTopSpendersAsync(start, end, top);
             return Ok(result);
         }
 

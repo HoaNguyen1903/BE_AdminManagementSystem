@@ -23,4 +23,13 @@ namespace Unalive_WebManagement.DTOs
         public int DailyActiveUsers { get; set; }
         public int BannedAccountsCount { get; set; }
     }
+
+    public class TopSpenderDto
+    {
+        public int UserId { get; set; }
+        public string UserName { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public int TransactionCount { get; set; }
+        public decimal TotalSpent { get; set; }
+    }
 }

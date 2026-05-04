@@ -12,17 +12,23 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IUserItemRepository _userItemRepository;
         private readonly IUserBundleRepository _userBundleRepository;
         private readonly IUserBanLogRepository _userBanLogRepository;
+        private readonly IShopOrderRepository _shopOrderRepository;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
 
         public UserService(
             IUserRepository userRepository, 
             IUserItemRepository userItemRepository, 
             IUserBundleRepository userBundleRepository,
-            IUserBanLogRepository userBanLogRepository)
+            IUserBanLogRepository userBanLogRepository,
+            IShopOrderRepository shopOrderRepository,
+            IOrderTransactionRepository orderTransactionRepository)
         {
             _userRepository = userRepository;
             _userItemRepository = userItemRepository;
             _userBundleRepository = userBundleRepository;
             _userBanLogRepository = userBanLogRepository;
+            _shopOrderRepository = shopOrderRepository;
+            _orderTransactionRepository = orderTransactionRepository;
         }
 
         public async Task<IEnumerable<UserDto>> GetUsersAsync(UserFilterParameters filter)
@@ -391,6 +397,39 @@ namespace Unalive_WebManagement.BLL.Services
             if (user == null) return;
             user.AvatarUrl = avatarUrl;
             await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task<PlayerProfileDto?> GetPlayerProfileAsync(int userId)
+        {
+            var user = await GetUserByIdAsync(userId);
+            if (user == null) return null;
+
+            var inventory = await GetUserItemsWithNamesByUserIdAsync(userId, new QueryParameters());
+            var orders = await _shopOrderRepository.GetByUserIdAsync(userId);
+            
+            var orderDtos = orders.Select(o => new ShopOrderDto
+            {
+                ShopOrderId = o.ShopOrderId,
+                UserId = o.UserId,
+                TotalAmount = o.TotalAmount,
+                OrderDate = o.OrderDate,
+                Status = o.Status.ToString(),
+                PlayerEmail = o.PlayerEmail,
+                PlayerUserName = o.PlayerUserName,
+                OrderCode = o.OrderCode,
+                Currency = o.Currency ?? "VND"
+            }).ToList();
+
+            var orderIds = orders.Select(o => o.ShopOrderId).ToList();
+            var transactions = await _orderTransactionRepository.GetByOrderIdsAsync(orderIds);
+
+            return new PlayerProfileDto
+            {
+                User = user,
+                Inventory = inventory,
+                Orders = orderDtos,
+                Transactions = transactions
+            };
         }
     }
 }
