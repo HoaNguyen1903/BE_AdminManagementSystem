@@ -42,8 +42,8 @@ namespace Unalive_WebManagement.Controllers
                 order.Amount = paymentLink.Amount;
                 order.AmountPaid = paymentLink.AmountPaid;
                 order.AmountRemaining = paymentLink.AmountRemaining;
-                order.CreatedAt = DateTimeOffset.TryParse(paymentLink.CreatedAt, out var createdAt) ? createdAt : null;
-                order.CanceledAt = DateTimeOffset.TryParse(paymentLink.CanceledAt, out var canceledAt) ? canceledAt : null;
+                order.CreatedAt = DateTimeOffset.TryParse(paymentLink.CreatedAt, out var createdAt) ? createdAt.ToUniversalTime() : (DateTimeOffset?)null;
+                order.CanceledAt = DateTimeOffset.TryParse(paymentLink.CanceledAt, out var canceledAt) ? canceledAt.ToUniversalTime() : (DateTimeOffset?)null;
                 order.CancellationReason = paymentLink.CancellationReason;
 
                 if (paymentLink.Transactions != null && paymentLink.Transactions.Count > 0)
@@ -59,7 +59,7 @@ namespace Unalive_WebManagement.Controllers
                         Amount = t.Amount,
                         AccountNumber = t.AccountNumber,
                         Description = t.Description,
-                        TransactionDateTime = DateTimeOffset.TryParse(t.TransactionDateTime, out var transactionDateTime) ? transactionDateTime : DateTimeOffset.UtcNow,
+                        TransactionDateTime = DateTimeOffset.TryParse(t.TransactionDateTime, out var transactionDateTime) ? transactionDateTime.ToUniversalTime() : DateTimeOffset.UtcNow,
                         VirtualAccountName = t.VirtualAccountName,
                         VirtualAccountNumber = t.VirtualAccountNumber,
                         CounterAccountBankId = t.CounterAccountBankId,
@@ -71,6 +71,8 @@ namespace Unalive_WebManagement.Controllers
                     await _orderTransactionService.CreateTransactionsAsync(transactions);
                     order.LastTransactionUpdate = DateTimeOffset.UtcNow;
                 }
+
+                order.DetailedOrderDetails = await _shopService.GetDetailedOrderDetailsByOrderIdAsync(order.ShopOrderId);
 
                 await _shopService.UpdateShopOrderAsync(order.ShopOrderId, order);
                 

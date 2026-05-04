@@ -13,6 +13,7 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IGemBundleRepository _gemBundleRepository;
         private readonly ISkinAndCharacterBundleRepository _skinBundleRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IShopOrderRepository _shopOrderRepository;
 
         public AnalyticsService(
             IOrderTransactionRepository orderTransactionRepository,
@@ -20,7 +21,8 @@ namespace Unalive_WebManagement.BLL.Services
             ITopUpHistoryRepository topUpHistoryRepository,
             IGemBundleRepository gemBundleRepository,
             ISkinAndCharacterBundleRepository skinBundleRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IShopOrderRepository shopOrderRepository)
         {
             _orderTransactionRepository = orderTransactionRepository;
             _shopOrderDetailRepository = shopOrderDetailRepository;
@@ -28,6 +30,7 @@ namespace Unalive_WebManagement.BLL.Services
             _gemBundleRepository = gemBundleRepository;
             _skinBundleRepository = skinBundleRepository;
             _userRepository = userRepository;
+            _shopOrderRepository = shopOrderRepository;
         }
 
         public async Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy)
@@ -146,6 +149,53 @@ namespace Unalive_WebManagement.BLL.Services
                 DailyActiveUsers = dau,
                 BannedAccountsCount = bannedCount
             };
+        }
+
+        public async Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(int top)
+        {
+            // 1. Get all transactions
+            var transactions = await _orderTransactionRepository.GetAllAsync();
+
+            // 2. Get associated orders to find user IDs
+            var orderIds = transactions.Select(t => t.OrderId).Distinct().ToList();
+            var orders = (await _shopOrderRepository.GetAllAsync())
+                .Where(o => orderIds.Contains(o.ShopOrderId))
+                .ToDictionary(o => o.ShopOrderId, o => o.UserId);
+
+            // 3. Aggregate spending by UserID
+            var userSpending = new Dictionary<int, (decimal Total, int Count)>();
+            foreach (var transaction in transactions)
+            {
+                if (orders.TryGetValue(transaction.OrderId, out var userId))
+                {
+                    if (!userSpending.ContainsKey(userId))
+                        userSpending[userId] = (0, 0);
+
+                    var current = userSpending[userId];
+                    userSpending[userId] = (current.Total + (decimal)transaction.Amount, current.Count + 1);
+                }
+            }
+
+            // 4. Get User details
+            var userIds = userSpending.Keys.ToList();
+            var users = (await _userRepository.GetAllAsync())
+                .Where(u => userIds.Contains(u.UserId))
+                .ToDictionary(u => u.UserId, u => (u.UserName, u.Email));
+
+            // 5. Combine and sort
+            var result = userSpending.Select(kvp => new TopSpenderDto
+            {
+                UserId = kvp.Key,
+                UserName = users.ContainsKey(kvp.Key) ? users[kvp.Key].UserName : "Unknown",
+                Email = users.ContainsKey(kvp.Key) ? users[kvp.Key].Email : "Unknown",
+                TransactionCount = kvp.Value.Count,
+                TotalSpent = kvp.Value.Total
+            })
+            .OrderByDescending(x => x.TotalSpent)
+            .Take(top)
+            .ToList();
+
+            return result;
         }
     }
 }

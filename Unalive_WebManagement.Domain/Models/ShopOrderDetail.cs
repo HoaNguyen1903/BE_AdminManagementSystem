@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Unalive_WebManagement.Models;
 
@@ -20,5 +21,6 @@ public partial class ShopOrderDetail
     public float UnitPrice { get; set; }
 
     [ForeignKey(nameof(ShopOrderId))]
+    [JsonIgnore]
     public ShopOrder? ShopOrder { get; set; }
 }

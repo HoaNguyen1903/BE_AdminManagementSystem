@@ -70,8 +70,11 @@ namespace Unalive_WebManagement.DTOs
         public int ShopOrderDetailId { get; set; }
         public int ShopOrderId { get; set; }
         public int? SkinAndCharacterBundleId { get; set; }
+        public string? SkinAndCharacterBundleName { get; set; }
         public int? GemBundleId { get; set; }
+        public string? GemBundleName { get; set; }
         public int ItemId { get; set; }
+        public string? ItemName { get; set; }
         public int Quantity { get; set; }
         public float UnitPrice { get; set; }
     }

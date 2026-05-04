@@ -68,6 +68,13 @@ namespace Unalive_WebManagement.Controllers
             return Ok(result);
         }
 
+        [HttpGet("top-spenders")]
+        public async Task<ActionResult<IEnumerable<TopSpenderDto>>> GetTopSpenders([FromQuery] int top = 10)
+        {
+            var result = await _analyticsService.GetTopSpendersAsync(top);
+            return Ok(result);
+        }
+
         [HttpGet("player-history")]
         public async Task<ActionResult<IEnumerable<PlayerOnlineHistoryDto>>> GetPlayerHistory([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
         {

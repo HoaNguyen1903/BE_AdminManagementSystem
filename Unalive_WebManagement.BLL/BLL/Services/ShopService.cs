@@ -18,6 +18,7 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly IUserBundleRepository _userBundleRepository;
         private readonly IUserItemRepository _userItemRepository;
+        private readonly IItemRepository _itemRepository;
 
         public ShopService(
             IGemBundleRepository gemBundleRepository,
@@ -28,7 +29,8 @@ namespace Unalive_WebManagement.BLL.Services
             IAnnouncementRepository announcementRepository,
             INotificationRepository notificationRepository,
             IUserBundleRepository userBundleRepository,
-            IUserItemRepository userItemRepository)
+            IUserItemRepository userItemRepository,
+            IItemRepository itemRepository)
         {
             _gemBundleRepository = gemBundleRepository;
             _skinAndCharacterBundleRepository = skinAndCharacterBundleRepository;
@@ -39,6 +41,7 @@ namespace Unalive_WebManagement.BLL.Services
             _notificationRepository = notificationRepository;
             _userBundleRepository = userBundleRepository;
             _userItemRepository = userItemRepository;
+            _itemRepository = itemRepository;
         }
 
         // GemBundle CRUD
@@ -235,23 +238,6 @@ namespace Unalive_WebManagement.BLL.Services
             return dtos.ApplyQuery(query, (o, search) => o.UserId.ToString().Contains(search) || (o.PlayerUserName != null && o.PlayerUserName.Contains(search, StringComparison.OrdinalIgnoreCase)) || (o.PlayerEmail != null && o.PlayerEmail.Contains(search, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public async Task<ShopOrder?> GetShopOrderByIdAsync(int id)
-        {
-            var orders = await _shopOrderRepository.GetAllAsync();
-            return orders.FirstOrDefault(o => o.ShopOrderId == id);
-        }
-
-        public async Task<ShopOrder?> GetShopOrderByPaymentLinkIdAsync(string paymentLinkId)
-        {
-            var orders = await _shopOrderRepository.GetAllAsync();
-            return orders.FirstOrDefault(o => o.PaymentLinkId == paymentLinkId);
-        }
-
-        public async Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode)
-        {
-            return await _shopOrderRepository.GetByOrderCodeAsync(orderCode);
-        }
-
         public async Task UpdateShopOrderAsync(int id, ShopOrder updatedOrder)
         {
             var orders = await _shopOrderRepository.GetAllAsync();
@@ -285,6 +271,37 @@ namespace Unalive_WebManagement.BLL.Services
             await _shopOrderRepository.UpdateAsync(order);
         }
 
+        public async Task<ShopOrder?> GetShopOrderByIdAsync(int id)
+        {
+            var order = await _shopOrderRepository.GetByIdAsync(id);
+            if (order != null)
+            {
+                order.DetailedOrderDetails = await GetDetailedOrderDetailsByOrderIdAsync(order.ShopOrderId);
+            }
+            return order;
+        }
+
+        public async Task<ShopOrder?> GetShopOrderByPaymentLinkIdAsync(string paymentLinkId)
+        {
+            var orders = await _shopOrderRepository.GetAllAsync();
+            var order = orders.FirstOrDefault(o => o.PaymentLinkId == paymentLinkId);
+            if (order != null)
+            {
+                order.DetailedOrderDetails = await GetDetailedOrderDetailsByOrderIdAsync(order.ShopOrderId);
+            }
+            return order;
+        }
+
+        public async Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode)
+        {
+            var order = await _shopOrderRepository.GetByOrderCodeAsync(orderCode);
+            if (order != null)
+            {
+                order.DetailedOrderDetails = await GetDetailedOrderDetailsByOrderIdAsync(order.ShopOrderId);
+            }
+            return order;
+        }
+
         public async Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId, QueryParameters query)
         {
             var details = await _shopOrderDetailRepository.GetAllAsync();
@@ -299,6 +316,38 @@ namespace Unalive_WebManagement.BLL.Services
                 UnitPrice = d.UnitPrice
             });
             return dtos.ApplyQuery(query, (d, search) => d.ItemId.ToString().Contains(search));
+        }
+
+        public async Task<IEnumerable<ShopOrderDetailDto>> GetDetailedOrderDetailsByOrderIdAsync(int orderId)
+        {
+            var details = (await _shopOrderDetailRepository.GetAllAsync())
+                .Where(d => d.ShopOrderId == orderId).ToList();
+
+            if (!details.Any()) return Enumerable.Empty<ShopOrderDetailDto>();
+
+            // Get all unique IDs
+            var itemIds = details.Select(d => d.ItemId).Distinct().ToList();
+            var gemBundleIds = details.Where(d => d.GemBundleId.HasValue).Select(d => d.GemBundleId!.Value).Distinct().ToList();
+            var skinBundleIds = details.Where(d => d.SkinAndCharacterBundleId.HasValue).Select(d => d.SkinAndCharacterBundleId!.Value).Distinct().ToList();
+
+            // Fetch names from respective repositories
+            var items = (await _itemRepository.GetAllAsync()).Where(i => itemIds.Contains(i.ItemId)).ToDictionary(i => i.ItemId, i => i.ItemName);
+            var gemBundles = (await _gemBundleRepository.GetAllAsync()).Where(g => gemBundleIds.Contains(g.GemBundleId)).ToDictionary(g => g.GemBundleId, g => g.BundleName);
+            var skinBundles = (await _skinAndCharacterBundleRepository.GetAllAsync()).Where(s => skinBundleIds.Contains(s.SkinAndCharacterBundleId)).ToDictionary(s => s.SkinAndCharacterBundleId, s => s.BundleName);
+
+            return details.Select(d => new ShopOrderDetailDto
+            {
+                ShopOrderDetailId = d.ShopOrderDetailId,
+                ShopOrderId = d.ShopOrderId,
+                SkinAndCharacterBundleId = d.SkinAndCharacterBundleId,
+                SkinAndCharacterBundleName = d.SkinAndCharacterBundleId.HasValue && skinBundles.TryGetValue(d.SkinAndCharacterBundleId.Value, out var sn) ? sn : null,
+                GemBundleId = d.GemBundleId,
+                GemBundleName = d.GemBundleId.HasValue && gemBundles.TryGetValue(d.GemBundleId.Value, out var gn) ? gn : null,
+                ItemId = d.ItemId,
+                ItemName = items.TryGetValue(d.ItemId, out var inn) ? inn : null,
+                Quantity = d.Quantity,
+                UnitPrice = d.UnitPrice
+            });
         }
 
         public async Task<IEnumerable<TopUpHistoryDto>> GetAllTopUpHistoriesAsync(QueryParameters query)
@@ -434,7 +483,7 @@ namespace Unalive_WebManagement.BLL.Services
                 }
             }
 
-            createdOrder.OrderDetails = detailsToInsert;
+            createdOrder.DetailedOrderDetails = await GetDetailedOrderDetailsByOrderIdAsync(createdOrder.ShopOrderId);
             return createdOrder;
         }
 

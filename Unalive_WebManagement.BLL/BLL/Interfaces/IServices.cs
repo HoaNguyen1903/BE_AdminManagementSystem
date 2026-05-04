@@ -66,6 +66,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<ShopOrder?> GetShopOrderByOrderCodeAsync(long orderCode);
 
         Task<IEnumerable<ShopOrderDetailDto>> GetOrderDetailsByOrderIdAsync(int orderId, QueryParameters query);
+        Task<IEnumerable<ShopOrderDetailDto>> GetDetailedOrderDetailsByOrderIdAsync(int orderId);
         Task<IEnumerable<TopUpHistoryDto>> GetAllTopUpHistoriesAsync(QueryParameters query);
 
         Task PurchaseGemBundleAsync(int userId, int bundleId);
@@ -138,6 +139,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime start, DateTime end, string groupBy);
         Task<IEnumerable<BundleRankingDto>> GetBundleRankingAsync(DateTime start, DateTime end, int top);
         Task<PlayerStatsDto> GetPlayerStatsAsync(DateTime start, DateTime end);
+        Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(int top);
     }
 
     public interface IOrderTransactionService

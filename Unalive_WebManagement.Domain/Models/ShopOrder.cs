@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Unalive_WebManagement.DTOs;
 
 namespace Unalive_WebManagement.Models;
 
@@ -50,7 +52,12 @@ public partial class ShopOrder
     // Cancellation
     public string? CancellationReason { get; set; }
 
+    [JsonIgnore]
     public List<ShopOrderDetail> OrderDetails { get; set; } = new List<ShopOrderDetail>();
+
+    [NotMapped]
+    [JsonPropertyName("orderDetails")]
+    public IEnumerable<ShopOrderDetailDto>? DetailedOrderDetails { get; set; }
 
     [NotMapped]
     public short IsSuccess => (short)(Status == PaymentLinkStatus.Paid ? 1 : 0);
