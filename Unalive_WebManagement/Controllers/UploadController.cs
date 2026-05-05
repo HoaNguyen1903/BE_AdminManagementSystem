@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Unalive_WebManagement.BLL.Interfaces;
 
 namespace Unalive_WebManagement.Controllers
 {
@@ -8,11 +9,11 @@ namespace Unalive_WebManagement.Controllers
     [ApiController]
     public class UploadController : ControllerBase
     {
-        private readonly IWebHostEnvironment _environment;
+        private readonly IBlobService _blobService;
 
-        public UploadController(IWebHostEnvironment environment)
+        public UploadController(IBlobService blobService)
         {
-            _environment = environment;
+            _blobService = blobService;
         }
 
         [HttpPost("image")]
@@ -30,24 +31,19 @@ namespace Unalive_WebManagement.Controllers
                 return BadRequest("Invalid file type. Only images are allowed.");
             }
 
-            var webRootPath = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var imageFolder = Path.Combine(webRootPath, "Image");
-
-            if (!Directory.Exists(imageFolder))
+            try
             {
-                Directory.CreateDirectory(imageFolder);
-            }
+                // Generate a unique file name to prevent overwriting in cloud storage
+                var uniqueFileName = Guid.NewGuid().ToString() + extension;
 
-            var uniqueFileName = Guid.NewGuid().ToString() + extension;
-            var filePath = Path.Combine(imageFolder, uniqueFileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
+                string cloudUrl = await _blobService.UploadImageAsync(file, uniqueFileName);
+
+                return Ok(new { url = cloudUrl });
+            }
+            catch (Exception ex)
             {
-                await file.CopyToAsync(stream);
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-
-            var fileUrl = $"/Image/{uniqueFileName}";
-
-            return Ok(new { url = fileUrl });
         }
     }
 }
