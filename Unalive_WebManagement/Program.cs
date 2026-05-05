@@ -171,4 +171,6 @@ app.MapControllers();
 
 app.MapHub<AnnouncementHub>("/hubs/announcement");
 
+app.UseStaticFiles();
+
 app.Run();
