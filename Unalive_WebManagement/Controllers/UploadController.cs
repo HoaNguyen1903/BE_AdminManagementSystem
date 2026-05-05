@@ -6,7 +6,6 @@ namespace Unalive_WebManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UploadController : ControllerBase
     {
         private readonly IWebHostEnvironment _environment;
