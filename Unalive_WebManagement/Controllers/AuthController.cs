@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DTOs;
@@ -24,6 +25,15 @@ namespace Unalive_WebManagement.Controllers
                 return Unauthorized("Invalid credentials");
             }
             return Ok(response);
+        }
+
+        [HttpPost("logout")]
+        [Authorize(Roles = "Admin,Staff")]
+        public IActionResult Logout()
+        {
+            // For staff, we just return OK as the token is cleared on the frontend.
+            // We can add audit logging here later if needed.
+            return Ok(new { message = "Logged out successfully" });
         }
 
         [HttpPost("login-user")]
