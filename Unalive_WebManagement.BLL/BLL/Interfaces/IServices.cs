@@ -165,5 +165,6 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<PurchaseOrder> CreatePurchaseOrderAsync(PurchaseOrder order);
         Task UpdatePurchaseOrderAsync(int id, PurchaseOrder updatedOrder);
         Task DeletePurchaseOrderAsync(int id);
+        Task<PurchaseOrder> ProcessBundlePurchaseAsync(int userId, int bundleId);
     }
 }

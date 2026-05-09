@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unalive_WebManagement.BLL.Interfaces;
+using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.Controllers
@@ -43,14 +44,21 @@ namespace Unalive_WebManagement.Controllers
 
         // POST: api/PurchaseOrder
         [HttpPost]
-        public async Task<ActionResult<PurchaseOrder>> CreatePurchaseOrder([FromBody] PurchaseOrder order)
+        public async Task<ActionResult<PurchaseOrder>> CreatePurchaseOrder([FromBody] CreatePurchaseOrderDto dto)
         {
-            var createdOrder = await _purchaseOrderService.CreatePurchaseOrderAsync(order);
+            try
+            {
+                var createdOrder = await _purchaseOrderService.ProcessBundlePurchaseAsync(dto.UserId, dto.SkinAndCharacterBundleId);
 
-            return CreatedAtAction(
-                nameof(GetPurchaseOrderById),
-                new { id = createdOrder.PurchaseOrderId },
-                createdOrder);
+                return CreatedAtAction(
+                    nameof(GetPurchaseOrderById),
+                    new { id = createdOrder.PurchaseOrderId },
+                    createdOrder);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // PUT: api/PurchaseOrder/5
