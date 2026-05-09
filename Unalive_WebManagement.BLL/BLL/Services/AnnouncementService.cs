@@ -25,12 +25,12 @@ namespace Unalive_WebManagement.BLL.Services
                 Content = a.Content,
                 Type = a.Type,
                 Status = a.Status,
-                StartDate = a.StartDate,
-                EndDate = a.EndDate,
+                StartDate = a.StartDate.ToUniversalTime(),
+                EndDate = a.EndDate.ToUniversalTime(),
                 CreatedBy = a.CreatedBy,
-                CreatedAt = a.CreatedAt,
+                CreatedAt = a.CreatedAt.ToUniversalTime(),
                 UpdatedBy = a.UpdatedBy,
-                UpdatedAt = a.UpdatedAt
+                UpdatedAt = a.UpdatedAt?.ToUniversalTime()
             });
             return dtos.ApplyQuery(query, (a, search) => a.Title.Contains(search, StringComparison.OrdinalIgnoreCase) || a.Content.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -46,12 +46,12 @@ namespace Unalive_WebManagement.BLL.Services
                 Content = a.Content,
                 Type = a.Type,
                 Status = a.Status,
-                StartDate = a.StartDate,
-                EndDate = a.EndDate,
+                StartDate = a.StartDate.ToUniversalTime(),
+                EndDate = a.EndDate.ToUniversalTime(),
                 CreatedBy = a.CreatedBy,
-                CreatedAt = a.CreatedAt,
+                CreatedAt = a.CreatedAt.ToUniversalTime(),
                 UpdatedBy = a.UpdatedBy,
-                UpdatedAt = a.UpdatedAt
+                UpdatedAt = a.UpdatedAt?.ToUniversalTime()
             };
         }
 
@@ -63,8 +63,8 @@ namespace Unalive_WebManagement.BLL.Services
                 Content = dto.Content,
                 Type = dto.Type,
                 Status = dto.Status,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
+                StartDate = dto.StartDate.ToUniversalTime(),
+                EndDate = dto.EndDate.ToUniversalTime(),
                 CreatedBy = staffId,
                 CreatedAt = DateTime.UtcNow
             };
@@ -80,8 +80,8 @@ namespace Unalive_WebManagement.BLL.Services
             a.Content = dto.Content;
             a.Type = dto.Type;
             a.Status = dto.Status;
-            a.StartDate = dto.StartDate;
-            a.EndDate = dto.EndDate;
+            a.StartDate = dto.StartDate.ToUniversalTime();
+            a.EndDate = dto.EndDate.ToUniversalTime();
             a.UpdatedBy = staffId;
             a.UpdatedAt = DateTime.UtcNow;
             await _announcementRepository.UpdateAsync(a);
