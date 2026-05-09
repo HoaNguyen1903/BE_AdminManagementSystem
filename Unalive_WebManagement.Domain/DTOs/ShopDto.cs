@@ -109,5 +109,7 @@ namespace Unalive_WebManagement.DTOs
     {
         public string? Status { get; set; }
         public int? ItemId { get; set; }
+        public float? MinPrice { get; set; }
+        public float? MaxPrice { get; set; }
     }
 }

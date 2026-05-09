@@ -60,6 +60,16 @@ namespace Unalive_WebManagement.BLL.Services
                 q = q.Where(b => b.ItemId == query.ItemId.Value);
             }
 
+            if (query.MinPrice.HasValue)
+            {
+                q = q.Where(b => b.BundlePrice >= query.MinPrice.Value);
+            }
+
+            if (query.MaxPrice.HasValue)
+            {
+                q = q.Where(b => b.BundlePrice <= query.MaxPrice.Value);
+            }
+
             var dtos = q.Select(b => new GemBundleDto
             {
                 GemBundleId = b.GemBundleId,
@@ -199,6 +209,16 @@ namespace Unalive_WebManagement.BLL.Services
             if (query.ItemId.HasValue)
             {
                 q = q.Where(b => b.ItemId == query.ItemId.Value);
+            }
+
+            if (query.MinPrice.HasValue)
+            {
+                q = q.Where(b => b.BundlePrice >= query.MinPrice.Value);
+            }
+
+            if (query.MaxPrice.HasValue)
+            {
+                q = q.Where(b => b.BundlePrice <= query.MaxPrice.Value);
             }
 
             var dtos = q.Select(b => new SkinAndCharacterBundleDto
