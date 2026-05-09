@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
+using Unalive_WebManagement.DAL.Repositories;
 using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.BLL.Services
@@ -9,10 +10,14 @@ namespace Unalive_WebManagement.BLL.Services
     public class PurchaseOrderService : IPurchaseOrderService
     {
         private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+        private readonly ISkinAndCharacterBundleRepository _skinAndCharacterBundleRepository;
+        private readonly IUserItemRepository _userItemRepository;
 
-        public PurchaseOrderService(IPurchaseOrderRepository purchaseOrderRepository)
+        public PurchaseOrderService(IPurchaseOrderRepository purchaseOrderRepository, ISkinAndCharacterBundleRepository skinAndCharacterBundleRepository, IUserItemRepository userItemRepository)
         {
             _purchaseOrderRepository = purchaseOrderRepository;
+            _skinAndCharacterBundleRepository = skinAndCharacterBundleRepository;
+            _userItemRepository = userItemRepository;
         }
 
         public async Task<IEnumerable<PurchaseOrder>> GetAllPurchaseOrdersAsync()
@@ -47,6 +52,92 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task DeletePurchaseOrderAsync(int id)
         {
             await _purchaseOrderRepository.DeleteAsync(id);
+        }
+
+        public async Task<PurchaseOrder> ProcessBundlePurchaseAsync(int userId, int bundleId)
+        {
+            // 1. Fetch the bundle
+            var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(bundleId);
+            if (bundle == null)
+            {
+                throw new Exception("Bundle not found.");
+            }
+
+            // 2. Fetch the user's Gem inventory
+            var userInventory = await _userItemRepository.GetByUserIdAsync(userId);
+            var gemItem = userInventory.FirstOrDefault(i => i.ItemId == 4);
+            int costInGems = (int)bundle.BundlePrice;
+
+            // 3. THE FAIL SCENARIO
+            if (gemItem == null || gemItem.Quantity < costInGems)
+            {
+                var failedOrder = new PurchaseOrder
+                {
+                    UserId = userId,
+                    SkinAndCharacterBundleId = bundleId,
+                    GemCost = bundle.BundlePrice,
+                    Status = InGamePurchaseStatus.Failed,
+                    PurchaseDate = DateTimeOffset.UtcNow
+                };
+
+                await _purchaseOrderRepository.AddAsync(failedOrder);
+
+                throw new InvalidOperationException("Not enough gems to purchase this bundle.");
+            }
+
+            // 4. THE SUCCESS SCENARIO
+            gemItem.Quantity -= costInGems;
+            await _userItemRepository.UpdateAsync(gemItem);
+
+            var successfulOrder = new PurchaseOrder
+            {
+                UserId = userId,
+                SkinAndCharacterBundleId = bundleId,
+                GemCost = bundle.BundlePrice,
+                Status = InGamePurchaseStatus.Completed,
+                PurchaseDate = DateTimeOffset.UtcNow
+            };
+
+            return await _purchaseOrderRepository.AddAsync(successfulOrder);
+        }
+
+        // Refund Logic incase of a refund request
+        public async Task<PurchaseOrder> RefundPurchaseAsync(int purchaseOrderId)
+        {
+            // 1. Find the existing order
+            var order = await _purchaseOrderRepository.GetByIdWithDetailsAsync(purchaseOrderId);
+            if (order == null) throw new KeyNotFoundException("Order not found.");
+
+            // 2. Prevent double-refunding
+            if (order.Status == InGamePurchaseStatus.Refunded)
+            {
+                throw new InvalidOperationException("This order has already been refunded.");
+            }
+
+            if (order.Status != InGamePurchaseStatus.Completed)
+            {
+                throw new InvalidOperationException("Only completed orders can be refunded.");
+            }
+
+            // 3. Return the Gems
+            var userInventory = await _userItemRepository.GetByUserIdAsync(order.UserId);
+            var gemItem = userInventory.FirstOrDefault(i => i.ItemId == 4);
+
+            if (gemItem != null)
+            {
+                // Add the historical cost back to their inventory
+                gemItem.Quantity += (int)order.GemCost;
+                await _userItemRepository.UpdateAsync(gemItem);
+            }
+
+            // 4. Update the order status
+            order.Status = InGamePurchaseStatus.Refunded;
+            await _purchaseOrderRepository.UpdateAsync(order);
+
+            // TODO: In a complete system, you must also remove the bundle items 
+            // (skins/characters) from the user's inventory here!
+
+            return order;
         }
     }
 }
