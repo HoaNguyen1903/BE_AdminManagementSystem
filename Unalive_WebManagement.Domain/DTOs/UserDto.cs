@@ -58,6 +58,7 @@ namespace Unalive_WebManagement.DTOs
         public int ItemId { get; set; }
         public int Quantity { get; set; }
         public int ShopOrderId { get; set; }
+        public int PurchaseOrderId { get; set; }
     }
 
     public class UserItemWithNameDto
@@ -75,6 +76,7 @@ namespace Unalive_WebManagement.DTOs
         public int ItemId { get; set; }
         public int Quantity { get; set; }
         public int ShopOrderId { get; set; }
+        public int PurchaseOrderId { get; set; }
     }
 
     public class UpdateUserItemDto

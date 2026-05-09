@@ -58,38 +58,36 @@ namespace Unalive_WebManagement.BLL.Services
         {
             // 1. Fetch the bundle
             var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(bundleId);
-            if (bundle == null)
+            if (bundle == null || bundle.Status != SkinAndCharacterBundle.StatusEnum.Available)
             {
-                throw new Exception("Bundle not found.");
+                throw new Exception("Bundle is not available.");
             }
 
-            // 2. Fetch the user's Gem inventory
-            var userInventory = await _userItemRepository.GetByUserIdAsync(userId);
+            // 2. Fetch user's inventory
+            var userInventory = (await _userItemRepository.GetByUserIdAsync(userId)).ToList();
+
+            // check if item already owned
+            var alreadyOwnsItem = userInventory.Any(i => i.ItemId == bundle.ItemId);
+            if (alreadyOwnsItem)
+            {
+                throw new Exception("This item is already owned by the user.");
+            }
+
+            // 3. Check Gem Balance
             var gemItem = userInventory.FirstOrDefault(i => i.ItemId == 4);
             int costInGems = (int)bundle.BundlePrice;
 
-            // 3. THE FAIL SCENARIO
             if (gemItem == null || gemItem.Quantity < costInGems)
             {
-                var failedOrder = new PurchaseOrder
-                {
-                    UserId = userId,
-                    SkinAndCharacterBundleId = bundleId,
-                    GemCost = bundle.BundlePrice,
-                    Status = InGamePurchaseStatus.Failed,
-                    PurchaseDate = DateTimeOffset.UtcNow
-                };
-
-                await _purchaseOrderRepository.AddAsync(failedOrder);
-
-                throw new InvalidOperationException("Not enough gems to purchase this bundle.");
+                throw new Exception("Not enough gems to purchase this bundle.");
             }
 
-            // 4. THE SUCCESS SCENARIO
+            // 4. Deduct the Gems
             gemItem.Quantity -= costInGems;
             await _userItemRepository.UpdateAsync(gemItem);
 
-            var successfulOrder = new PurchaseOrder
+            // 5. Create the Purchase Order
+            var newOrder = new PurchaseOrder
             {
                 UserId = userId,
                 SkinAndCharacterBundleId = bundleId,
@@ -98,7 +96,31 @@ namespace Unalive_WebManagement.BLL.Services
                 PurchaseDate = DateTimeOffset.UtcNow
             };
 
-            return await _purchaseOrderRepository.AddAsync(successfulOrder);
+            var savedOrder = await _purchaseOrderRepository.AddAsync(newOrder);
+
+            // 6. GRANT THE ITEM TO THE PLAYER
+            var existingItem = userInventory.FirstOrDefault(i => i.ItemId == bundle.ItemId);
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity += bundle.Quantity;
+                await _userItemRepository.UpdateAsync(existingItem);
+            }
+            else
+            {
+                var newItemToGrant = new UserItem
+                {
+                    UserId = userId,
+                    ItemId = bundle.ItemId,
+                    Quantity = bundle.Quantity,
+                    ShopOrderId = null,
+                    PurchaseOrderId = savedOrder.PurchaseOrderId
+                };
+
+                await _userItemRepository.AddAsync(newItemToGrant);
+            }
+
+            return savedOrder;
         }
 
         // Refund Logic incase of a refund request

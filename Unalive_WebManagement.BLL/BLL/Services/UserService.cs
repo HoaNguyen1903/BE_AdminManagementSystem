@@ -291,7 +291,8 @@ namespace Unalive_WebManagement.BLL.Services
                 UserId = i.UserId,
                 ItemId = i.ItemId,
                 Quantity = i.Quantity,
-                ShopOrderId = i.ShopOrderId
+                ShopOrderId = i.ShopOrderId ?? 0,
+                PurchaseOrderId = i.PurchaseOrderId ?? 0
             };
         }
 
@@ -313,7 +314,7 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<UserItemDto> CreateUserItemAsync(CreateUserItemDto dto)
         {
-            var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity, ShopOrderId = dto.ShopOrderId };
+            var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity, ShopOrderId = dto.ShopOrderId, PurchaseOrderId = dto.PurchaseOrderId };
             var created = await _userItemRepository.AddAsync(item);
             return MapToUserItemDto(created);
         }

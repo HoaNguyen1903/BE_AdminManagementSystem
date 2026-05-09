@@ -10,7 +10,8 @@ public partial class UserItem
 
     public int Quantity { get; set; }
 
-    public int ShopOrderId { get; set; }
+    public int? ShopOrderId { get; set; }
+    public int? PurchaseOrderId { get; set; }
 
     // Navigation properties
     public virtual User? User { get; set; }
