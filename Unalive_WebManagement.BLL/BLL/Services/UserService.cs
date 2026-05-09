@@ -422,13 +422,15 @@ namespace Unalive_WebManagement.BLL.Services
 
             var orderIds = orders.Select(o => o.ShopOrderId).ToList();
             var transactions = await _orderTransactionRepository.GetByOrderIdsAsync(orderIds);
+            var banLogs = await GetUserBanLogsByUserIdAsync(userId, new QueryParameters());
 
             return new PlayerProfileDto
             {
                 User = user,
                 Inventory = inventory,
                 Orders = orderDtos,
-                Transactions = transactions
+                Transactions = transactions,
+                BanLogs = banLogs
             };
         }
     }

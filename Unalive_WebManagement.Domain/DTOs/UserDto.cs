@@ -110,6 +110,7 @@ namespace Unalive_WebManagement.DTOs
         public IEnumerable<UserItemWithNameDto> Inventory { get; set; } = null!;
         public IEnumerable<ShopOrderDto> Orders { get; set; } = null!;
         public IEnumerable<OrderTransaction> Transactions { get; set; } = null!;
+        public IEnumerable<UserBanLogDto> BanLogs { get; set; } = null!;
     }
 
     public class UserBanLogDto
