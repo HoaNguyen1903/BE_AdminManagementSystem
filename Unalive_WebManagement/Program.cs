@@ -140,7 +140,7 @@ builder.Services.AddCors(options =>
             builder.WithOrigins(
                     "http://localhost:3000",
                     "http://localhost:5173",
-                    "https://gamemanagementpage.vercel.app/"
+                    "https://gamemanagementpage.vercel.app"
                    )
                    .AllowAnyMethod()
                    .AllowAnyHeader()
