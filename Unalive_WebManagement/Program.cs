@@ -44,6 +44,7 @@ builder.Services.AddScoped<IPlayerOnlineHistoryRepository, PlayerOnlineHistoryRe
 builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
 
 // Register Services
 builder.Services.AddScoped<IItemService, ItemService>();
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IOrderTransactionService, OrderTransactionService>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 
 // Register Background Services
 builder.Services.AddHostedService<PlayerOnlineTrackerService>();
