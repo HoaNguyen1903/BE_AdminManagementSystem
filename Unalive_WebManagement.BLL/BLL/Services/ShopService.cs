@@ -55,7 +55,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
                 Quantity = b.Quantity,
-                imageUrl = b.imageUrl
+                imageUrl = b.imageUrl,
+                Status = b.Status.ToString()
             });
             return dtos.ApplyQuery(query, (b, search) => b.BundleName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -71,7 +72,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
                 Quantity = b.Quantity,
-                imageUrl = b.imageUrl
+                imageUrl = b.imageUrl,
+                Status = b.Status.ToString()
             };
         }
 
@@ -83,7 +85,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = dto.BundlePrice,
                 ItemId = dto.ItemId,
                 Quantity = dto.Quantity,
-                imageUrl = dto.imageUrl
+                imageUrl = dto.imageUrl,
+                Status = Enum.TryParse<GemBundle.StatusEnum>(dto.Status, true, out var s) ? s : GemBundle.StatusEnum.Available
             };
             var created = await _gemBundleRepository.AddAsync(bundle);
             return new GemBundleDto
@@ -93,7 +96,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = created.BundlePrice,
                 ItemId = created.ItemId,
                 Quantity = created.Quantity,
-                imageUrl = created.imageUrl
+                imageUrl = created.imageUrl,
+                Status = created.Status.ToString()
             };
         }
 
@@ -136,6 +140,8 @@ namespace Unalive_WebManagement.BLL.Services
             if (dto.BundlePrice != null) bundle.BundlePrice = dto.BundlePrice.Value;
             if (dto.ItemId != null) bundle.ItemId = dto.ItemId.Value;
             if (dto.Quantity != null) bundle.Quantity = dto.Quantity.Value;
+            if (dto.Status != null && Enum.TryParse<GemBundle.StatusEnum>(dto.Status, true, out var status))
+                bundle.Status = status;
 
             bundle.imageUrl = dto.imageUrl;
 
@@ -155,7 +161,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
                 Quantity = b.Quantity,
-                imageUrl = b.imageUrl
+                imageUrl = b.imageUrl,
+                Status = b.Status.ToString()
             });
             return dtos.ApplyQuery(query, (b, search) => b.BundleName.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
@@ -171,7 +178,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = b.BundlePrice,
                 ItemId = b.ItemId,
                 Quantity = b.Quantity,
-                imageUrl = b.imageUrl
+                imageUrl = b.imageUrl,
+                Status = b.Status.ToString()
             };
         }
 
@@ -183,7 +191,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = dto.BundlePrice,
                 ItemId = dto.ItemId,
                 Quantity = dto.Quantity,
-                imageUrl = dto.imageUrl
+                imageUrl = dto.imageUrl,
+                Status = Enum.TryParse<SkinAndCharacterBundle.StatusEnum>(dto.Status, true, out var s) ? s : SkinAndCharacterBundle.StatusEnum.Available
             };
             var created = await _skinAndCharacterBundleRepository.AddAsync(bundle);
 
@@ -217,7 +226,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BundlePrice = created.BundlePrice,
                 ItemId = created.ItemId,
                 Quantity = created.Quantity,
-                imageUrl = created.imageUrl
+                imageUrl = created.imageUrl,
+                Status = created.Status.ToString()
             };
         }
 
@@ -230,6 +240,8 @@ namespace Unalive_WebManagement.BLL.Services
             if (dto.BundlePrice != null) bundle.BundlePrice = dto.BundlePrice.Value;
             if (dto.ItemId != null) bundle.ItemId = dto.ItemId.Value;
             if (dto.Quantity != null) bundle.Quantity = dto.Quantity.Value;
+            if (dto.Status != null && Enum.TryParse<SkinAndCharacterBundle.StatusEnum>(dto.Status, true, out var status))
+                bundle.Status = status;
 
             bundle.imageUrl = dto.imageUrl;
 

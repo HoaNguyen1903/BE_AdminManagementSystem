@@ -31,7 +31,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemName = i.ItemName,
                 ItemDescription = i.ItemDescription,
                 ItemType = i.ItemType,
-                ItemImageUrl = i.ItemImageUrl
+                ItemImageUrl = i.ItemImageUrl,
+                Status = i.Status.ToString()
             });
 
             return dtos.ApplyQuery(query, (i, s) =>
@@ -51,7 +52,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemName = item.ItemName,
                 ItemDescription = item.ItemDescription,
                 ItemType = item.ItemType,
-                ItemImageUrl = item.ItemImageUrl
+                ItemImageUrl = item.ItemImageUrl,
+                Status = item.Status.ToString()
             };
         }
 
@@ -62,7 +64,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemName = dto.ItemName,
                 ItemDescription = dto.ItemDescription,
                 ItemType = dto.ItemType,
-                ItemImageUrl = dto.ItemImageUrl
+                ItemImageUrl = dto.ItemImageUrl,
+                Status = Enum.TryParse<Item.StatusEnum>(dto.Status, true, out var s) ? s : Item.StatusEnum.Available
             };
 
             var created = await _itemRepository.AddAsync(item);
@@ -96,7 +99,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemName = created.ItemName,
                 ItemDescription = created.ItemDescription,
                 ItemType = created.ItemType,
-                ItemImageUrl = created.ItemImageUrl
+                ItemImageUrl = created.ItemImageUrl,
+                Status = created.Status.ToString()
             };
         }
 
@@ -109,6 +113,8 @@ namespace Unalive_WebManagement.BLL.Services
             item.ItemDescription = dto.ItemDescription;
             item.ItemType = dto.ItemType;
             item.ItemImageUrl = dto.ItemImageUrl;
+            if (dto.Status != null && Enum.TryParse<Item.StatusEnum>(dto.Status, true, out var status))
+                item.Status = status;
 
             await _itemRepository.UpdateAsync(item);
         }

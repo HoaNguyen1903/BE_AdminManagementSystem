@@ -12,4 +12,13 @@ public partial class Item
 
     public string ItemType { get; set; } = null!;
     public string? ItemImageUrl { get; set; }
+
+    public enum StatusEnum
+    {
+        Available,
+        Unavailable,
+        Discontinued
+    }
+
+    public StatusEnum Status { get; set; } = StatusEnum.Available;
 }

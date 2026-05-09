@@ -13,6 +13,14 @@ public partial class SkinAndCharacterBundle
     public int ItemId { get; set; }
 
     public int Quantity { get; set; }
+    public enum StatusEnum
+    {
+        Available,
+        Unavailable,
+        Discontinued
+    }
+
+    public StatusEnum Status { get; set; } = StatusEnum.Available;
 
     public string? imageUrl { get; set; }
 }

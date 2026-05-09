@@ -7,6 +7,7 @@ namespace Unalive_WebManagement.DTOs
         public string ItemDescription { get; set; } = null!;
         public string ItemType { get; set; } = null!;
         public string? ItemImageUrl { get; set; }
+        public string? Status { get; set; }
     }
 
     public class CreateItemDto
@@ -15,6 +16,7 @@ namespace Unalive_WebManagement.DTOs
         public string ItemDescription { get; set; } = null!;
         public string ItemType { get; set; } = null!;
         public string? ItemImageUrl { get; set; }
+        public string? Status { get; set; }
     }
 
     public class UpdateItemDto
@@ -23,6 +25,7 @@ namespace Unalive_WebManagement.DTOs
         public string ItemDescription { get; set; } = null!;
         public string ItemType { get; set; } = null!;
         public string? ItemImageUrl { get; set; }
+        public string? Status { get; set; }
     }
 
 }

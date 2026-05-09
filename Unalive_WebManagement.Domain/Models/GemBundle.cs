@@ -19,5 +19,14 @@ public partial class GemBundle
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
     public int Quantity { get; set; }
 
+    public enum StatusEnum
+    {
+        Available,
+        Unavailable,
+        Discontinued
+    }
+
+    public StatusEnum Status { get; set; } = StatusEnum.Available;
+
     public string? imageUrl { get; set; }
 }

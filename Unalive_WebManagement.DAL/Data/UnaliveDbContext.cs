@@ -132,16 +132,19 @@ public partial class UnaliveDbContext : DbContext
         modelBuilder.Entity<Item>(entity =>
         {
             entity.HasKey(e => e.ItemId);
+            entity.Property(e => e.Status).HasConversion<string>();
         });
 
         modelBuilder.Entity<SkinAndCharacterBundle>(entity =>
         {
             entity.HasKey(e => e.SkinAndCharacterBundleId);
+            entity.Property(e => e.Status).HasConversion<string>();
         });
 
         modelBuilder.Entity<GemBundle>(entity =>
         {
             entity.HasKey(e => e.GemBundleId);
+            entity.Property(e => e.Status).HasConversion<string>();
         });
 
         modelBuilder.Entity<UserBundle>(entity =>
