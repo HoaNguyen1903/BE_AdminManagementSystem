@@ -78,13 +78,13 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("shop/gem-bundles")]
-        public async Task<ActionResult<IEnumerable<GemBundleDto>>> GetGemBundles([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<GemBundleDto>>> GetGemBundles([FromQuery] BundleFilterParameters query)
         {
             return Ok(await _shopService.GetAllGemBundlesAsync(query));
         }
 
         [HttpGet("shop/skin-bundles")]
-        public async Task<ActionResult<IEnumerable<SkinAndCharacterBundleDto>>> GetSkinBundles([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<SkinAndCharacterBundleDto>>> GetSkinBundles([FromQuery] BundleFilterParameters query)
         {
             return Ok(await _shopService.GetAllSkinAndCharacterBundlesAsync(query));
         }

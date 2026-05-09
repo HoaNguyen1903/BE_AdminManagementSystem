@@ -104,4 +104,10 @@ namespace Unalive_WebManagement.DTOs
         public string Status { get; set; } = null!;
         public DateTime Date { get; set; }
     }
+
+    public class BundleFilterParameters : QueryParameters
+    {
+        public string? Status { get; set; }
+        public int? ItemId { get; set; }
+    }
 }

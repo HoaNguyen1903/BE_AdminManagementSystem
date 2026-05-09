@@ -20,7 +20,7 @@ namespace Unalive_WebManagement.Controllers
 
         // GemBundle Endpoints
         [HttpGet("gem-bundles")]
-        public async Task<ActionResult<IEnumerable<GemBundleDto>>> GetGemBundles([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<GemBundleDto>>> GetGemBundles([FromQuery] BundleFilterParameters query)
         {
             return Ok(await _shopService.GetAllGemBundlesAsync(query));
         }
@@ -57,6 +57,25 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
+        [HttpPatch("gem-bundles/{id}/status")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> UpdateGemBundleStatus(int id, [FromQuery] string status)
+        {
+            try
+            {
+                await _shopService.UpdateGemBundleStatusAsync(id, status);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpDelete("gem-bundles/{id}")]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteGemBundle(int id)
@@ -74,7 +93,7 @@ namespace Unalive_WebManagement.Controllers
 
         // SkinAndCharacterBundle Endpoints
         [HttpGet("skin-and-character-bundles")]
-        public async Task<ActionResult<IEnumerable<SkinAndCharacterBundleDto>>> GetSkinAndCharacterBundles([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<SkinAndCharacterBundleDto>>> GetSkinAndCharacterBundles([FromQuery] BundleFilterParameters query)
         {
             return Ok(await _shopService.GetAllSkinAndCharacterBundlesAsync(query));
         }
@@ -106,6 +125,25 @@ namespace Unalive_WebManagement.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+        }
+
+        [HttpPatch("skin-and-character-bundles/{id}/status")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> UpdateSkinAndCharacterBundleStatus(int id, [FromQuery] string status)
+        {
+            try
+            {
+                await _shopService.UpdateSkinAndCharacterBundleStatusAsync(id, status);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 

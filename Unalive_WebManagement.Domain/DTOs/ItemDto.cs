@@ -28,4 +28,9 @@ namespace Unalive_WebManagement.DTOs
         public string? Status { get; set; }
     }
 
+    public class ItemFilterParameters : QueryParameters
+    {
+        public string? Status { get; set; }
+        public string? ItemType { get; set; }
+    }
 }

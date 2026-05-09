@@ -20,10 +20,11 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
     public interface IItemService
     {
-        Task<IEnumerable<ItemDto>> GetAllItemsAsync(QueryParameters query);
+        Task<IEnumerable<ItemDto>> GetAllItemsAsync(ItemFilterParameters query);
         Task<ItemDto?> GetItemByIdAsync(int id);
         Task<ItemDto> CreateItemAsync(CreateItemDto dto, int staffId);
         Task UpdateItemAsync(int id, UpdateItemDto dto);
+        Task UpdateItemStatusAsync(int id, string status);
         Task DeleteItemAsync(int id);
     }
 
@@ -44,17 +45,19 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
     public interface IShopService
     {
-        Task<IEnumerable<GemBundleDto>> GetAllGemBundlesAsync(QueryParameters query);
+        Task<IEnumerable<GemBundleDto>> GetAllGemBundlesAsync(BundleFilterParameters query);
         Task<GemBundleDto?> GetGemBundleByIdAsync(int id);
         Task<GemBundleDto> CreateGemBundleAsync(CreateGemBundleDto dto, int staffId);
         Task UpdateGemBundleAsync(int id, UpdateGemBundleDto dto);
+        Task UpdateGemBundleStatusAsync(int id, string status);
         Task DeleteGemBundleAsync(int id);
 
 
-        Task<IEnumerable<SkinAndCharacterBundleDto>> GetAllSkinAndCharacterBundlesAsync(QueryParameters query);
+        Task<IEnumerable<SkinAndCharacterBundleDto>> GetAllSkinAndCharacterBundlesAsync(BundleFilterParameters query);
         Task<SkinAndCharacterBundleDto?> GetSkinAndCharacterBundleByIdAsync(int id);
         Task<SkinAndCharacterBundleDto> CreateSkinAndCharacterBundleAsync(CreateSkinAndCharacterBundleDto dto, int staffId);
         Task UpdateSkinAndCharacterBundleAsync(int id, UpdateSkinAndCharacterBundleDto dto);
+        Task UpdateSkinAndCharacterBundleStatusAsync(int id, string status);
         Task DeleteSkinAndCharacterBundleAsync(int id);
 
         Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query);

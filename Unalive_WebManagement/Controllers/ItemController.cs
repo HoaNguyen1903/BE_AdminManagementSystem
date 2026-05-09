@@ -19,7 +19,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll([FromQuery] ItemFilterParameters query)
         {
             return Ok(await _itemService.GetAllItemsAsync(query));
         }
@@ -51,6 +51,25 @@ namespace Unalive_WebManagement.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+        }
+
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromQuery] string status)
+        {
+            try
+            {
+                await _itemService.UpdateItemStatusAsync(id, status);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 

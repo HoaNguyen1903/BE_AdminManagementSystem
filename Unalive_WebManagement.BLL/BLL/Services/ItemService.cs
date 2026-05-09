@@ -22,10 +22,22 @@ namespace Unalive_WebManagement.BLL.Services
             _notificationRepository = notificationRepository;
         }
 
-        public async Task<IEnumerable<ItemDto>> GetAllItemsAsync(QueryParameters query)
+        public async Task<IEnumerable<ItemDto>> GetAllItemsAsync(ItemFilterParameters query)
         {
             var items = await _itemRepository.GetAllAsync();
-            var dtos = items.Select(i => new ItemDto
+            var q = items.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.Status))
+            {
+                q = q.Where(i => i.Status.ToString().Equals(query.Status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.ItemType))
+            {
+                q = q.Where(i => i.ItemType.Contains(query.ItemType, StringComparison.OrdinalIgnoreCase));
+            }
+
+            var dtos = q.Select(i => new ItemDto
             {
                 ItemId = i.ItemId,
                 ItemName = i.ItemName,
@@ -119,9 +131,29 @@ namespace Unalive_WebManagement.BLL.Services
             await _itemRepository.UpdateAsync(item);
         }
 
+        public async Task UpdateItemStatusAsync(int id, string status)
+        {
+            var item = await _itemRepository.GetByIdAsync(id);
+            if (item == null) throw new KeyNotFoundException();
+
+            if (Enum.TryParse<Item.StatusEnum>(status, true, out var s))
+            {
+                item.Status = s;
+                await _itemRepository.UpdateAsync(item);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid status");
+            }
+        }
+
         public async Task DeleteItemAsync(int id)
         {
-            await _itemRepository.DeleteAsync(id);
+            var item = await _itemRepository.GetByIdAsync(id);
+            if (item == null) throw new KeyNotFoundException();
+
+            item.Status = Item.StatusEnum.Discontinued;
+            await _itemRepository.UpdateAsync(item);
         }
     }
 }

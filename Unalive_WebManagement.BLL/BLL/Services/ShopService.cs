@@ -45,10 +45,22 @@ namespace Unalive_WebManagement.BLL.Services
         }
 
         // GemBundle CRUD
-        public async Task<IEnumerable<GemBundleDto>> GetAllGemBundlesAsync(QueryParameters query)
+        public async Task<IEnumerable<GemBundleDto>> GetAllGemBundlesAsync(BundleFilterParameters query)
         {
             var bundles = await _gemBundleRepository.GetAllAsync();
-            var dtos = bundles.Select(b => new GemBundleDto
+            var q = bundles.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.Status))
+            {
+                q = q.Where(b => b.Status.ToString().Equals(query.Status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (query.ItemId.HasValue)
+            {
+                q = q.Where(b => b.ItemId == query.ItemId.Value);
+            }
+
+            var dtos = q.Select(b => new GemBundleDto
             {
                 GemBundleId = b.GemBundleId,
                 BundleName = b.BundleName,
@@ -148,13 +160,48 @@ namespace Unalive_WebManagement.BLL.Services
             await _gemBundleRepository.UpdateAsync(bundle);
         }
 
-        public async Task DeleteGemBundleAsync(int id) => await _gemBundleRepository.DeleteAsync(id);
+        public async Task UpdateGemBundleStatusAsync(int id, string status)
+        {
+            var bundle = await _gemBundleRepository.GetByIdAsync(id);
+            if (bundle == null) throw new KeyNotFoundException();
+
+            if (Enum.TryParse<GemBundle.StatusEnum>(status, true, out var s))
+            {
+                bundle.Status = s;
+                await _gemBundleRepository.UpdateAsync(bundle);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid status");
+            }
+        }
+
+        public async Task DeleteGemBundleAsync(int id)
+        {
+            var bundle = await _gemBundleRepository.GetByIdAsync(id);
+            if (bundle == null) throw new KeyNotFoundException();
+
+            bundle.Status = GemBundle.StatusEnum.Discontinued;
+            await _gemBundleRepository.UpdateAsync(bundle);
+        }
 
         // SkinAndCharacterBundle CRUD
-        public async Task<IEnumerable<SkinAndCharacterBundleDto>> GetAllSkinAndCharacterBundlesAsync(QueryParameters query)
+        public async Task<IEnumerable<SkinAndCharacterBundleDto>> GetAllSkinAndCharacterBundlesAsync(BundleFilterParameters query)
         {
             var bundles = await _skinAndCharacterBundleRepository.GetAllAsync();
-            var dtos = bundles.Select(b => new SkinAndCharacterBundleDto
+            var q = bundles.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.Status))
+            {
+                q = q.Where(b => b.Status.ToString().Equals(query.Status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (query.ItemId.HasValue)
+            {
+                q = q.Where(b => b.ItemId == query.ItemId.Value);
+            }
+
+            var dtos = q.Select(b => new SkinAndCharacterBundleDto
             {
                 SkinAndCharacterBundleId = b.SkinAndCharacterBundleId,
                 BundleName = b.BundleName,
@@ -248,7 +295,30 @@ namespace Unalive_WebManagement.BLL.Services
             await _skinAndCharacterBundleRepository.UpdateAsync(bundle);
         }
 
-        public async Task DeleteSkinAndCharacterBundleAsync(int id) => await _skinAndCharacterBundleRepository.DeleteAsync(id);
+        public async Task UpdateSkinAndCharacterBundleStatusAsync(int id, string status)
+        {
+            var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(id);
+            if (bundle == null) throw new KeyNotFoundException();
+
+            if (Enum.TryParse<SkinAndCharacterBundle.StatusEnum>(status, true, out var s))
+            {
+                bundle.Status = s;
+                await _skinAndCharacterBundleRepository.UpdateAsync(bundle);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid status");
+            }
+        }
+
+        public async Task DeleteSkinAndCharacterBundleAsync(int id)
+        {
+            var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(id);
+            if (bundle == null) throw new KeyNotFoundException();
+
+            bundle.Status = SkinAndCharacterBundle.StatusEnum.Discontinued;
+            await _skinAndCharacterBundleRepository.UpdateAsync(bundle);
+        }
 
         // ShopOrder & Details & TopUp (Read Only / Management)
         public async Task<IEnumerable<ShopOrderDto>> GetAllShopOrdersAsync(QueryParameters query)
