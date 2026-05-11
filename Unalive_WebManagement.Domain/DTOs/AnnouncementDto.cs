@@ -28,4 +28,12 @@ namespace Unalive_WebManagement.DTOs
     }
 
     public class UpdateAnnouncementDto : CreateAnnouncementDto { }
+
+    public class AnnouncementFilterParameters : QueryParameters
+    {
+        public string? Type { get; set; }
+        public string? Status { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
 }

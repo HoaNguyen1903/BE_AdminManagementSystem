@@ -32,14 +32,29 @@ namespace Unalive_WebManagement.BLL.Interfaces
     {
         Task<IEnumerable<CharacterStatDto>> GetAllCharacterStatsAsync(QueryParameters query);
         Task<CharacterStatDto?> GetCharacterStatByIdAsync(int id);
+        Task<CharacterStatDto> CreateCharacterStatAsync(CreateCharacterStatDto dto);
+        Task UpdateCharacterStatAsync(int id, UpdateCharacterStatDto dto);
+
         Task<IEnumerable<CharacterPvPDto>> GetAllCharacterPvPsAsync(QueryParameters query);
         Task<CharacterPvPDto?> GetCharacterPvPByIdAsync(int id);
-        Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync(QueryParameters query);
+        Task<CharacterPvPDto> CreateCharacterPvPAsync(CreateCharacterPvPDto dto);
+        Task UpdateCharacterPvPAsync(int id, UpdateCharacterPvPDto dto);
+
+        Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync(CharacterFilterParameters query);
         Task<CharacterPassiveDto?> GetCharacterPassiveByIdAsync(int id);
-        Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync(QueryParameters query);
+        Task<CharacterPassiveDto> CreateCharacterPassiveAsync(CreateCharacterPassiveDto dto);
+        Task UpdateCharacterPassiveAsync(int id, UpdateCharacterPassiveDto dto);
+
+        Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync(CharacterFilterParameters query);
         Task<CharacterSkillDto?> GetCharacterSkillByIdAsync(int id);
-        Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync(QueryParameters query);
+        Task<CharacterSkillDto> CreateCharacterSkillAsync(CreateCharacterSkillDto dto);
+        Task UpdateCharacterSkillAsync(int id, UpdateCharacterSkillDto dto);
+
+        Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync(CharacterFilterParameters query);
         Task<CharacterAttackDto?> GetCharacterAttackByIdAsync(int id);
+        Task<CharacterAttackDto> CreateCharacterAttackAsync(CreateCharacterAttackDto dto);
+        Task UpdateCharacterAttackAsync(int id, UpdateCharacterAttackDto dto);
+
         Task<AbilitiesSetDto?> GetAbilitiesSetByTacticIdAsync(int id);
     }
 
@@ -79,7 +94,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
 
     public interface IAnnouncementService
     {
-        Task<IEnumerable<AnnouncementDto>> GetAllAnnouncementsAsync(QueryParameters query);
+        Task<IEnumerable<AnnouncementDto>> GetAllAnnouncementsAsync(AnnouncementFilterParameters query);
         Task<AnnouncementDto?> GetAnnouncementByIdAsync(int id);
         Task<AnnouncementDto> CreateAnnouncementAsync(CreateAnnouncementDto dto, int staffId);
         Task<AnnouncementDto> UpdateAnnouncementAsync(int id, UpdateAnnouncementDto dto, int staffId);

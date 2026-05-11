@@ -23,7 +23,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAll([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAll([FromQuery] AnnouncementFilterParameters query)
         {
             return Ok(await _announcementService.GetAllAnnouncementsAsync(query));
         }

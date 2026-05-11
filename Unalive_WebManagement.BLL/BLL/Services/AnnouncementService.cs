@@ -15,10 +15,32 @@ namespace Unalive_WebManagement.BLL.Services
             _announcementRepository = announcementRepository;
         }
 
-        public async Task<IEnumerable<AnnouncementDto>> GetAllAnnouncementsAsync(QueryParameters query)
+        public async Task<IEnumerable<AnnouncementDto>> GetAllAnnouncementsAsync(AnnouncementFilterParameters query)
         {
             var items = await _announcementRepository.GetAllAsync();
-            var dtos = items.Select(a => new AnnouncementDto
+            var q = items.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.Type))
+            {
+                q = q.Where(a => a.Type.Equals(query.Type, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Status))
+            {
+                q = q.Where(a => a.Status.Equals(query.Status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (query.StartDate.HasValue)
+            {
+                q = q.Where(a => a.StartDate >= query.StartDate.Value.ToUniversalTime());
+            }
+
+            if (query.EndDate.HasValue)
+            {
+                q = q.Where(a => a.EndDate <= query.EndDate.Value.ToUniversalTime());
+            }
+
+            var dtos = q.Select(a => new AnnouncementDto
             {
                 AnnouncementId = a.AnnouncementId,
                 Title = a.Title,
@@ -30,7 +52,7 @@ namespace Unalive_WebManagement.BLL.Services
                 CreatedBy = a.CreatedBy,
                 CreatedAt = a.CreatedAt.ToUniversalTime(),
                 UpdatedBy = a.UpdatedBy,
-                UpdatedAt = a.UpdatedAt?.ToUniversalTime()
+                UpdatedAt = a.UpdatedAt.HasValue ? a.UpdatedAt.Value.ToUniversalTime() : (DateTime?)null
             });
             return dtos.ApplyQuery(query, (a, search) => a.Title.Contains(search, StringComparison.OrdinalIgnoreCase) || a.Content.Contains(search, StringComparison.OrdinalIgnoreCase));
         }

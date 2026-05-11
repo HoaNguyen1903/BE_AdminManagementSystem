@@ -50,6 +50,32 @@ namespace Unalive_WebManagement.BLL.Services
             return new CharacterStatDto { CharacterId = s.CharacterId, MoveRange = s.MoveRange, MaxHealth = s.MaxHealth };
         }
 
+        public async Task<CharacterStatDto> CreateCharacterStatAsync(CreateCharacterStatDto dto)
+        {
+            if (dto.MoveRange < 0) throw new ArgumentException("Move Range cannot be negative.");
+            if (dto.MaxHealth <= 0) throw new ArgumentException("Max Health must be greater than zero.");
+
+            var s = new CharacterStat
+            {
+                MoveRange = dto.MoveRange,
+                MaxHealth = dto.MaxHealth
+            };
+            await _statRepository.AddAsync(s);
+            return new CharacterStatDto { CharacterId = s.CharacterId, MoveRange = s.MoveRange, MaxHealth = s.MaxHealth };
+        }
+
+        public async Task UpdateCharacterStatAsync(int id, UpdateCharacterStatDto dto)
+        {
+            if (dto.MoveRange < 0) throw new ArgumentException("Move Range cannot be negative.");
+            if (dto.MaxHealth <= 0) throw new ArgumentException("Max Health must be greater than zero.");
+
+            var s = await _statRepository.GetByIdAsync(id);
+            if (s == null) throw new KeyNotFoundException();
+            s.MoveRange = dto.MoveRange;
+            s.MaxHealth = dto.MaxHealth;
+            await _statRepository.UpdateAsync(s);
+        }
+
         public async Task<IEnumerable<CharacterPvPDto>> GetAllCharacterPvPsAsync(QueryParameters query)
         {
             var pvps = await _pvpRepository.GetAllAsync();
@@ -71,10 +97,48 @@ namespace Unalive_WebManagement.BLL.Services
             return new CharacterPvPDto { CharacterTacticId = p.CharacterTacticId, Name = p.Name, Description = p.Description };
         }
 
-        public async Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync(QueryParameters query)
+        public async Task<CharacterPvPDto> CreateCharacterPvPAsync(CreateCharacterPvPDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+
+            var stat = await _statRepository.GetByIdAsync(dto.CharacterTacticId);
+            if (stat == null) throw new KeyNotFoundException($"Character with ID {dto.CharacterTacticId} does not exist. Stats must be created first.");
+
+            var existing = await _pvpRepository.GetByIdAsync(dto.CharacterTacticId);
+            if (existing != null) throw new InvalidOperationException($"Character PvP with Tactic ID {dto.CharacterTacticId} already exists.");
+
+            var p = new CharacterPvP
+            {
+                CharacterTacticId = dto.CharacterTacticId,
+                Name = dto.Name,
+                Description = dto.Description
+            };
+            await _pvpRepository.AddAsync(p);
+            return new CharacterPvPDto { CharacterTacticId = p.CharacterTacticId, Name = p.Name, Description = p.Description };
+        }
+
+        public async Task UpdateCharacterPvPAsync(int id, UpdateCharacterPvPDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+
+            var p = await _pvpRepository.GetByIdAsync(id);
+            if (p == null) throw new KeyNotFoundException();
+            p.Name = dto.Name;
+            p.Description = dto.Description;
+            await _pvpRepository.UpdateAsync(p);
+        }
+
+        public async Task<IEnumerable<CharacterPassiveDto>> GetAllCharacterPassivesAsync(CharacterFilterParameters query)
         {
             var passives = await _passiveRepository.GetAllAsync();
-            var dtos = passives.Select(p => new CharacterPassiveDto
+            var q = passives.AsQueryable();
+
+            if (query.LockedState.HasValue)
+            {
+                q = q.Where(p => p.LockedState == query.LockedState.Value);
+            }
+
+            var dtos = q.Select(p => new CharacterPassiveDto
             {
                 CharacterPassiveId = p.CharacterPassiveId,
                 Name = p.Name,
@@ -93,10 +157,43 @@ namespace Unalive_WebManagement.BLL.Services
             return new CharacterPassiveDto { CharacterPassiveId = p.CharacterPassiveId, Name = p.Name, Description = p.Description, LockedState = p.LockedState };
         }
 
-        public async Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync(QueryParameters query)
+        public async Task<CharacterPassiveDto> CreateCharacterPassiveAsync(CreateCharacterPassiveDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+
+            var p = new CharacterPassive
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                LockedState = dto.LockedState
+            };
+            await _passiveRepository.AddAsync(p);
+            return new CharacterPassiveDto { CharacterPassiveId = p.CharacterPassiveId, Name = p.Name, Description = p.Description, LockedState = p.LockedState };
+        }
+
+        public async Task UpdateCharacterPassiveAsync(int id, UpdateCharacterPassiveDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+
+            var p = await _passiveRepository.GetByIdAsync(id);
+            if (p == null) throw new KeyNotFoundException();
+            p.Name = dto.Name;
+            p.Description = dto.Description;
+            p.LockedState = dto.LockedState;
+            await _passiveRepository.UpdateAsync(p);
+        }
+
+        public async Task<IEnumerable<CharacterSkillDto>> GetAllCharacterSkillsAsync(CharacterFilterParameters query)
         {
             var skills = await _skillRepository.GetAllAsync();
-            var dtos = skills.Select(s => new CharacterSkillDto
+            var q = skills.AsQueryable();
+
+            if (query.LockedState.HasValue)
+            {
+                q = q.Where(s => s.LockedState == query.LockedState.Value);
+            }
+
+            var dtos = q.Select(s => new CharacterSkillDto
             {
                 CharacterSkillId = s.CharacterSkillId,
                 Name = s.Name,
@@ -131,10 +228,74 @@ namespace Unalive_WebManagement.BLL.Services
             };
         }
 
-        public async Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync(QueryParameters query)
+        public async Task<CharacterSkillDto> CreateCharacterSkillAsync(CreateCharacterSkillDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+            if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
+            if (dto.SP < 0) throw new ArgumentException("SP cannot be negative.");
+            if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
+            if (dto.CritDmg < 0) throw new ArgumentException("Crit Dmg cannot be negative.");
+            if (dto.CritRate < 0) throw new ArgumentException("Crit Rate cannot be negative.");
+
+            var s = new CharacterSkill
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Damage = dto.Damage,
+                SP = dto.SP,
+                YuanPressure = dto.YuanPressure,
+                CritDmg = dto.CritDmg,
+                CritRate = dto.CritRate,
+                LockedState = dto.LockedState
+            };
+            await _skillRepository.AddAsync(s);
+            return new CharacterSkillDto
+            {
+                CharacterSkillId = s.CharacterSkillId,
+                Name = s.Name,
+                Description = s.Description,
+                Damage = s.Damage,
+                SP = s.SP,
+                YuanPressure = s.YuanPressure,
+                CritDmg = s.CritDmg,
+                CritRate = s.CritRate,
+                LockedState = s.LockedState
+            };
+        }
+
+        public async Task UpdateCharacterSkillAsync(int id, UpdateCharacterSkillDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+            if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
+            if (dto.SP < 0) throw new ArgumentException("SP cannot be negative.");
+            if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
+            if (dto.CritDmg < 0) throw new ArgumentException("Crit Dmg cannot be negative.");
+            if (dto.CritRate < 0) throw new ArgumentException("Crit Rate cannot be negative.");
+
+            var s = await _skillRepository.GetByIdAsync(id);
+            if (s == null) throw new KeyNotFoundException();
+            s.Name = dto.Name;
+            s.Description = dto.Description;
+            s.Damage = dto.Damage;
+            s.SP = dto.SP;
+            s.YuanPressure = dto.YuanPressure;
+            s.CritDmg = dto.CritDmg;
+            s.CritRate = dto.CritRate;
+            s.LockedState = dto.LockedState;
+            await _skillRepository.UpdateAsync(s);
+        }
+
+        public async Task<IEnumerable<CharacterAttackDto>> GetAllCharacterAttacksAsync(CharacterFilterParameters query)
         {
             var attacks = await _attackRepository.GetAllAsync();
-            var dtos = attacks.Select(a => new CharacterAttackDto
+            var q = attacks.AsQueryable();
+
+            if (query.LockedState.HasValue)
+            {
+                q = q.Where(a => a.LockedState == query.LockedState.Value);
+            }
+
+            var dtos = q.Select(a => new CharacterAttackDto
             {
                 CharacterAttackId = a.CharacterAttackId,
                 Name = a.Name,
@@ -167,6 +328,63 @@ namespace Unalive_WebManagement.BLL.Services
                 CritRate = a.CritRate,
                 LockedState = a.LockedState
             };
+        }
+
+        public async Task<CharacterAttackDto> CreateCharacterAttackAsync(CreateCharacterAttackDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+            if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
+            if (dto.AP < 0) throw new ArgumentException("AP cannot be negative.");
+            if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
+            if (dto.CritDmg < 0) throw new ArgumentException("Crit Dmg cannot be negative.");
+            if (dto.CritRate < 0) throw new ArgumentException("Crit Rate cannot be negative.");
+
+            var a = new CharacterAttack
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Damage = dto.Damage,
+                AP = dto.AP,
+                YuanPressure = dto.YuanPressure,
+                CritDmg = dto.CritDmg,
+                CritRate = dto.CritRate,
+                LockedState = dto.LockedState
+            };
+            await _attackRepository.AddAsync(a);
+            return new CharacterAttackDto
+            {
+                CharacterAttackId = a.CharacterAttackId,
+                Name = a.Name,
+                Description = a.Description,
+                Damage = a.Damage,
+                AP = a.AP,
+                YuanPressure = a.YuanPressure,
+                CritDmg = a.CritDmg,
+                CritRate = a.CritRate,
+                LockedState = a.LockedState
+            };
+        }
+
+        public async Task UpdateCharacterAttackAsync(int id, UpdateCharacterAttackDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+            if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
+            if (dto.AP < 0) throw new ArgumentException("AP cannot be negative.");
+            if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
+            if (dto.CritDmg < 0) throw new ArgumentException("Crit Dmg cannot be negative.");
+            if (dto.CritRate < 0) throw new ArgumentException("Crit Rate cannot be negative.");
+
+            var a = await _attackRepository.GetByIdAsync(id);
+            if (a == null) throw new KeyNotFoundException();
+            a.Name = dto.Name;
+            a.Description = dto.Description;
+            a.Damage = dto.Damage;
+            a.AP = dto.AP;
+            a.YuanPressure = dto.YuanPressure;
+            a.CritDmg = dto.CritDmg;
+            a.CritRate = dto.CritRate;
+            a.LockedState = dto.LockedState;
+            await _attackRepository.UpdateAsync(a);
         }
 
         public async Task<AbilitiesSetDto?> GetAbilitiesSetByTacticIdAsync(int id)
