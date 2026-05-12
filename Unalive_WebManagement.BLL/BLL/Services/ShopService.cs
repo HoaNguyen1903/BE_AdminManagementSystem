@@ -191,7 +191,7 @@ namespace Unalive_WebManagement.BLL.Services
             var bundle = await _gemBundleRepository.GetByIdAsync(id);
             if (bundle == null) throw new KeyNotFoundException();
 
-            bundle.Status = GemBundle.StatusEnum.Discontinued;
+            bundle.Status = GemBundle.StatusEnum.Unavailable;
             await _gemBundleRepository.UpdateAsync(bundle);
         }
 
@@ -336,7 +336,7 @@ namespace Unalive_WebManagement.BLL.Services
             var bundle = await _skinAndCharacterBundleRepository.GetByIdAsync(id);
             if (bundle == null) throw new KeyNotFoundException();
 
-            bundle.Status = SkinAndCharacterBundle.StatusEnum.Discontinued;
+            bundle.Status = SkinAndCharacterBundle.StatusEnum.Unavailable;
             await _skinAndCharacterBundleRepository.UpdateAsync(bundle);
         }
 

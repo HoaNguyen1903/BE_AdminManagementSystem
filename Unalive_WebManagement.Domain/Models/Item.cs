@@ -16,8 +16,7 @@ public partial class Item
     public enum StatusEnum
     {
         Available,
-        Unavailable,
-        Discontinued
+        Unavailable
     }
 
     public StatusEnum Status { get; set; } = StatusEnum.Available;

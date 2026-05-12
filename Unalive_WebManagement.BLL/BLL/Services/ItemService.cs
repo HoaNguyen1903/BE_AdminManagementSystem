@@ -152,7 +152,7 @@ namespace Unalive_WebManagement.BLL.Services
             var item = await _itemRepository.GetByIdAsync(id);
             if (item == null) throw new KeyNotFoundException();
 
-            item.Status = Item.StatusEnum.Discontinued;
+            item.Status = Item.StatusEnum.Unavailable;
             await _itemRepository.UpdateAsync(item);
         }
     }
