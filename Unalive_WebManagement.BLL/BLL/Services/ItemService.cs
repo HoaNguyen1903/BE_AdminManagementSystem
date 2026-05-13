@@ -11,15 +11,21 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IItemRepository _itemRepository;
         private readonly IAnnouncementRepository _announcementRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly ISkinAndCharacterBundleRepository _skinBundleRepository;
+        private readonly IGemBundleRepository _gemBundleRepository;
 
         public ItemService(
             IItemRepository itemRepository,
             IAnnouncementRepository announcementRepository,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository,
+            ISkinAndCharacterBundleRepository skinBundleRepository,
+            IGemBundleRepository gemBundleRepository)
         {
             _itemRepository = itemRepository;
             _announcementRepository = announcementRepository;
             _notificationRepository = notificationRepository;
+            _skinBundleRepository = skinBundleRepository;
+            _gemBundleRepository = gemBundleRepository;
         }
 
         public async Task<IEnumerable<ItemDto>> GetAllItemsAsync(ItemFilterParameters query)
@@ -140,6 +146,12 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 item.Status = s;
                 await _itemRepository.UpdateAsync(item);
+
+                // Cascade disable bundles if item becomes unavailable
+                if (s == Item.StatusEnum.Unavailable)
+                {
+                    await DisableAssociatedBundlesAsync(id);
+                }
             }
             else
             {
@@ -154,6 +166,63 @@ namespace Unalive_WebManagement.BLL.Services
 
             item.Status = Item.StatusEnum.Unavailable;
             await _itemRepository.UpdateAsync(item);
+            
+            // Cascade disable bundles
+            await DisableAssociatedBundlesAsync(id);
+        }
+
+        public async Task<AssociatedBundlesDto> GetAssociatedBundlesAsync(int itemId)
+        {
+            var skinBundles = await _skinBundleRepository.GetAllAsync();
+            var gemBundles = await _gemBundleRepository.GetAllAsync();
+
+            var associatedSkinBundles = skinBundles.Where(b => b.ItemId == itemId).Select(b => new SkinAndCharacterBundleDto
+            {
+                SkinAndCharacterBundleId = b.SkinAndCharacterBundleId,
+                BundleName = b.BundleName,
+                BundlePrice = b.BundlePrice,
+                ItemId = b.ItemId,
+                Quantity = b.Quantity,
+                imageUrl = b.imageUrl,
+                Status = b.Status.ToString()
+            });
+
+            var associatedGemBundles = gemBundles.Where(b => b.ItemId == itemId).Select(b => new GemBundleDto
+            {
+                GemBundleId = b.GemBundleId,
+                BundleName = b.BundleName,
+                BundlePrice = b.BundlePrice,
+                ItemId = b.ItemId,
+                Quantity = b.Quantity,
+                imageUrl = b.imageUrl,
+                Status = b.Status.ToString()
+            });
+
+            return new AssociatedBundlesDto
+            {
+                SkinAndCharacterBundles = associatedSkinBundles,
+                GemBundles = associatedGemBundles
+            };
+        }
+
+        private async Task DisableAssociatedBundlesAsync(int itemId)
+        {
+            var skinBundles = await _skinBundleRepository.GetAllAsync();
+            var gemBundles = await _gemBundleRepository.GetAllAsync();
+
+            var associatedSkinBundles = skinBundles.Where(b => b.ItemId == itemId && b.Status == SkinAndCharacterBundle.StatusEnum.Available);
+            foreach (var bundle in associatedSkinBundles)
+            {
+                bundle.Status = SkinAndCharacterBundle.StatusEnum.Unavailable;
+                await _skinBundleRepository.UpdateAsync(bundle);
+            }
+
+            var associatedGemBundles = gemBundles.Where(b => b.ItemId == itemId && b.Status == GemBundle.StatusEnum.Available);
+            foreach (var bundle in associatedGemBundles)
+            {
+                bundle.Status = GemBundle.StatusEnum.Unavailable;
+                await _gemBundleRepository.UpdateAsync(bundle);
+            }
         }
     }
 }
