@@ -33,4 +33,10 @@ namespace Unalive_WebManagement.DTOs
         public string? Status { get; set; }
         public string? ItemType { get; set; }
     }
+
+    public class AssociatedBundlesDto
+    {
+        public IEnumerable<SkinAndCharacterBundleDto> SkinAndCharacterBundles { get; set; } = new List<SkinAndCharacterBundleDto>();
+        public IEnumerable<GemBundleDto> GemBundles { get; set; } = new List<GemBundleDto>();
+    }
 }

@@ -79,5 +79,11 @@ namespace Unalive_WebManagement.Controllers
             await _itemService.DeleteItemAsync(id);
             return NoContent();
         }
+
+        [HttpGet("{id}/associated-bundles")]
+        public async Task<ActionResult<AssociatedBundlesDto>> GetAssociatedBundles(int id)
+        {
+            return Ok(await _itemService.GetAssociatedBundlesAsync(id));
+        }
     }
 }

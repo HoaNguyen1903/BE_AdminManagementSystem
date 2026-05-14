@@ -26,6 +26,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task UpdateItemAsync(int id, UpdateItemDto dto);
         Task UpdateItemStatusAsync(int id, string status);
         Task DeleteItemAsync(int id);
+        Task<AssociatedBundlesDto> GetAssociatedBundlesAsync(int itemId);
     }
 
     public interface ICharacterService
