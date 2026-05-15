@@ -70,12 +70,12 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("player-history")]
-        public async Task<ActionResult<IEnumerable<PlayerOnlineHistoryDto>>> GetPlayerHistory([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        public async Task<ActionResult<IEnumerable<PlayerOnlineHistoryDto>>> GetPlayerHistory([FromQuery] DateTime? start, [FromQuery] DateTime? end)
         {
-            var end = endDate ?? DateTime.UtcNow;
-            var start = startDate ?? end.AddDays(-30);
+            var endDate = end ?? DateTime.UtcNow;
+            var startDate = start ?? endDate.AddDays(-30);
 
-            var history = await _historyRepository.GetByDateRangeAsync(start, end);
+            var history = await _historyRepository.GetByDateRangeAsync(startDate, endDate);
             
             var result = history.Select(h => new PlayerOnlineHistoryDto
             {
