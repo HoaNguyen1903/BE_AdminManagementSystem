@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
@@ -18,19 +19,22 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly ILogger<AuthService> _logger;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public AuthService(
             IStaffRepository staffRepository, 
             IUserRepository userRepository, 
             IConfiguration configuration, 
             IEmailService emailService,
-            ILogger<AuthService> logger)
+            ILogger<AuthService> logger,
+            IServiceScopeFactory scopeFactory)
         {
             _staffRepository = staffRepository;
             _userRepository = userRepository;
             _configuration = configuration;
             _emailService = emailService;
             _logger = logger;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
@@ -110,20 +114,24 @@ namespace Unalive_WebManagement.BLL.Services
 
             var created = await _userRepository.AddAsync(user);
 
-            // Send verification email in a background task or handle errors gracefully
+            // Send verification email in a background task with a fresh scope
             var apiBaseUrl = _configuration["ApiBaseUrl"] ?? "https://localhost:7270";
             var verificationLink = $"{apiBaseUrl}/api/auth/verify-email?userId={created.UserId}&token={verificationToken}";
             
             _ = Task.Run(async () =>
             {
-                try
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    await _emailService.SendVerificationEmailAsync(created.Email, created.FirstName, verificationLink);
-                    _logger.LogInformation("Verification email sent to {Email}", created.Email);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to send verification email to {Email}", created.Email);
+                    var scopedEmailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                    try
+                    {
+                        await scopedEmailService.SendVerificationEmailAsync(created.Email, created.FirstName, verificationLink);
+                        _logger.LogInformation("Verification email sent to {Email}", created.Email);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send verification email to {Email}", created.Email);
+                    }
                 }
             });
 
@@ -131,6 +139,7 @@ namespace Unalive_WebManagement.BLL.Services
 
             return new LoginResponse
             {
+                Id = created.UserId,
                 Token = token,
                 Email = created.Email,
                 UserName = created.UserName,
