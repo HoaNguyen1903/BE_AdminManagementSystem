@@ -104,6 +104,7 @@ namespace Unalive_WebManagement.BLL.Services
 
             // Send verification email
             var apiBaseUrl = _configuration["ApiBaseUrl"] ?? "https://localhost:7270";
+            Console.WriteLine(apiBaseUrl);
             var verificationLink = $"{apiBaseUrl}/api/auth/verify-email?userId={created.UserId}&token={verificationToken}";
             await _emailService.SendVerificationEmailAsync(created.Email, created.FirstName, verificationLink);
 

@@ -14,7 +14,9 @@ namespace Unalive_WebManagement.DTOs
     {
         public int ReportId { get; set; }
         public int SenderId { get; set; }
+        public string? SenderUserName { get; set; }
         public int AccusedId { get; set; }
+        public string? AccusedUserName { get; set; }
         public string Reason { get; set; } = null!;
         public string? AdditionalInfo { get; set; }
         public DateTime SendDate { get; set; }
@@ -28,5 +30,14 @@ namespace Unalive_WebManagement.DTOs
         public int AccusedId { get; set; }
         public string Reason { get; set; } = null!;
         public string? AdditionalInfo { get; set; }
+    }
+
+    public class ReportFilterParameters : QueryParameters
+    {
+        public string? SenderUserName { get; set; }
+        public string? AccusedUserName { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public short? Approved { get; set; }
     }
 }

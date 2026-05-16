@@ -142,7 +142,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(int userId, QueryParameters query);
         Task MarkNotificationReadAsync(int id);
         Task MarkNotificationUnreadAsync(int id);
-        Task<IEnumerable<ReportDto>> GetAllReportsAsync(QueryParameters query);
+        Task<IEnumerable<ReportDto>> GetAllReportsAsync(ReportFilterParameters query);
         Task<ReportDto?> GetReportByIdAsync(int id);
         Task<ReportDto> CreateReportAsync(CreateReportDto dto, int senderId);
         Task ApproveReportAsync(int id, int staffId);

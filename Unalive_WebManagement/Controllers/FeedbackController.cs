@@ -52,7 +52,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("reports")]
-        public async Task<ActionResult<IEnumerable<ReportDto>>> GetAllReports([FromQuery] QueryParameters query)
+        public async Task<ActionResult<IEnumerable<ReportDto>>> GetAllReports([FromQuery] ReportFilterParameters query)
         {
             return Ok(await _feedbackService.GetAllReportsAsync(query));
         }
