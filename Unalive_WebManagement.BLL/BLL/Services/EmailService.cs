@@ -52,16 +52,26 @@ namespace Unalive_WebManagement.BLL.Services
                 {
                     // For debugging and handling potential SSL issues in cloud environments
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    client.Timeout = 30000; // 30 seconds timeout
+                    client.Timeout = 60000; // Increase to 60 seconds for slow cloud networks
 
-                    // Use StartTls for port 587, SslOnConnect for 465
-                    var socketOptions = port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
+                    // Use StartTls for port 587, SslOnConnect for 465, or Auto
+                    SecureSocketOptions socketOptions;
+                    if (port == 465)
+                        socketOptions = SecureSocketOptions.SslOnConnect;
+                    else if (port == 587)
+                        socketOptions = SecureSocketOptions.StartTls;
+                    else
+                        socketOptions = SecureSocketOptions.Auto;
+
                     if (!enableSsl) socketOptions = SecureSocketOptions.None;
 
-                    _logger.LogInformation("Attempting to connect to SMTP host {Host}:{Port} with {Options}", host, port, socketOptions);
+                    _logger.LogInformation("SMTP CONFIG CHECK: Host={Host}, Port={Port}, User={User}, SSL={SSL}, Options={Options}", 
+                        host, port, userName, enableSsl, socketOptions);
+
+                    _logger.LogInformation("Connecting to {Host}...", host);
                     await client.ConnectAsync(host, port, socketOptions);
                     
-                    _logger.LogInformation("Attempting to authenticate user {UserName}", userName);
+                    _logger.LogInformation("Authenticating {UserName}...", userName);
                     await client.AuthenticateAsync(userName, password);
                     
                     _logger.LogInformation("Sending email to {To}", to);
