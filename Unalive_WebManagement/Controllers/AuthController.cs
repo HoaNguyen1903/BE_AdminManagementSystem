@@ -10,10 +10,12 @@ namespace Unalive_WebManagement.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IEmailService emailService)
         {
             _authService = authService;
+            _emailService = emailService;
         }
 
         [HttpPost("login")]
@@ -74,6 +76,31 @@ namespace Unalive_WebManagement.Controllers
                 return Redirect("/email-verification-failed.html");
             }
             return Redirect("/email-verified.html");
+        }
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerification([FromQuery] string email)
+        {
+            var result = await _authService.ResendVerificationEmailAsync(email);
+            if (!result)
+            {
+                return BadRequest("User not found or already verified");
+            }
+            return Ok(new { message = "Verification email resent" });
+        }
+
+        [HttpPost("test-email")]
+        public async Task<IActionResult> TestEmail([FromQuery] string email)
+        {
+            try
+            {
+                await _emailService.SendTestEmailAsync(email);
+                return Ok(new { message = "Test email sent successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to send test email", error = ex.Message });
+            }
         }
     }
 }

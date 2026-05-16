@@ -10,12 +10,14 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<LoginResponse?> LoginUserAsync(LoginRequest request);
         Task<LoginResponse?> RegisterUserAsync(RegisterRequest request);
         Task<bool> VerifyEmailAsync(int userId, string token);
+        Task<bool> ResendVerificationEmailAsync(string email);
     }
 
     public interface IEmailService
     {
         Task SendEmailAsync(string to, string subject, string body);
         Task SendVerificationEmailAsync(string to, string userName, string verificationLink);
+        Task SendTestEmailAsync(string to);
     }
 
     public interface IItemService

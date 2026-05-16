@@ -164,6 +164,42 @@ namespace Unalive_WebManagement.BLL.Services
             return true;
         }
 
+        public async Task<bool> ResendVerificationEmailAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null || user.IsEmailVerified == 1)
+            {
+                return false;
+            }
+
+            var verificationToken = Guid.NewGuid().ToString();
+            user.EmailVerificationToken = verificationToken;
+            user.EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24);
+            await _userRepository.UpdateAsync(user);
+
+            var apiBaseUrl = _configuration["ApiBaseUrl"] ?? "https://localhost:7270";
+            var verificationLink = $"{apiBaseUrl}/api/auth/verify-email?userId={user.UserId}&token={verificationToken}";
+
+            _ = Task.Run(async () =>
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedEmailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                    try
+                    {
+                        await scopedEmailService.SendVerificationEmailAsync(user.Email, user.FirstName, verificationLink);
+                        _logger.LogInformation("Resent verification email to {Email}", user.Email);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to resend verification email to {Email}", user.Email);
+                    }
+                }
+            });
+
+            return true;
+        }
+
         private string GenerateJwtToken(int staffId, string email, string role)
         {
             var jwtSettings = _configuration.GetSection("Jwt");

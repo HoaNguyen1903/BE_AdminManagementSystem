@@ -90,5 +90,17 @@ namespace Unalive_WebManagement.BLL.Services
 
             await SendEmailAsync(to, subject, body);
         }
+
+        public async Task SendTestEmailAsync(string to)
+        {
+            var subject = "Unalive - Test Email";
+            var body = $@"
+                <h1>SMTP Configuration Test</h1>
+                <p>This is a test email to verify that your SMTP settings are working correctly on the server.</p>
+                <p>Sent at: {DateTime.UtcNow} UTC</p>
+                <p>Best regards,<br/>The Unalive Team</p>";
+
+            await SendEmailAsync(to, subject, body);
+        }
     }
 }
