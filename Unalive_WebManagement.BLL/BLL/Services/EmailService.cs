@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MimeKit;
-using MailKit.Net.Smtp;
-using MailKit.Security;
+using Resend;
 using Unalive_WebManagement.BLL.Interfaces;
 
 namespace Unalive_WebManagement.BLL.Services
@@ -11,80 +9,45 @@ namespace Unalive_WebManagement.BLL.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
+        private readonly IResend _resend;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger, IResend resend)
         {
             _configuration = configuration;
             _logger = logger;
+            _resend = resend;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {
-            var smtpSettings = _configuration.GetSection("Smtp");
-            var host = smtpSettings["Host"];
-            var port = int.Parse(smtpSettings["Port"] ?? "587");
-            var enableSsl = bool.Parse(smtpSettings["EnableSsl"] ?? "true");
-            var userName = smtpSettings["UserName"];
-            var password = smtpSettings["Password"];
-            var fromEmail = smtpSettings["FromEmail"];
-            var fromName = smtpSettings["FromName"] ?? "Unalive Team";
+            var resendSettings = _configuration.GetSection("Resend");
+            var fromEmail = resendSettings["FromEmail"] ?? "onboarding@resend.dev";
+            var fromName = resendSettings["FromName"] ?? "Unalive Team";
 
-            if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(userName))
+            if (string.IsNullOrEmpty(to))
             {
-                _logger.LogWarning("Email to {To} with subject '{Subject}' was not sent because SMTP is not configured.", to, subject);
+                _logger.LogWarning("Email was not sent because 'to' address is missing.");
                 return;
             }
 
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(fromName, fromEmail ?? userName));
-            message.To.Add(new MailboxAddress("", to));
-            message.Subject = subject;
-
-            var bodyBuilder = new BodyBuilder
+            try
             {
-                HtmlBody = body
-            };
-            message.Body = bodyBuilder.ToMessageBody();
+                _logger.LogInformation("Attempting to send email to {To} via Resend API", to);
+                
+                var message = new EmailMessage();
+                message.From = $"{fromName} <{fromEmail}>";
+                message.To.Add(to);
+                message.Subject = subject;
+                message.HtmlBody = body;
 
-            using (var client = new SmtpClient())
+                await _resend.EmailSendAsync(message);
+                
+                _logger.LogInformation("Email sent successfully to {To} via Resend", to);
+            }
+            catch (Exception ex)
             {
-                try
-                {
-                    // For debugging and handling potential SSL issues in cloud environments
-                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    client.Timeout = 60000; // Increase to 60 seconds for slow cloud networks
-
-                    // Use StartTls for port 587, SslOnConnect for 465, or Auto
-                    SecureSocketOptions socketOptions;
-                    if (port == 465)
-                        socketOptions = SecureSocketOptions.SslOnConnect;
-                    else if (port == 587)
-                        socketOptions = SecureSocketOptions.StartTls;
-                    else
-                        socketOptions = SecureSocketOptions.Auto;
-
-                    if (!enableSsl) socketOptions = SecureSocketOptions.None;
-
-                    _logger.LogInformation("SMTP CONFIG CHECK: Host={Host}, Port={Port}, User={User}, SSL={SSL}, Options={Options}", 
-                        host, port, userName, enableSsl, socketOptions);
-
-                    _logger.LogInformation("Connecting to {Host}...", host);
-                    await client.ConnectAsync(host, port, socketOptions);
-                    
-                    _logger.LogInformation("Authenticating {UserName}...", userName);
-                    await client.AuthenticateAsync(userName, password);
-                    
-                    _logger.LogInformation("Sending email to {To}", to);
-                    await client.SendAsync(message);
-                    
-                    _logger.LogInformation("Email sent successfully to {To}", to);
-                    await client.DisconnectAsync(true);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error sending email via MailKit to {To}: {Message}", to, ex.Message);
-                    throw;
-                }
+                _logger.LogError(ex, "Error sending email via Resend to {To}: {Message}", to, ex.Message);
+                throw;
             }
         }
 
@@ -92,23 +55,27 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var subject = "Unalive - Verify your email address";
             var body = $@"
-                <h1>Welcome to Unalive, {userName}!</h1>
-                <p>Thank you for registering. Please verify your email address by clicking the link below:</p>
-                <p><a href='{verificationLink}'>Verify Email Address</a></p>
-                <p>If you did not register for an account, please ignore this email.</p>
-                <p>Best regards,<br/>The Unalive Team</p>";
+                <div style='font-family: sans-serif;'>
+                    <h1>Welcome to Unalive, {userName}!</h1>
+                    <p>Thank you for registering. Please verify your email address by clicking the link below:</p>
+                    <p><a href='{verificationLink}' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Verify Email Address</a></p>
+                    <p>If you did not register for an account, please ignore this email.</p>
+                    <p>Best regards,<br/>The Unalive Team</p>
+                </div>";
 
             await SendEmailAsync(to, subject, body);
         }
 
         public async Task SendTestEmailAsync(string to)
         {
-            var subject = "Unalive - Test Email";
+            var subject = "Unalive - Resend Test Email";
             var body = $@"
-                <h1>SMTP Configuration Test</h1>
-                <p>This is a test email to verify that your SMTP settings are working correctly on the server.</p>
-                <p>Sent at: {DateTime.UtcNow} UTC</p>
-                <p>Best regards,<br/>The Unalive Team</p>";
+                <div style='font-family: sans-serif;'>
+                    <h1>Resend API Test</h1>
+                    <p>This is a test email to verify that your Resend API configuration is working correctly on the server.</p>
+                    <p>Sent at: {DateTime.UtcNow} UTC</p>
+                    <p>Best regards,<br/>The Unalive Team</p>
+                </div>";
 
             await SendEmailAsync(to, subject, body);
         }

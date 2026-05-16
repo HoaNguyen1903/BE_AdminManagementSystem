@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PayOS;
 using System.Text;
+using Resend;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.BLL.Services;
 using Unalive_WebManagement.DAL.Interfaces;
@@ -13,6 +14,15 @@ using Unalive_WebManagement.Data;
 using Unalive_WebManagement.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Resend
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(options =>
+{
+    options.ApiToken = builder.Configuration["Resend:ApiKey"]!;
+});
+builder.Services.AddTransient<IResend, ResendClient>();
 
 // Add DbContext
 builder.Services.AddDbContext<UnaliveDbContext>(options =>
