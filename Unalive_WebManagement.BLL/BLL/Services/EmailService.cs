@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using System.Net;
-using System.Net.Mail;
+using MimeKit;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Unalive_WebManagement.BLL.Interfaces;
 
 namespace Unalive_WebManagement.BLL.Services
@@ -23,6 +24,7 @@ namespace Unalive_WebManagement.BLL.Services
             var userName = smtpSettings["UserName"];
             var password = smtpSettings["Password"];
             var fromEmail = smtpSettings["FromEmail"];
+            var fromName = smtpSettings["FromName"] ?? "Unalive Team";
 
             if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(userName))
             {
@@ -31,21 +33,36 @@ namespace Unalive_WebManagement.BLL.Services
                 return;
             }
 
-            using (var client = new SmtpClient(host, port))
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(fromName, fromEmail ?? userName));
+            message.To.Add(new MailboxAddress("", to));
+            message.Subject = subject;
+
+            var bodyBuilder = new BodyBuilder
             {
-                client.EnableSsl = enableSsl;
-                client.Credentials = new NetworkCredential(userName, password);
+                HtmlBody = body
+            };
+            message.Body = bodyBuilder.ToMessageBody();
 
-                var mailMessage = new MailMessage
+            using (var client = new SmtpClient())
+            {
+                try
                 {
-                    From = new MailAddress(fromEmail ?? userName),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = true
-                };
-                mailMessage.To.Add(to);
+                    // Use StartTls for port 587, SslOnConnect for 465
+                    var socketOptions = port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
+                    if (!enableSsl) socketOptions = SecureSocketOptions.None;
 
-                await client.SendMailAsync(mailMessage);
+                    await client.ConnectAsync(host, port, socketOptions);
+                    await client.AuthenticateAsync(userName, password);
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+                catch (Exception ex)
+                {
+                    // Log the error
+                    Console.WriteLine($"Error sending email via MailKit: {ex.Message}");
+                    throw;
+                }
             }
         }
 
