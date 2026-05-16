@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DAL.Interfaces;
 using Unalive_WebManagement.DTOs;
@@ -16,13 +17,20 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IStaffRepository staffRepository, IUserRepository userRepository, IConfiguration configuration, IEmailService emailService)
+        public AuthService(
+            IStaffRepository staffRepository, 
+            IUserRepository userRepository, 
+            IConfiguration configuration, 
+            IEmailService emailService,
+            ILogger<AuthService> logger)
         {
             _staffRepository = staffRepository;
             _userRepository = userRepository;
             _configuration = configuration;
             _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
@@ -102,10 +110,22 @@ namespace Unalive_WebManagement.BLL.Services
 
             var created = await _userRepository.AddAsync(user);
 
-            // Send verification email
+            // Send verification email in a background task or handle errors gracefully
             var apiBaseUrl = _configuration["ApiBaseUrl"] ?? "https://localhost:7270";
             var verificationLink = $"{apiBaseUrl}/api/auth/verify-email?userId={created.UserId}&token={verificationToken}";
-            await _emailService.SendVerificationEmailAsync(created.Email, created.FirstName, verificationLink);
+            
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailService.SendVerificationEmailAsync(created.Email, created.FirstName, verificationLink);
+                    _logger.LogInformation("Verification email sent to {Email}", created.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send verification email to {Email}", created.Email);
+                }
+            });
 
             var token = GenerateJwtToken(created.UserId, created.Email, "User");
 

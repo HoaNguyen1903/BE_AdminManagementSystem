@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -9,10 +10,12 @@ namespace Unalive_WebManagement.BLL.Services
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)
@@ -28,8 +31,7 @@ namespace Unalive_WebManagement.BLL.Services
 
             if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(userName))
             {
-                // If SMTP is not configured, just log it for now
-                Console.WriteLine($"Email to {to} with subject '{subject}' was not sent because SMTP is not configured.");
+                _logger.LogWarning("Email to {To} with subject '{Subject}' was not sent because SMTP is not configured.", to, subject);
                 return;
             }
 
@@ -48,19 +50,29 @@ namespace Unalive_WebManagement.BLL.Services
             {
                 try
                 {
+                    // For debugging and handling potential SSL issues in cloud environments
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    client.Timeout = 30000; // 30 seconds timeout
+
                     // Use StartTls for port 587, SslOnConnect for 465
                     var socketOptions = port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
                     if (!enableSsl) socketOptions = SecureSocketOptions.None;
 
+                    _logger.LogInformation("Attempting to connect to SMTP host {Host}:{Port} with {Options}", host, port, socketOptions);
                     await client.ConnectAsync(host, port, socketOptions);
+                    
+                    _logger.LogInformation("Attempting to authenticate user {UserName}", userName);
                     await client.AuthenticateAsync(userName, password);
+                    
+                    _logger.LogInformation("Sending email to {To}", to);
                     await client.SendAsync(message);
+                    
+                    _logger.LogInformation("Email sent successfully to {To}", to);
                     await client.DisconnectAsync(true);
                 }
                 catch (Exception ex)
                 {
-                    // Log the error
-                    Console.WriteLine($"Error sending email via MailKit: {ex.Message}");
+                    _logger.LogError(ex, "Error sending email via MailKit to {To}: {Message}", to, ex.Message);
                     throw;
                 }
             }
