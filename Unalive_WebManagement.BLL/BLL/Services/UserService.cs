@@ -319,6 +319,13 @@ namespace Unalive_WebManagement.BLL.Services
             return MapToUserItemDto(created);
         }
 
+        public async Task<UserItemDto> CreateUserItemNoOrderAsync(CreateUserItemNoOrderDto dto)
+        {
+            var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity};
+            var created = await _userItemRepository.AddAsync(item);
+            return MapToUserItemDto(created);
+        }
+
         public async Task UpdateUserItemAsync(int userId, int itemId, UpdateUserItemDto dto)
         {
             var item = await _userItemRepository.GetByIdAsync(userId, itemId);
