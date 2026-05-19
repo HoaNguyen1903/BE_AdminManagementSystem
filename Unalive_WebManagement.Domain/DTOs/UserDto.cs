@@ -14,6 +14,7 @@ namespace Unalive_WebManagement.DTOs
         public DateTimeOffset? LastOnline { get; set; }
         public short IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
+        public long RankPoint { get; set; }
     }
 
     public class CreateUserDto
@@ -37,6 +38,7 @@ namespace Unalive_WebManagement.DTOs
         public DateTimeOffset? LastOnline { get; set; }
         public short IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
+        public long RankPoint { get; set; }
     }
 
     public class UserStatusDto
@@ -50,6 +52,12 @@ namespace Unalive_WebManagement.DTOs
     {
         public string BanReason { get; set; } = null!;
         public DateTimeOffset? BannedUntil { get; set; }
+    }
+
+    public class UpdateRankPointRequest
+    {
+        public long Points { get; set; }
+        public bool IsAddition { get; set; } = true;
     }
 
     public class UserItemDto

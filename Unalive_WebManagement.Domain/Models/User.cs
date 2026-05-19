@@ -27,4 +27,6 @@ public partial class User
     public string? EmailVerificationToken { get; set; }
 
     public DateTimeOffset? EmailVerificationTokenExpiry { get; set; }
+
+    public long RankPoint { get; set; }
 }

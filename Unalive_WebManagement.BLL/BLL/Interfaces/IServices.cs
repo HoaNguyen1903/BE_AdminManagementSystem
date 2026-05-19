@@ -116,6 +116,8 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<UserStatusDto?> GetUserStatusAsync(int userId, int onlineThresholdSeconds);
         Task UpdateAvatarAsync(int userId, string avatarUrl);
         Task<PlayerProfileDto?> GetPlayerProfileAsync(int userId);
+        Task<long> GetRankPointAsync(int userId);
+        Task<long> UpdateRankPointAsync(int userId, long points, bool isAddition);
 
 
         Task<IEnumerable<UserBanLogDto>> GetAllUserBanLogsAsync(QueryParameters query);

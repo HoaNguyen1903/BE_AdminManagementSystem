@@ -71,6 +71,12 @@ namespace Unalive_WebManagement.Controllers
             return Ok(await _userService.GetUserBundlesByUserIdAsync(CurrentPlayerId, query));
         }
 
+        [HttpGet("rank-point")]
+        public async Task<ActionResult<long>> GetRankPoint()
+        {
+            return Ok(await _userService.GetRankPointAsync(CurrentPlayerId));
+        }
+
         [HttpGet("announcements")]
         public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAnnouncements([FromQuery] AnnouncementFilterParameters query)
         {

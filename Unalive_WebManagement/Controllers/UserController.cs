@@ -50,6 +50,34 @@ namespace Unalive_WebManagement.Controllers
             return Ok(await _userService.GetUserItemsWithNamesByUserIdAsync(id, query));
         }
 
+        [HttpGet("{id}/rank-point")]
+        public async Task<ActionResult<long>> GetRankPoint(int id)
+        {
+            try
+            {
+                var rankPoint = await _userService.GetRankPointAsync(id);
+                return Ok(rankPoint);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("{id}/rank-point")]
+        public async Task<ActionResult<long>> UpdateRankPoint(int id, [FromBody] UpdateRankPointRequest request)
+        {
+            try
+            {
+                var newRankPoint = await _userService.UpdateRankPointAsync(id, request.Points, request.IsAddition);
+                return Ok(newRankPoint);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto dto)
         {

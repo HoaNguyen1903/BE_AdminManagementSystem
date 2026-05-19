@@ -121,7 +121,8 @@ namespace Unalive_WebManagement.BLL.Services
                 BannedUntil = isBanned ? u.BannedUntil : null,
                 LastOnline = u.LastOnline,
                 IsOnline = u.IsOnline,
-                AvatarUrl = u.AvatarUrl
+                AvatarUrl = u.AvatarUrl,
+                RankPoint = u.RankPoint
             };
         }
 
@@ -148,6 +149,7 @@ namespace Unalive_WebManagement.BLL.Services
             user.LastOnline = dto.LastOnline;
             user.IsOnline = dto.IsOnline;
             user.AvatarUrl = dto.AvatarUrl;
+            user.RankPoint = dto.RankPoint;
 
             // Set to null if past date or null
             user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTimeOffset.UtcNow)
@@ -433,6 +435,32 @@ namespace Unalive_WebManagement.BLL.Services
                 Transactions = transactions,
                 BanLogs = banLogs
             };
+        }
+
+        public async Task<long> GetRankPointAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) throw new KeyNotFoundException("User not found");
+            return user.RankPoint;
+        }
+
+        public async Task<long> UpdateRankPointAsync(int userId, long points, bool isAddition)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) throw new KeyNotFoundException("User not found");
+
+            if (isAddition)
+            {
+                user.RankPoint += points;
+            }
+            else
+            {
+                user.RankPoint -= points;
+                if (user.RankPoint < 0) user.RankPoint = 0; // Prevent negative rank points
+            }
+
+            await _userRepository.UpdateAsync(user);
+            return user.RankPoint;
         }
     }
 }
