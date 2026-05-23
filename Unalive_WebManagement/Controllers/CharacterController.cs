@@ -125,7 +125,7 @@ namespace Unalive_WebManagement.Controllers
                 return NotFound();
             }
         }
-
+        [AllowAnonymous]
         [HttpGet("passives")]
         public async Task<ActionResult<IEnumerable<CharacterPassiveDto>>> GetAllPassives([FromQuery] CharacterFilterParameters query)
         {
@@ -174,6 +174,7 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("skills")]
         public async Task<ActionResult<IEnumerable<CharacterSkillDto>>> GetAllSkills([FromQuery] CharacterFilterParameters query)
         {
