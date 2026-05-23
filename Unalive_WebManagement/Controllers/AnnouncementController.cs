@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DTOs;
@@ -63,7 +64,8 @@ namespace Unalive_WebManagement.Controllers
                 UpdatedBy = null
             };
 
-            await _hubContext.Clients.Group("announcements").SendAsync("SendNewAnnoucement", payload);
+            string json = JsonConvert.SerializeObject(payload);
+            await _hubContext.Clients.All.SendAsync("SendNewAnnoucement", json);
 
             return Ok(payload);
         }
