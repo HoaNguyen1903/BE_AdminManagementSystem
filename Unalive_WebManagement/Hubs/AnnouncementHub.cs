@@ -19,7 +19,24 @@ namespace Unalive_WebManagement.Hubs
         public async Task SendNewAnnoucement(Announcement announcement)
         {
             string json = JsonConvert.SerializeObject(announcement);
-            await Clients.All.SendAsync("ReceiveAnnouncement",json);
+            await Clients.All.SendAsync("ReceiveAnnouncement", json);
+        }
+
+        public async Task BroadcastAnnouncementCreated(object payload)
+        {
+            string json = JsonConvert.SerializeObject(payload);
+            await Clients.All.SendAsync("AnnouncementCreated", json);
+        }
+
+        public async Task BroadcastAnnouncementUpdated(object payload)
+        {
+            string json = JsonConvert.SerializeObject(payload);
+            await Clients.All.SendAsync("AnnouncementUpdated", json);
+        }
+
+        public async Task BroadcastAnnouncementDeleted(int announcementId)
+        {
+            await Clients.All.SendAsync("AnnouncementDeleted", announcementId);
         }
     }
 }

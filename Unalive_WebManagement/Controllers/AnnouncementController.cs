@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DTOs;
@@ -22,6 +21,8 @@ namespace Unalive_WebManagement.Controllers
             _announcementService = announcementService;
             _hubContext = hubContext;
         }
+
+        //  CRUD endpoints 
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAll([FromQuery] AnnouncementFilterParameters query)
@@ -46,30 +47,6 @@ namespace Unalive_WebManagement.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.AnnouncementId }, created);
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendNewAnnoucement([FromBody] CreateAnnouncementDto dto)
-        {
-            if (dto == null) return BadRequest();
-
-            var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-
-            var payload = new AnnouncementDto
-            {
-                AnnouncementId = 0,
-                Title = dto.Title,
-                Content = dto.Content,
-                Type = dto.Type,
-                Status = dto.Status,
-                CreatedBy = staffId,
-                UpdatedBy = null
-            };
-
-            string json = JsonConvert.SerializeObject(payload);
-            await _hubContext.Clients.All.SendAsync("SendNewAnnoucement", json);
-
-            return Ok(payload);
-        }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateAnnouncementDto dto)
         {
@@ -92,6 +69,79 @@ namespace Unalive_WebManagement.Controllers
             await _announcementService.DeleteAnnouncementAsync(id);
             await _hubContext.Clients.Group("announcements").SendAsync("AnnouncementDeleted", id);
             return NoContent();
+        }
+
+        //  SignalR broadcast endpoints 
+
+
+        [HttpPost("send-create")]
+        public async Task<ActionResult<AnnouncementDto>> SendCreate([FromBody] CreateAnnouncementDto dto)
+        {
+            if (dto == null) return BadRequest("Payload không được để trống.");
+
+            var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+            var created = await _announcementService.CreateAnnouncementAsync(dto, staffId);
+
+            await _hubContext.Clients.All.SendAsync("AnnouncementCreated", created);
+
+            return CreatedAtAction(nameof(GetById), new { id = created.AnnouncementId }, created);
+        }
+
+
+        [HttpPut("send-update/{id}")]
+        public async Task<IActionResult> SendUpdate(int id, [FromBody] UpdateAnnouncementDto dto)
+        {
+            if (dto == null) return BadRequest("Payload không được để trống.");
+
+            var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+            try
+            {
+                var updated = await _announcementService.UpdateAnnouncementAsync(id, dto, staffId);
+
+                await _hubContext.Clients.All.SendAsync("AnnouncementUpdated", updated);
+
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Không tìm thấy announcement với id = {id}.");
+            }
+        }
+
+
+        [HttpDelete("send-delete/{id}")]
+        public async Task<IActionResult> SendDelete(int id)
+        {
+            var existing = await _announcementService.GetAnnouncementByIdAsync(id);
+            if (existing == null) return NotFound($"Không tìm thấy announcement với id = {id}.");
+
+            await _announcementService.DeleteAnnouncementAsync(id);
+
+            await _hubContext.Clients.All.SendAsync("AnnouncementDeleted", new { announcementId = id });
+
+            return Ok(new { message = $"Announcement {id} đã được xóa và thông báo đến game server." });
+        }
+
+
+        [HttpPost("send")]
+        public async Task<IActionResult> SendNewAnnoucement([FromBody] CreateAnnouncementDto dto)
+        {
+            if (dto == null) return BadRequest();
+            var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var payload = new AnnouncementDto
+            {
+                AnnouncementId = 0,
+                Title = dto.Title,
+                Content = dto.Content,
+                Type = dto.Type,
+                Status = dto.Status,
+                CreatedBy = staffId,
+                UpdatedBy = null
+            };
+            await _hubContext.Clients.All.SendAsync("SendNewAnnoucement", payload);
+            return Ok(payload);
         }
     }
 }
