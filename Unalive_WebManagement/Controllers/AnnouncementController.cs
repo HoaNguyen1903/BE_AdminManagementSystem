@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.DTOs;
@@ -77,13 +78,12 @@ namespace Unalive_WebManagement.Controllers
         [HttpPost("send-create")]
         public async Task<ActionResult<AnnouncementDto>> SendCreate([FromBody] CreateAnnouncementDto dto)
         {
-            if (dto == null) return BadRequest("Payload không được để trống.");
-
+            if (dto == null) return BadRequest();
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-
             var created = await _announcementService.CreateAnnouncementAsync(dto, staffId);
 
-            await _hubContext.Clients.All.SendAsync("AnnouncementCreated", created);
+            string json = JsonConvert.SerializeObject(created);
+            await _hubContext.Clients.All.SendAsync("AnnouncementCreated", json);
 
             return CreatedAtAction(nameof(GetById), new { id = created.AnnouncementId }, created);
         }
@@ -93,14 +93,12 @@ namespace Unalive_WebManagement.Controllers
         public async Task<IActionResult> SendUpdate(int id, [FromBody] UpdateAnnouncementDto dto)
         {
             if (dto == null) return BadRequest("Payload không được để trống.");
-
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-
             try
             {
                 var updated = await _announcementService.UpdateAnnouncementAsync(id, dto, staffId);
-
-                await _hubContext.Clients.All.SendAsync("AnnouncementUpdated", updated);
+                string json = JsonConvert.SerializeObject(updated);
+                await _hubContext.Clients.All.SendAsync("AnnouncementUpdated", json);
 
                 return Ok(updated);
             }
@@ -115,13 +113,14 @@ namespace Unalive_WebManagement.Controllers
         public async Task<IActionResult> SendDelete(int id)
         {
             var existing = await _announcementService.GetAnnouncementByIdAsync(id);
-            if (existing == null) return NotFound($"Không tìm thấy announcement với id = {id}.");
+            if (existing == null) return NotFound();
 
             await _announcementService.DeleteAnnouncementAsync(id);
 
-            await _hubContext.Clients.All.SendAsync("AnnouncementDeleted", new { announcementId = id });
+            string json = JsonConvert.SerializeObject(new { announcementId = id });
+            await _hubContext.Clients.All.SendAsync("AnnouncementDeleted", json);
 
-            return Ok(new { message = $"Announcement {id} đã được xóa và thông báo đến game server." });
+            return Ok(new { message = $"Announcement {id} đã bị xóa." });
         }
 
 
