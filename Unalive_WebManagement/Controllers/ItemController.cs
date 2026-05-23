@@ -55,7 +55,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPatch("{id}/status")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateStatus(int id, [FromQuery] string status)
         {
             try

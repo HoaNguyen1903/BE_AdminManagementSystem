@@ -79,6 +79,13 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<AnnouncementDto> CreateAnnouncementAsync(CreateAnnouncementDto dto, int staffId)
         {
+            // Backend Guard: Prevent duplicate announcements by title
+            var announcements = await _announcementRepository.GetAllAsync();
+            if (announcements.Any(a => a.Title.Equals(dto.Title, StringComparison.OrdinalIgnoreCase) && a.Status != "Archived"))
+            {
+                throw new InvalidOperationException($"An active announcement with the title '{dto.Title}' already exists.");
+            }
+
             var a = new Announcement
             {
                 Title = dto.Title,

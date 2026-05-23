@@ -34,7 +34,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("gem-bundles")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<GemBundleDto>> CreateGemBundle([FromBody] CreateGemBundleDto dto)
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -43,7 +43,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("gem-bundles/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateGemBundle(int id, [FromBody] UpdateGemBundleDto dto)
         {
             try
@@ -58,7 +58,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPatch("gem-bundles/{id}/status")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateGemBundleStatus(int id, [FromQuery] string status)
         {
             try
@@ -77,7 +77,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpDelete("gem-bundles/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> DeleteGemBundle(int id)
         {
             try
@@ -129,7 +129,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPatch("skin-and-character-bundles/{id}/status")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateSkinAndCharacterBundleStatus(int id, [FromQuery] string status)
         {
             try

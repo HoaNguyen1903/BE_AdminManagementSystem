@@ -101,6 +101,13 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<GemBundleDto> CreateGemBundleAsync(CreateGemBundleDto dto)
         {
+            // Backend Guard: Prevent duplicate bundles by name
+            var bundles = await _gemBundleRepository.GetAllAsync();
+            if (bundles.Any(b => b.BundleName.Equals(dto.BundleName, StringComparison.OrdinalIgnoreCase) && b.Status == GemBundle.StatusEnum.Available))
+            {
+                throw new InvalidOperationException($"An active gem bundle with the name '{dto.BundleName}' already exists.");
+            }
+
             var bundle = new GemBundle
             {
                 BundleName = dto.BundleName,
@@ -252,6 +259,13 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<SkinAndCharacterBundleDto> CreateSkinAndCharacterBundleAsync(CreateSkinAndCharacterBundleDto dto, int staffId)
         {
+            // Backend Guard: Prevent duplicate bundles by name
+            var bundles = await _skinAndCharacterBundleRepository.GetAllAsync();
+            if (bundles.Any(b => b.BundleName.Equals(dto.BundleName, StringComparison.OrdinalIgnoreCase) && b.Status == SkinAndCharacterBundle.StatusEnum.Available))
+            {
+                throw new InvalidOperationException($"An active skin bundle with the name '{dto.BundleName}' already exists.");
+            }
+
             var bundle = new SkinAndCharacterBundle
             {
                 BundleName = dto.BundleName,

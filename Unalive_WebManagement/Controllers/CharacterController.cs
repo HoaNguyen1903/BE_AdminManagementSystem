@@ -32,7 +32,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("stats")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<CharacterStatDto>> CreateStat([FromBody] CreateCharacterStatDto dto)
         {
             try
@@ -51,7 +51,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("stats/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateStat(int id, [FromBody] UpdateCharacterStatDto dto)
         {
             try
@@ -84,7 +84,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("pvp")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<CharacterPvPDto>> CreatePvP([FromBody] CreateCharacterPvPDto dto)
         {
             try
@@ -107,7 +107,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("pvp/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdatePvP(int id, [FromBody] UpdateCharacterPvPDto dto)
         {
             try
@@ -140,7 +140,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("passives")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<CharacterPassiveDto>> CreatePassive([FromBody] CreateCharacterPassiveDto dto)
         {
             try
@@ -155,7 +155,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("passives/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdatePassive(int id, [FromBody] UpdateCharacterPassiveDto dto)
         {
             try
@@ -188,7 +188,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("skills")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<CharacterSkillDto>> CreateSkill([FromBody] CreateCharacterSkillDto dto)
         {
             try
@@ -203,7 +203,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("skills/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateSkill(int id, [FromBody] UpdateCharacterSkillDto dto)
         {
             try
@@ -236,7 +236,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("attacks")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<CharacterAttackDto>> CreateAttack([FromBody] CreateCharacterAttackDto dto)
         {
             try
@@ -251,7 +251,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("attacks/{id}")]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateAttack(int id, [FromBody] UpdateCharacterAttackDto dto)
         {
             try

@@ -161,6 +161,13 @@ namespace Unalive_WebManagement.BLL.Services
         {
             if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
 
+            // Backend Guard: Prevent duplicate passives by name
+            var passives = await _passiveRepository.GetAllAsync();
+            if (passives.Any(p => p.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException($"A character passive with the name '{dto.Name}' already exists.");
+            }
+
             var p = new CharacterPassive
             {
                 Name = dto.Name,
@@ -231,6 +238,14 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<CharacterSkillDto> CreateCharacterSkillAsync(CreateCharacterSkillDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+
+            // Backend Guard: Prevent duplicate skills by name
+            var skills = await _skillRepository.GetAllAsync();
+            if (skills.Any(s => s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException($"A character skill with the name '{dto.Name}' already exists.");
+            }
+
             if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
             if (dto.SP < 0) throw new ArgumentException("SP cannot be negative.");
             if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
@@ -333,6 +348,14 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<CharacterAttackDto> CreateCharacterAttackAsync(CreateCharacterAttackDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
+
+            // Backend Guard: Prevent duplicate attacks by name
+            var attacks = await _attackRepository.GetAllAsync();
+            if (attacks.Any(a => a.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException($"A character attack with the name '{dto.Name}' already exists.");
+            }
+
             if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
             if (dto.AP < 0) throw new ArgumentException("AP cannot be negative.");
             if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");

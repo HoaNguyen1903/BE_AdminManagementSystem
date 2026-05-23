@@ -77,6 +77,13 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<ItemDto> CreateItemAsync(CreateItemDto dto, int staffId)
         {
+            // Backend Guard: Prevent duplicate items by name
+            var items = await _itemRepository.GetAllAsync();
+            if (items.Any(i => i.ItemName.Equals(dto.ItemName, StringComparison.OrdinalIgnoreCase) && i.Status == Item.StatusEnum.Available))
+            {
+                throw new InvalidOperationException($"An active item with the name '{dto.ItemName}' already exists.");
+            }
+
             var item = new Item
             {
                 ItemName = dto.ItemName,
