@@ -187,7 +187,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<AnnouncementHub>("/hubs/announcement");
+app.MapHub<AnnouncementHub>("/annoucementHub");
 
 app.UseStaticFiles();
 

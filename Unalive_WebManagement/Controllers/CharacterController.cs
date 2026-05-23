@@ -17,6 +17,7 @@ namespace Unalive_WebManagement.Controllers
             _characterService = characterService;
         }
 
+        [AllowAnonymous]
         [HttpGet("stats")]
         public async Task<ActionResult<IEnumerable<CharacterStatDto>>> GetAllStats([FromQuery] QueryParameters query)
         {
