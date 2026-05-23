@@ -45,6 +45,29 @@ namespace Unalive_WebManagement.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.AnnouncementId }, created);
         }
 
+        [HttpPost("send")]
+        public async Task<IActionResult> SendNewAnnoucement([FromBody] CreateAnnouncementDto dto)
+        {
+            if (dto == null) return BadRequest();
+
+            var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+            var payload = new AnnouncementDto
+            {
+                AnnouncementId = 0,
+                Title = dto.Title,
+                Content = dto.Content,
+                Type = dto.Type,
+                Status = dto.Status,
+                CreatedBy = staffId,
+                UpdatedBy = null
+            };
+
+            await _hubContext.Clients.Group("announcements").SendAsync("SendNewAnnoucement", payload);
+
+            return Ok(payload);
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateAnnouncementDto dto)
         {
