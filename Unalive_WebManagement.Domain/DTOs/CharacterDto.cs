@@ -51,17 +51,17 @@ namespace Unalive_WebManagement.DTOs
     [Serializable]
     public class CharacterAttackNormalInfo
     {
-        public int ActionPointCost = 1;
-        public int YuanLiCost = 1;
-        public int SkillPointCost = 0;
+        public int ActionPointCost { get; set; }
+        public int YuanLiCost { get; set; }
+        public int SkillPointCost { get; set; }
     }
 
     [Serializable]
     public class CharacterAttackYuanInfo
     {
-        public int ActionPointCost = 1;
-        public int YuanLiCost = 1;
-        public int SkillPointCost = 0;
+        public int ActionPointCost { get; set; }
+        public int YuanLiCost { get; set; }
+        public int SkillPointCost { get; set; }
     }
 
 
