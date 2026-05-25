@@ -10,7 +10,7 @@ namespace Unalive_WebManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin,Staff")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -110,7 +110,7 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpPost("{id}/ban")]
         public async Task<IActionResult> Ban(int id, [FromBody] BanUserRequest dto)
         {
             var staffId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -144,11 +144,13 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("{id}/status")]
+        [AllowAnonymous] // Keep this AllowAnonymous or specific logic if needed, but previously it was open
         public async Task<ActionResult<UserStatusDto>> GetStatus(int id, [FromQuery] int onlineThresholdSeconds = 120)
         {
             if (onlineThresholdSeconds <= 0) onlineThresholdSeconds = 120;
 
-            if (User.IsInRole("User"))
+            // Internal logic still checks roles
+            if (User.Identity?.IsAuthenticated == true && User.IsInRole("User"))
             {
                 var currentUserId = GetAuthenticatedUserId();
                 if (currentUserId != id) return Forbid();

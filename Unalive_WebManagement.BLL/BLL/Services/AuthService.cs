@@ -41,7 +41,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var staff = await _staffRepository.GetByEmailAsync(request.Email);
 
-            if (staff == null || staff.Password != request.Password)
+            if (staff == null || !BCrypt.Net.BCrypt.Verify(request.Password, staff.Password))
             {
                 return null;
             }
@@ -61,7 +61,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
 
-            if (user == null || user.Password != request.Password)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
                 return null;
             }
@@ -101,7 +101,7 @@ namespace Unalive_WebManagement.BLL.Services
             var user = new User
             {
                 Email = request.Email,
-                Password = request.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 UserName = request.UserName,

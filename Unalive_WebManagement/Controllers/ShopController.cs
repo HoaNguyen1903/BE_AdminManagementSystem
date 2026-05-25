@@ -107,6 +107,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("skin-and-character-bundles")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<SkinAndCharacterBundleDto>> CreateSkinAndCharacterBundle([FromBody] CreateSkinAndCharacterBundleDto dto)
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -115,6 +116,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("skin-and-character-bundles/{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> UpdateSkinAndCharacterBundle(int id, [FromBody] UpdateSkinAndCharacterBundleDto dto)
         {
             try
@@ -148,6 +150,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpDelete("skin-and-character-bundles/{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> DeleteSkinAndCharacterBundle(int id)
         {
             await _shopService.DeleteSkinAndCharacterBundleAsync(id);

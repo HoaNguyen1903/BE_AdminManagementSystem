@@ -46,7 +46,7 @@ namespace Unalive_WebManagement.Controllers
 
             if (!string.IsNullOrEmpty(dto.Password))
             {
-                staff.Password = dto.Password;
+                staff.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             }
 
             await _staffRepository.UpdateAsync(staff);

@@ -52,12 +52,14 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet("reports")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<IEnumerable<ReportDto>>> GetAllReports([FromQuery] ReportFilterParameters query)
         {
             return Ok(await _feedbackService.GetAllReportsAsync(query));
         }
 
         [HttpGet("reports/{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<ReportDto>> GetReportById(int id)
         {
             var report = await _feedbackService.GetReportByIdAsync(id);
@@ -66,6 +68,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost("reports/{id}/approve")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Approve(int id)
         {
             var staffId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");

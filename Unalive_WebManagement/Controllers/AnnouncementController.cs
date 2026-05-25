@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
@@ -40,6 +40,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<AnnouncementDto>> Create([FromBody] CreateAnnouncementDto dto)
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -49,6 +50,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateAnnouncementDto dto)
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -65,6 +67,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             await _announcementService.DeleteAnnouncementAsync(id);
@@ -76,6 +79,7 @@ namespace Unalive_WebManagement.Controllers
 
 
         [HttpPost("send-create")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<AnnouncementDto>> SendCreate([FromBody] CreateAnnouncementDto dto)
         {
             if (dto == null) return BadRequest();
@@ -90,6 +94,7 @@ namespace Unalive_WebManagement.Controllers
 
 
         [HttpPut("send-update/{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> SendUpdate(int id, [FromBody] UpdateAnnouncementDto dto)
         {
             if (dto == null) return BadRequest("Payload không được để trống.");
@@ -110,6 +115,7 @@ namespace Unalive_WebManagement.Controllers
 
 
         [HttpDelete("send-delete/{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> SendDelete(int id)
         {
             var existing = await _announcementService.GetAnnouncementByIdAsync(id);
@@ -125,6 +131,7 @@ namespace Unalive_WebManagement.Controllers
 
 
         [HttpPost("send")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> SendNewAnnoucement([FromBody] CreateAnnouncementDto dto)
         {
             if (dto == null) return BadRequest();

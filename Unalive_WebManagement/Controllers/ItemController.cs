@@ -33,6 +33,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<ActionResult<ItemDto>> Create([FromBody] CreateItemDto dto)
         {
             var staffId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -41,6 +42,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateItemDto dto)
         {
             try
@@ -74,6 +76,7 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Delete(int id)
         {
             await _itemService.DeleteItemAsync(id);
