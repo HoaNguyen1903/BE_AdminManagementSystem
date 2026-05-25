@@ -20,12 +20,14 @@ namespace Unalive_WebManagement.Controllers
 
         // GemBundle Endpoints
         [HttpGet("gem-bundles")]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<IEnumerable<GemBundleDto>>> GetGemBundles([FromQuery] BundleFilterParameters query)
         {
             return Ok(await _shopService.GetAllGemBundlesAsync(query));
         }
 
         [HttpGet("gem-bundles/{id}")]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<GemBundleDto>> GetGemBundleById(int id)
         {
             var b = await _shopService.GetGemBundleByIdAsync(id);
@@ -93,12 +95,14 @@ namespace Unalive_WebManagement.Controllers
 
         // SkinAndCharacterBundle Endpoints
         [HttpGet("skin-and-character-bundles")]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<IEnumerable<SkinAndCharacterBundleDto>>> GetSkinAndCharacterBundles([FromQuery] BundleFilterParameters query)
         {
             return Ok(await _shopService.GetAllSkinAndCharacterBundlesAsync(query));
         }
 
         [HttpGet("skin-and-character-bundles/{id}")]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<SkinAndCharacterBundleDto>> GetSkinAndCharacterBundleById(int id)
         {
             var b = await _shopService.GetSkinAndCharacterBundleByIdAsync(id);

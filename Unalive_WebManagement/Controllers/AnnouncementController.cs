@@ -26,12 +26,14 @@ namespace Unalive_WebManagement.Controllers
         //  CRUD endpoints 
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAll([FromQuery] AnnouncementFilterParameters query)
         {
             return Ok(await _announcementService.GetAllAnnouncementsAsync(query));
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<AnnouncementDto>> GetById(int id)
         {
             var a = await _announcementService.GetAnnouncementByIdAsync(id);

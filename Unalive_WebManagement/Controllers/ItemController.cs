@@ -19,12 +19,14 @@ namespace Unalive_WebManagement.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll([FromQuery] ItemFilterParameters query)
         {
             return Ok(await _itemService.GetAllItemsAsync(query));
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Staff,User")]
         public async Task<ActionResult<ItemDto>> GetById(int id)
         {
             var item = await _itemService.GetItemByIdAsync(id);
