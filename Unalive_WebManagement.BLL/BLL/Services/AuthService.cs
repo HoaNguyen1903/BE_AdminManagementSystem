@@ -40,10 +40,33 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
         {
             var staff = await _staffRepository.GetByEmailAsync(request.Email);
+            if (staff == null) return null;
 
-            if (staff == null || !BCrypt.Net.BCrypt.Verify(request.Password, staff.Password))
+            bool isPasswordCorrect = false;
+            bool needsUpgrade = false;
+
+            try
             {
-                return null;
+                isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, staff.Password);
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                // Fallback for plaintext passwords during migration
+                if (staff.Password == request.Password)
+                {
+                    isPasswordCorrect = true;
+                    needsUpgrade = true;
+                }
+            }
+
+            if (!isPasswordCorrect) return null;
+
+            // Auto-migrate plaintext passwords to BCrypt hashes
+            if (needsUpgrade)
+            {
+                staff.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                await _staffRepository.UpdateAsync(staff);
+                _logger.LogInformation("Automatically migrated password for staff {Email} to BCrypt hash.", staff.Email);
             }
 
             var token = GenerateJwtToken(staff.StaffId, staff.Email, staff.Role);
@@ -60,15 +83,37 @@ namespace Unalive_WebManagement.BLL.Services
         public async Task<LoginResponse?> LoginUserAsync(LoginRequest request)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user == null) return null;
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+            bool isPasswordCorrect = false;
+            bool needsUpgrade = false;
+
+            try
             {
-                return null;
+                isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, user.Password);
             }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                // Fallback for plaintext passwords during migration
+                if (user.Password == request.Password)
+                {
+                    isPasswordCorrect = true;
+                    needsUpgrade = true;
+                }
+            }
+
+            if (!isPasswordCorrect) return null;
 
             if (user.IsEmailVerified == 0)
             {
                 throw new InvalidOperationException("Email is not verified.");
+            }
+
+            // Auto-migrate plaintext passwords to BCrypt hashes
+            if (needsUpgrade)
+            {
+                user.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                _logger.LogInformation("Automatically migrated password for user {Email} to BCrypt hash.", user.Email);
             }
 
             user.LastOnline = DateTime.UtcNow;
