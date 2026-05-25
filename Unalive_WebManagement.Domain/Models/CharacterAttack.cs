@@ -15,10 +15,7 @@ public partial class CharacterAttack
     public int CritDmg { get; set; }
 
     public int CritRate { get; set; }
-
     public string? NormalInfo { get; set; }
-
     public string? YuanInfo { get; set; }
-
     public short LockedState { get; set; }
 }
