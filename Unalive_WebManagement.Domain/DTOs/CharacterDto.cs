@@ -48,12 +48,15 @@ namespace Unalive_WebManagement.DTOs
         public short LockedState { get; set; }
     }
 
+    [Serializable]
     public class CharacterAttackNormalInfo
     {
         public int ActionPointCost = 1;
         public int YuanLiCost = 1;
         public int SkillPointCost = 0;
     }
+
+    [Serializable]
     public class CharacterAttackYuanInfo
     {
         public int ActionPointCost = 1;
