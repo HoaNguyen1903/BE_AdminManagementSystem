@@ -12,13 +12,10 @@ public partial class CharacterAttack
 
     public int Damage { get; set; }
 
-    public int AP { get; set; }
-
-    public int YuanPressure { get; set; }
-
     public int CritDmg { get; set; }
 
     public int CritRate { get; set; }
-
+    public string? NormalInfo { get; set; }
+    public string? YuanInfo { get; set; }
     public short LockedState { get; set; }
 }

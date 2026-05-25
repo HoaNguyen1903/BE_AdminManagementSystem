@@ -223,6 +223,7 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("attacks")]
         public async Task<ActionResult<IEnumerable<CharacterAttackDto>>> GetAllAttacks([FromQuery] CharacterFilterParameters query)
         {

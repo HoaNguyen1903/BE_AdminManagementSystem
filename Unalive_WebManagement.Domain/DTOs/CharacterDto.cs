@@ -41,12 +41,29 @@ namespace Unalive_WebManagement.DTOs
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public int Damage { get; set; }
-        public int AP { get; set; }
-        public int YuanPressure { get; set; }
         public int CritDmg { get; set; }
         public int CritRate { get; set; }
+        public CharacterAttackNormalInfo? NormalInfo { get; set; }
+        public CharacterAttackYuanInfo? YuanInfo { get; set; }
         public short LockedState { get; set; }
     }
+
+    [Serializable]
+    public class CharacterAttackNormalInfo
+    {
+        public int ActionPointCost { get; set; }
+        public int YuanLiCost { get; set; }
+        public int SkillPointCost { get; set; }
+    }
+
+    [Serializable]
+    public class CharacterAttackYuanInfo
+    {
+        public int ActionPointCost { get; set; }
+        public int YuanLiCost { get; set; }
+        public int SkillPointCost { get; set; }
+    }
+
 
     public class AbilitiesSetDto
     {
@@ -92,10 +109,10 @@ namespace Unalive_WebManagement.DTOs
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public int Damage { get; set; }
-        public int AP { get; set; }
-        public int YuanPressure { get; set; }
         public int CritDmg { get; set; }
         public int CritRate { get; set; }
+        public CharacterAttackNormalInfo NormalInfo { get; set; } = null!;
+        public CharacterAttackYuanInfo? YuanInfo { get; set; }
         public short LockedState { get; set; }
     }
 
@@ -136,10 +153,10 @@ namespace Unalive_WebManagement.DTOs
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
         public int Damage { get; set; }
-        public int AP { get; set; }
-        public int YuanPressure { get; set; }
         public int CritDmg { get; set; }
         public int CritRate { get; set; }
+        public CharacterAttackNormalInfo NormalInfo { get; set; } = null!;
+        public CharacterAttackYuanInfo? YuanInfo { get; set; }
         public short LockedState { get; set; }
     }
 
