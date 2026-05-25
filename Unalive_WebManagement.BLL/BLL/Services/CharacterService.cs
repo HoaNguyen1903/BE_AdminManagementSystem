@@ -3,6 +3,7 @@ using Unalive_WebManagement.DAL.Interfaces;
 using Unalive_WebManagement.DTOs;
 using Unalive_WebManagement.Models;
 using Unalive_WebManagement.BLL.Helpers;
+using Newtonsoft.Json;
 
 namespace Unalive_WebManagement.BLL.Services
 {
@@ -85,8 +86,8 @@ namespace Unalive_WebManagement.BLL.Services
                 Name = p.Name,
                 Description = p.Description
             });
-            return dtos.ApplyQuery(query, (p, search) => 
-                p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+            return dtos.ApplyQuery(query, (p, search) =>
+                p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -145,8 +146,8 @@ namespace Unalive_WebManagement.BLL.Services
                 Description = p.Description,
                 LockedState = p.LockedState
             });
-            return dtos.ApplyQuery(query, (p, search) => 
-                p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+            return dtos.ApplyQuery(query, (p, search) =>
+                p.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -212,8 +213,8 @@ namespace Unalive_WebManagement.BLL.Services
                 CritRate = s.CritRate,
                 LockedState = s.LockedState
             });
-            return dtos.ApplyQuery(query, (s, search) => 
-                s.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+            return dtos.ApplyQuery(query, (s, search) =>
+                s.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 s.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -316,14 +317,14 @@ namespace Unalive_WebManagement.BLL.Services
                 Name = a.Name,
                 Description = a.Description,
                 Damage = a.Damage,
-                AP = a.AP,
-                YuanPressure = a.YuanPressure,
                 CritDmg = a.CritDmg,
                 CritRate = a.CritRate,
+                NormalInfo = JsonConvert.DeserializeObject<CharacterAttackNormalInfo>(a.NormalInfo ?? ""),
+                YuanInfo = JsonConvert.DeserializeObject<CharacterAttackYuanInfo>(a.YuanInfo ?? ""),
                 LockedState = a.LockedState
             });
-            return dtos.ApplyQuery(query, (a, search) => 
-                a.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+            return dtos.ApplyQuery(query, (a, search) =>
+                a.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 a.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -337,10 +338,10 @@ namespace Unalive_WebManagement.BLL.Services
                 Name = a.Name,
                 Description = a.Description,
                 Damage = a.Damage,
-                AP = a.AP,
-                YuanPressure = a.YuanPressure,
                 CritDmg = a.CritDmg,
                 CritRate = a.CritRate,
+                NormalInfo = JsonConvert.DeserializeObject<CharacterAttackNormalInfo>(a.NormalInfo ?? ""),
+                YuanInfo = JsonConvert.DeserializeObject<CharacterAttackYuanInfo>(a.YuanInfo ?? ""),
                 LockedState = a.LockedState
             };
         }
@@ -357,8 +358,9 @@ namespace Unalive_WebManagement.BLL.Services
             }
 
             if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
-            if (dto.AP < 0) throw new ArgumentException("AP cannot be negative.");
-            if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
+            if (dto.NormalInfo == null) throw new ArgumentException("Normal cannot be null.");
+            if (dto.NormalInfo.ActionPointCost < 0) throw new ArgumentException("Action Point Cost cannot be null.");
+            if (dto.NormalInfo.SkillPointCost < 0) throw new ArgumentException("Skill Point Cost cannot be null.");
             if (dto.CritDmg < 0) throw new ArgumentException("Crit Dmg cannot be negative.");
             if (dto.CritRate < 0) throw new ArgumentException("Crit Rate cannot be negative.");
 
@@ -367,10 +369,10 @@ namespace Unalive_WebManagement.BLL.Services
                 Name = dto.Name,
                 Description = dto.Description,
                 Damage = dto.Damage,
-                AP = dto.AP,
-                YuanPressure = dto.YuanPressure,
                 CritDmg = dto.CritDmg,
                 CritRate = dto.CritRate,
+                NormalInfo = JsonConvert.SerializeObject(dto.NormalInfo),
+                YuanInfo = JsonConvert.SerializeObject(dto.YuanInfo),
                 LockedState = dto.LockedState
             };
             await _attackRepository.AddAsync(a);
@@ -380,10 +382,10 @@ namespace Unalive_WebManagement.BLL.Services
                 Name = a.Name,
                 Description = a.Description,
                 Damage = a.Damage,
-                AP = a.AP,
-                YuanPressure = a.YuanPressure,
                 CritDmg = a.CritDmg,
                 CritRate = a.CritRate,
+                NormalInfo = JsonConvert.DeserializeObject<CharacterAttackNormalInfo>(a.NormalInfo),
+                YuanInfo = JsonConvert.DeserializeObject<CharacterAttackYuanInfo>(a.YuanInfo),
                 LockedState = a.LockedState
             };
         }
@@ -392,8 +394,9 @@ namespace Unalive_WebManagement.BLL.Services
         {
             if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("Name is required.");
             if (dto.Damage < 0) throw new ArgumentException("Damage cannot be negative.");
-            if (dto.AP < 0) throw new ArgumentException("AP cannot be negative.");
-            if (dto.YuanPressure < 0) throw new ArgumentException("Yuan Pressure cannot be negative.");
+            if (dto.NormalInfo == null) throw new ArgumentException("Normal cannot be null.");
+            if (dto.NormalInfo.ActionPointCost < 0) throw new ArgumentException("Action Point Cost cannot be null.");
+            if (dto.NormalInfo.SkillPointCost < 0) throw new ArgumentException("Skill Point Cost cannot be null.");
             if (dto.CritDmg < 0) throw new ArgumentException("Crit Dmg cannot be negative.");
             if (dto.CritRate < 0) throw new ArgumentException("Crit Rate cannot be negative.");
 
@@ -402,10 +405,10 @@ namespace Unalive_WebManagement.BLL.Services
             a.Name = dto.Name;
             a.Description = dto.Description;
             a.Damage = dto.Damage;
-            a.AP = dto.AP;
-            a.YuanPressure = dto.YuanPressure;
             a.CritDmg = dto.CritDmg;
             a.CritRate = dto.CritRate;
+            a.NormalInfo = JsonConvert.SerializeObject(dto.NormalInfo);
+            a.YuanInfo = JsonConvert.SerializeObject(dto.YuanInfo);
             a.LockedState = dto.LockedState;
             await _attackRepository.UpdateAsync(a);
         }
