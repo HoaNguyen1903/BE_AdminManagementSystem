@@ -146,29 +146,18 @@ builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DefaultCorsPolicy",
-        policy =>
+    options.AddPolicy("AllowAll",
+        builder =>
         {
-            if (builder.Environment.IsDevelopment())
-            {
-                policy.WithOrigins(
-                        "http://localhost:3000",
-                        "http://localhost:3001",
-                        "http://localhost:5173"
-                       )
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials();
-            }
-            else
-            {
-                policy.WithOrigins(
-                        "https://gamemanagementpage.vercel.app"
-                       )
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials();
-            }
+            builder.WithOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:3001",
+                    "http://localhost:5173",
+                    "https://gamemanagementpage.vercel.app"
+                   )
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
         });
 });
 
@@ -191,8 +180,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 
-app.UseCors("DefaultCorsPolicy");
-
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
