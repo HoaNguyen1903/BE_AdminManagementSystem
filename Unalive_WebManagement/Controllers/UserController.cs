@@ -255,6 +255,16 @@ namespace Unalive_WebManagement.Controllers
             throw new UnauthorizedAccessException("User id claim is missing.");
         }
 
+        [HttpGet("me/profile")]
+        [Authorize(Roles = "User")]
+        public async Task<ActionResult<PlayerProfileDto>> GetMyProfile()
+        {
+            var userId = GetAuthenticatedUserId();
+            var profile = await _userService.GetPlayerProfileAsync(userId);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        }
+
         [HttpPost("avatar")]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> UploadAvatar(IFormFile file)
