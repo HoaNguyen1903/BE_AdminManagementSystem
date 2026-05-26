@@ -73,8 +73,10 @@ namespace Unalive_WebManagement.BLL.Services
 
             return new LoginResponse
             {
+                Id = staff.StaffId,
                 Token = token,
                 Email = staff.Email,
+                UserName = staff.Email.Split('@')[0], // Use email prefix as UserName for staff
                 Role = staff.Role,
                 AvatarUrl = staff.AvatarUrl
             };
@@ -253,8 +255,9 @@ namespace Unalive_WebManagement.BLL.Services
 
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, staffId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, staffId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Role, role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
