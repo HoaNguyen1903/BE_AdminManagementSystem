@@ -11,6 +11,8 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<LoginResponse?> RegisterUserAsync(RegisterRequest request);
         Task<bool> VerifyEmailAsync(int userId, string token);
         Task<bool> ResendVerificationEmailAsync(string email);
+        Task<bool> ForgotPasswordAsync(string email, bool isStaff);
+        Task<bool> ResetPasswordAsync(ResetPasswordRequest request, bool isStaff);
     }
 
     public interface IEmailService
@@ -18,6 +20,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task SendEmailAsync(string to, string subject, string body);
         Task SendVerificationEmailAsync(string to, string userName, string verificationLink);
         Task SendTestEmailAsync(string to);
+        Task SendPasswordResetEmailAsync(string to, string userName, string resetLink);
     }
 
     public interface IItemService

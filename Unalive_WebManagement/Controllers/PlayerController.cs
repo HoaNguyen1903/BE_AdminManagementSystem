@@ -77,6 +77,20 @@ namespace Unalive_WebManagement.Controllers
             return Ok(await _userService.GetRankPointAsync(CurrentPlayerId));
         }
 
+        [HttpPost("rank-point")]
+        public async Task<ActionResult<long>> UpdateRankPoint([FromBody] UpdateRankPointRequest request)
+        {
+            try
+            {
+                var newRankPoint = await _userService.UpdateRankPointAsync(CurrentPlayerId, request.Points, request.IsAddition);
+                return Ok(newRankPoint);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpGet("announcements")]
         public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAnnouncements([FromQuery] AnnouncementFilterParameters query)
         {

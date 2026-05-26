@@ -6,6 +6,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IUserRepository : IRepository<User>
     {
         Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByResetTokenAsync(string token);
         Task<int> CountOnlineUsersAsync(DateTime threshold);
         Task<int> CountDailyActiveUsersAsync(DateTime date);
         Task<int> CountBannedUsersAsync(DateTime? bannedUntilAfter = null);
@@ -21,6 +22,7 @@ namespace Unalive_WebManagement.DAL.Interfaces
     public interface IStaffRepository : IRepository<Staff>
     {
         Task<Staff?> GetByEmailAsync(string email);
+        Task<Staff?> GetByResetTokenAsync(string token);
     }
     public interface IAbilitiesSetRepository : IRepository<AbilitiesSet> { }
     public interface IAnnouncementRepository : IRepository<Announcement> { }

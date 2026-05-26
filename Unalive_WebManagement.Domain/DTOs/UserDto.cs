@@ -60,6 +60,17 @@ namespace Unalive_WebManagement.DTOs
         public bool IsAddition { get; set; } = true;
     }
 
+    public class ForgotPasswordRequest
+    {
+        public string Email { get; set; } = null!;
+    }
+
+    public class ResetPasswordRequest
+    {
+        public string Token { get; set; } = null!;
+        public string NewPassword { get; set; } = null!;
+    }
+
     public class UserItemDto
     {
         public int UserId { get; set; }

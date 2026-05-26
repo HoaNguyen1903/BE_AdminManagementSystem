@@ -247,6 +247,92 @@ namespace Unalive_WebManagement.BLL.Services
             return true;
         }
 
+        public async Task<bool> ForgotPasswordAsync(string email, bool isStaff)
+        {
+            string token = Guid.NewGuid().ToString();
+            DateTimeOffset expiry = DateTimeOffset.UtcNow.AddHours(1);
+            string userName = "";
+            string resetLink = "";
+
+            if (isStaff)
+            {
+                var staff = await _staffRepository.GetByEmailAsync(email);
+                if (staff == null) return false;
+
+                staff.PasswordResetToken = token;
+                staff.PasswordResetTokenExpiry = expiry;
+                await _staffRepository.UpdateAsync(staff);
+
+                userName = staff.Email.Split('@')[0];
+                var staffFrontendUrl = _configuration["StaffFrontendUrl"] ?? "https://admin.unalive.site";
+                resetLink = $"{staffFrontendUrl}/reset-password?token={token}";
+            }
+            else
+            {
+                var user = await _userRepository.GetByEmailAsync(email);
+                if (user == null) return false;
+
+                user.PasswordResetToken = token;
+                user.PasswordResetTokenExpiry = expiry;
+                await _userRepository.UpdateAsync(user);
+
+                userName = user.FirstName;
+                var userFrontendUrl = _configuration["UserFrontendUrl"] ?? "https://unalive.site";
+                resetLink = $"{userFrontendUrl}/reset-password?token={token}";
+            }
+
+            _ = Task.Run(async () =>
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var scopedEmailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                    try
+                    {
+                        await scopedEmailService.SendPasswordResetEmailAsync(email, userName, resetLink);
+                        _logger.LogInformation("Password reset email sent to {Email}", email);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
+                    }
+                }
+            });
+
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request, bool isStaff)
+        {
+            if (isStaff)
+            {
+                var staff = await _staffRepository.GetByResetTokenAsync(request.Token);
+                if (staff == null || !staff.PasswordResetTokenExpiry.HasValue || staff.PasswordResetTokenExpiry.Value < DateTimeOffset.UtcNow)
+                {
+                    return false;
+                }
+
+                staff.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                staff.PasswordResetToken = null;
+                staff.PasswordResetTokenExpiry = null;
+                await _staffRepository.UpdateAsync(staff);
+                return true;
+            }
+            else
+            {
+                var user = await _userRepository.GetByResetTokenAsync(request.Token);
+                if (user == null || !user.PasswordResetTokenExpiry.HasValue || user.PasswordResetTokenExpiry.Value < DateTimeOffset.UtcNow)
+                {
+                    return false;
+                }
+
+                user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                user.PasswordResetToken = null;
+                user.PasswordResetTokenExpiry = null;
+                await _userRepository.UpdateAsync(user);
+                return true;
+            }
+        }
+
         private string GenerateJwtToken(int staffId, string email, string role)
         {
             var jwtSettings = _configuration.GetSection("Jwt");

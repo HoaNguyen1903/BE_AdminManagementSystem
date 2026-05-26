@@ -89,6 +89,36 @@ namespace Unalive_WebManagement.Controllers
             return Ok(new { message = "Verification email resent" });
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            await _authService.ForgotPasswordAsync(request.Email, true);
+            return Ok(new { message = "If the email exists, a reset link has been sent." });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.ResetPasswordAsync(request, true);
+            if (!result) return BadRequest("Invalid or expired token.");
+            return Ok(new { message = "Password reset successfully." });
+        }
+
+        [HttpPost("forgot-password-user")]
+        public async Task<IActionResult> ForgotPasswordUser([FromBody] ForgotPasswordRequest request)
+        {
+            await _authService.ForgotPasswordAsync(request.Email, false);
+            return Ok(new { message = "If the email exists, a reset link has been sent." });
+        }
+
+        [HttpPost("reset-password-user")]
+        public async Task<IActionResult> ResetPasswordUser([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.ResetPasswordAsync(request, false);
+            if (!result) return BadRequest("Invalid or expired token.");
+            return Ok(new { message = "Password reset successfully." });
+        }
+
         [HttpPost("test-email")]
         public async Task<IActionResult> TestEmail([FromQuery] string email)
         {

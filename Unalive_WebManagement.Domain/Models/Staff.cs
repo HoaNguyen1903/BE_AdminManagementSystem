@@ -13,4 +13,7 @@ public partial class Staff
     public string Role { get; set; } = null!;
 
     public string? AvatarUrl { get; set; }
+
+    public string? PasswordResetToken { get; set; }
+    public DateTimeOffset? PasswordResetTokenExpiry { get; set; }
 }

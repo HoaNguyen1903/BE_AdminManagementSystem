@@ -21,6 +21,12 @@ namespace Unalive_WebManagement.DAL.Repositories
             return await _dbSet.FirstOrDefaultAsync(u => u.Email.Trim() == trimmedEmail);
         }
 
+        public async Task<User?> GetByResetTokenAsync(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return null;
+            return await _dbSet.FirstOrDefaultAsync(u => u.PasswordResetToken == token);
+        }
+
         public async Task<int> CountOnlineUsersAsync(DateTime threshold)
         {
             return await _dbSet.CountAsync(u => u.IsOnline == 1);
@@ -95,6 +101,12 @@ namespace Unalive_WebManagement.DAL.Repositories
             if (string.IsNullOrWhiteSpace(email)) return null;
             var trimmedEmail = email.Trim();
             return await _dbSet.FirstOrDefaultAsync(s => s.Email.Trim() == trimmedEmail);
+        }
+
+        public async Task<Staff?> GetByResetTokenAsync(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return null;
+            return await _dbSet.FirstOrDefaultAsync(s => s.PasswordResetToken == token);
         }
     }
 

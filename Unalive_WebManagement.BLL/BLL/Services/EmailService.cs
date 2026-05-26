@@ -79,5 +79,21 @@ namespace Unalive_WebManagement.BLL.Services
 
             await SendEmailAsync(to, subject, body);
         }
+
+        public async Task SendPasswordResetEmailAsync(string to, string userName, string resetLink)
+        {
+            var subject = "Unalive - Password Reset Request";
+            var body = $@"
+                <div style='font-family: sans-serif;'>
+                    <h1>Password Reset Request</h1>
+                    <p>Hello {userName},</p>
+                    <p>We received a request to reset your password. Please click the button below to set a new password:</p>
+                    <p><a href='{resetLink}' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Reset Password</a></p>
+                    <p>This link will expire in 1 hour. If you did not request a password reset, please ignore this email.</p>
+                    <p>Best regards,<br/>The Unalive Team</p>
+                </div>";
+
+            await SendEmailAsync(to, subject, body);
+        }
     }
 }
