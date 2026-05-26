@@ -264,7 +264,7 @@ namespace Unalive_WebManagement.BLL.Services
                 await _staffRepository.UpdateAsync(staff);
 
                 userName = staff.Email.Split('@')[0];
-                var staffFrontendUrl = _configuration["ApiBaseUrl"] ?? "http://localhost:3000";
+                var staffFrontendUrl = _configuration["StaffFrontendUrl"] ?? "http://localhost:3000";
                 resetLink = $"{staffFrontendUrl}/reset-password?token={token}";
             }
             else
@@ -277,7 +277,7 @@ namespace Unalive_WebManagement.BLL.Services
                 await _userRepository.UpdateAsync(user);
 
                 userName = user.FirstName;
-                var userFrontendUrl = _configuration["ApiBaseUrl"] ?? "http://localhost:3000";
+                var userFrontendUrl = _configuration["UserFrontendUrl"] ?? "http://localhost:3000";
                 resetLink = $"{userFrontendUrl}/reset-password?token={token}";
             }
 
