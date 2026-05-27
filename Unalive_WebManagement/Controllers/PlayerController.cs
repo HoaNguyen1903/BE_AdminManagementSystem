@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
+using Unalive_WebManagement.BLL.Services;
 using Unalive_WebManagement.DTOs;
 
 namespace Unalive_WebManagement.Controllers
@@ -16,19 +18,21 @@ namespace Unalive_WebManagement.Controllers
         private readonly IShopService _shopService;
         private readonly IFeedbackService _feedbackService;
         private readonly ICharacterService _characterService;
-
+        private readonly IBlobService _blobService;
         public PlayerController(
             IUserService userService,
             IAnnouncementService announcementService,
             IShopService shopService,
             IFeedbackService feedbackService,
-            ICharacterService characterService)
+            ICharacterService characterService,
+            IBlobService blobService)
         {
             _userService = userService;
             _announcementService = announcementService;
             _shopService = shopService;
             _feedbackService = feedbackService;
             _characterService = characterService;
+            _blobService = blobService;
         }
 
         private int CurrentPlayerId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -181,5 +185,41 @@ namespace Unalive_WebManagement.Controllers
         {
             return Ok(await _userService.GetUserBanLogsByUserIdAsync(CurrentPlayerId, query));
         }
+
+        [HttpPost("avatar")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded");
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(file.ContentType))
+                return BadRequest("Only JPEG, PNG and WebP are allowed");
+
+            if (file.Length > 2 * 1024 * 1024)
+                return BadRequest("File size cannot exceed 2MB");
+
+            var userId = GetAuthenticatedUserId();
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = $"avatars/user/{userId}/{Guid.NewGuid()}{extension}";
+
+            var url = await _blobService.UploadImageAsync(file, fileName);
+            await _userService.UpdateAvatarAsync(userId, url);
+
+            return Ok(new { avatarUrl = url });
+        }
+
+        private int GetAuthenticatedUserId()
+        {
+            var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(nameIdentifier, out var idFromNameIdentifier)) return idFromNameIdentifier;
+
+            var sub = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue("sub");
+            if (int.TryParse(sub, out var idFromSub)) return idFromSub;
+
+            throw new UnauthorizedAccessException("User id claim is missing.");
+        }
+
     }
 }
