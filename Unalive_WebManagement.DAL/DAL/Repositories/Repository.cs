@@ -17,12 +17,17 @@ namespace Unalive_WebManagement.DAL.Repositories
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.AsNoTracking().ToListAsync();
         }
 
         public virtual async Task<T?> GetByIdAsync(params object[] keyValues)
         {
-            return await _dbSet.FindAsync(keyValues);
+            var entity = await _dbSet.FindAsync(keyValues);
+            if (entity != null)
+            {
+                _context.Entry(entity).State = EntityState.Detached;
+            }
+            return entity;
         }
 
         public virtual async Task<T> AddAsync(T entity)
@@ -34,7 +39,7 @@ namespace Unalive_WebManagement.DAL.Repositories
 
         public virtual async Task UpdateAsync(T entity)
         {
-            _dbSet.Update(entity);
+            _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 

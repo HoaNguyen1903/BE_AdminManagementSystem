@@ -271,6 +271,7 @@ namespace Unalive_WebManagement.DAL.Repositories
             return await _dbSet
                 .Include(p => p.Bundle)
                 .Include(p => p.User)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -279,6 +280,7 @@ namespace Unalive_WebManagement.DAL.Repositories
             return await _dbSet
                 .Include(p => p.Bundle)
                 .Include(p => p.User)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.PurchaseOrderId == id);
         }
     }
