@@ -262,7 +262,8 @@ namespace Unalive_WebManagement.Controllers
                     Rank = currentRank + index + 1,
                     DisplayName = $"{user.FirstName} {user.LastName}",
                     RankPoint = user.RankPoint,
-                    UserId = user.UserId
+                    UserId = user.UserId,
+                    AvatarUrl = user.AvatarUrl
                 })
                  .ToList();
             var response = new LeaderboardResponse
