@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Unalive_WebManagement.BLL.Interfaces;
 using Unalive_WebManagement.BLL.Services;
+using Unalive_WebManagement.Domain.DTOs;
 using Unalive_WebManagement.DTOs;
 
 namespace Unalive_WebManagement.Controllers
@@ -220,6 +221,66 @@ namespace Unalive_WebManagement.Controllers
 
             throw new UnauthorizedAccessException("User id claim is missing.");
         }
-
+        [HttpGet("rankingLeaderBoard")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> GetRanksByStartIndexAndEndIndex([FromQuery] int limit = 10, [FromQuery] string direction = "around", [FromQuery] int cursorRank = 0)
+        {
+            var users = await _userService.GetUsersAsync(new UserFilterParameters());
+            var sortedUserByRankPoint = users.OrderByDescending(x => x.RankPoint).ToList();
+            var totalPlayers = sortedUserByRankPoint.Count;
+            long startIndex = 0;
+            long stopIndex = 0;
+            switch (direction.ToLower())
+            {
+                case "around":
+                    var myRankIndex = sortedUserByRankPoint.FindIndex(x => x.UserId == CurrentPlayerId);
+                    var fiveIndexAbove = myRankIndex - 5;
+                    var fourIndexBelow = startIndex + limit - 1;
+                    startIndex = Math.Max(0, fiveIndexAbove);
+                    stopIndex = Math.Min(totalPlayers - 1, fourIndexBelow);
+                    break;
+                case "up":
+                    long targetStopIndex = cursorRank - 2;
+                    startIndex = Math.Max(0, targetStopIndex - limit + 1);
+                    stopIndex = targetStopIndex;
+                    break;
+                case "down":
+                    startIndex = cursorRank;
+                    stopIndex = Math.Min(totalPlayers - 1, startIndex + limit - 1);
+                    break;
+            }
+            if (startIndex > stopIndex || startIndex >= totalPlayers)
+            {
+                return Ok(new LeaderboardResponse { Message = "Không còn dữ liệu" });
+            }
+            var currentRank = startIndex;
+            var rankings = sortedUserByRankPoint
+                .Skip((int)(startIndex + 1))
+                .Take((int)(stopIndex - startIndex - 1))
+                .Select((user, index) => new PlayerRankDto
+                {
+                    Rank = currentRank + index + 1,
+                    DisplayName = $"{user.FirstName} {user.LastName}",
+                    RankPoint = user.RankPoint,
+                    UserId = user.UserId
+                })
+                 .ToList();
+            var response = new LeaderboardResponse
+            {
+                Meta = new LeaderboardMeta
+                {
+                    Direction = direction,
+                    HasBefore = startIndex > 0,
+                    HasAfter = stopIndex < (totalPlayers - 1),
+                    TopRank = startIndex + 1,
+                    BottomRank = stopIndex + 1,
+                },
+                Data = new LeaderboardData
+                {
+                    Rankings = rankings
+                }
+            };
+            return Ok(response);
+        }
     }
 }
