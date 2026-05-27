@@ -1,3 +1,5 @@
+using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel;
 using Unalive_WebManagement.Models;
 
 namespace Unalive_WebManagement.DTOs
@@ -28,17 +30,26 @@ namespace Unalive_WebManagement.DTOs
 
     public class UpdateUserDto
     {
-        public string Email { get; set; } = null!;
-        public string Password { get; set; } = null!;
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
-        public string UserName { get; set; } = null!;
-        public short Banned { get; set; }
+        [DefaultValue("")]
+        public string? Email { get; set; }
+        [DefaultValue("")]
+        public string? Password { get; set; }
+        [DefaultValue("")]
+        public string? FirstName { get; set; }
+        [DefaultValue("")]
+        public string? LastName { get; set; }
+        [DefaultValue("")]
+        public string? UserName { get; set; }
+        [DefaultValue("")]
+        public string? AvatarUrl { get; set; }
+        [DefaultValue(-1)]
+        public short? Banned { get; set; }
         public DateTimeOffset? BannedUntil { get; set; }
         public DateTimeOffset? LastOnline { get; set; }
-        public short IsOnline { get; set; }
-        public string? AvatarUrl { get; set; }
-        public long RankPoint { get; set; }
+        [DefaultValue(-1)]
+        public short? IsOnline { get; set; }
+        [DefaultValue(-1)]
+        public long? RankPoint { get; set; }
     }
 
     public class UserStatusDto

@@ -16,8 +16,8 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly IOrderTransactionRepository _orderTransactionRepository;
 
         public UserService(
-            IUserRepository userRepository, 
-            IUserItemRepository userItemRepository, 
+            IUserRepository userRepository,
+            IUserItemRepository userItemRepository,
             IUserBundleRepository userBundleRepository,
             IUserBanLogRepository userBanLogRepository,
             IShopOrderRepository shopOrderRepository,
@@ -132,7 +132,7 @@ namespace Unalive_WebManagement.BLL.Services
             if (user == null) throw new KeyNotFoundException();
 
             // Check if email is being changed and if new email already exists
-            if (!user.Email.Equals(dto.Email, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(dto.Email) && !user.Email.Equals(dto.Email, StringComparison.OrdinalIgnoreCase))
             {
                 var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
                 if (existingUser != null)
@@ -140,20 +140,38 @@ namespace Unalive_WebManagement.BLL.Services
                     throw new InvalidOperationException("Email is already in use.");
                 }
             }
+            if (!string.IsNullOrEmpty(dto.Email))
+                user.Email = dto.Email;
 
-            user.Email = dto.Email;
-            user.FirstName = dto.FirstName;
-            user.LastName = dto.LastName;
-            user.UserName = dto.UserName;
-            user.LastOnline = dto.LastOnline;
-            user.IsOnline = dto.IsOnline;
-            user.AvatarUrl = dto.AvatarUrl;
-            user.RankPoint = dto.RankPoint;
+            if (!string.IsNullOrEmpty(dto.FirstName))
+                user.FirstName = dto.FirstName;
+
+            if (!string.IsNullOrEmpty(dto.LastName))
+                user.LastName = dto.LastName;
+
+            if (!string.IsNullOrEmpty(dto.UserName))
+                user.UserName = dto.UserName;
+
+            if (dto.LastOnline.HasValue)
+                user.LastOnline = dto.LastOnline;
+
+            if (!string.IsNullOrEmpty(dto.AvatarUrl))
+                user.AvatarUrl = dto.AvatarUrl;
+
+            if (!string.IsNullOrEmpty(dto.Password))
+                user.Password = dto.Password;
+
+            if (dto.IsOnline.HasValue && dto.IsOnline != -1)
+                user.IsOnline = dto.IsOnline.Value;
+
+            if (dto.RankPoint.HasValue && dto.RankPoint != -1)
+                user.RankPoint = dto.RankPoint.Value;
 
             // Set to null if past date or null
             user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTimeOffset.UtcNow)
-                            ? dto.BannedUntil 
+                            ? dto.BannedUntil
                 : null;
+
             user.Banned = user.BannedUntil.HasValue ? (short)1 : (short)0;
 
             await _userRepository.UpdateAsync(user);
@@ -335,8 +353,8 @@ namespace Unalive_WebManagement.BLL.Services
                 ItemName = i.Item?.ItemName ?? "Unknown",
                 Quantity = i.Quantity
             });
-            return dtos.ApplyQuery(query, (i, search) => 
-                i.ItemName.Contains(search, StringComparison.OrdinalIgnoreCase) || 
+            return dtos.ApplyQuery(query, (i, search) =>
+                i.ItemName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 i.ItemId.ToString().Contains(search));
         }
 
@@ -349,7 +367,7 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task<UserItemDto> CreateUserItemNoOrderAsync(CreateUserItemNoOrderDto dto)
         {
-            var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity};
+            var item = new UserItem { UserId = dto.UserId, ItemId = dto.ItemId, Quantity = dto.Quantity };
             var created = await _userItemRepository.AddAsync(item);
             return MapToUserItemDto(created);
         }
@@ -412,7 +430,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var skinBundleIdNullable = skinBundleId == 0 ? null : (int?)skinBundleId;
             var gemBundleIdNullable = gemBundleId == 0 ? null : (int?)gemBundleId;
-            
+
             var bundle = await _userBundleRepository.GetByIdAsync(userId, skinBundleIdNullable, gemBundleIdNullable);
             if (bundle == null) throw new KeyNotFoundException();
             bundle.Remaining = dto.Remaining;
@@ -423,7 +441,7 @@ namespace Unalive_WebManagement.BLL.Services
         {
             var skinBundleIdNullable = skinBundleId == 0 ? null : (int?)skinBundleId;
             var gemBundleIdNullable = gemBundleId == 0 ? null : (int?)gemBundleId;
-            
+
             await _userBundleRepository.DeleteAsync(userId, skinBundleIdNullable, gemBundleIdNullable);
         }
 
@@ -442,7 +460,7 @@ namespace Unalive_WebManagement.BLL.Services
 
             var inventory = await GetUserItemsWithNamesByUserIdAsync(userId, new QueryParameters());
             var orders = await _shopOrderRepository.GetByUserIdAsync(userId);
-            
+
             var orderDtos = orders.Select(o => new ShopOrderDto
             {
                 ShopOrderId = o.ShopOrderId,
