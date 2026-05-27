@@ -22,6 +22,9 @@ namespace Unalive_WebManagement.DTOs
         public int CurrentOnline { get; set; }
         public int DailyActiveUsers { get; set; }
         public int BannedAccountsCount { get; set; }
+        public double? DauGrowth { get; set; }
+        public int TotalSales { get; set; }
+        public double? SalesGrowth { get; set; }
     }
 
     public class TopSpenderDto

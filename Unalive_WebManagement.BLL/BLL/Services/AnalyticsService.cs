@@ -14,6 +14,7 @@ namespace Unalive_WebManagement.BLL.Services
         private readonly ISkinAndCharacterBundleRepository _skinBundleRepository;
         private readonly IUserRepository _userRepository;
         private readonly IShopOrderRepository _shopOrderRepository;
+        private readonly IPlayerOnlineHistoryRepository _playerOnlineHistoryRepository;
 
         public AnalyticsService(
             IOrderTransactionRepository orderTransactionRepository,
@@ -22,7 +23,8 @@ namespace Unalive_WebManagement.BLL.Services
             IGemBundleRepository gemBundleRepository,
             ISkinAndCharacterBundleRepository skinBundleRepository,
             IUserRepository userRepository,
-            IShopOrderRepository shopOrderRepository)
+            IShopOrderRepository shopOrderRepository,
+            IPlayerOnlineHistoryRepository playerOnlineHistoryRepository)
         {
             _orderTransactionRepository = orderTransactionRepository;
             _shopOrderDetailRepository = shopOrderDetailRepository;
@@ -31,6 +33,7 @@ namespace Unalive_WebManagement.BLL.Services
             _skinBundleRepository = skinBundleRepository;
             _userRepository = userRepository;
             _shopOrderRepository = shopOrderRepository;
+            _playerOnlineHistoryRepository = playerOnlineHistoryRepository;
         }
 
         public async Task<IEnumerable<RevenueAnalyticsDto>> GetRevenueAnalyticsAsync(DateTime? start, DateTime? end, string groupBy)
@@ -159,12 +162,55 @@ namespace Unalive_WebManagement.BLL.Services
             var dau = await _userRepository.CountDailyActiveUsersAsync(today);
             var bannedCount = await _userRepository.CountBannedUsersAsync();
 
-            return new PlayerStatsDto
+            var stats = new PlayerStatsDto
             {
                 CurrentOnline = currentOnline,
                 DailyActiveUsers = dau,
                 BannedAccountsCount = bannedCount
             };
+
+            // Calculate growth if date range is provided
+            if (start.HasValue && end.HasValue)
+            {
+                var duration = end.Value - start.Value;
+                var prevStart = start.Value.Subtract(duration);
+                var prevEnd = start.Value;
+
+                // 1. Sales Growth
+                var currentTransactions = await _orderTransactionRepository.GetByDateRangeAsync(start.Value, end.Value);
+                var currentSales = currentTransactions.Count();
+
+                var prevTransactions = await _orderTransactionRepository.GetByDateRangeAsync(prevStart, prevEnd);
+                var prevSales = prevTransactions.Count();
+
+                stats.TotalSales = currentSales;
+                if (prevSales > 0)
+                {
+                    stats.SalesGrowth = (double)(currentSales - prevSales) / prevSales * 100;
+                }
+                else
+                {
+                    stats.SalesGrowth = currentSales > 0 ? 100 : 0;
+                }
+
+                // 2. DAU Growth
+                var currentHistory = await _playerOnlineHistoryRepository.GetByDateRangeAsync(start.Value, end.Value);
+                var currentAvgDau = currentHistory.Any() ? currentHistory.Average(h => h.DailyActiveUsers) : 0;
+
+                var prevHistory = await _playerOnlineHistoryRepository.GetByDateRangeAsync(prevStart, prevEnd);
+                var prevAvgDau = prevHistory.Any() ? prevHistory.Average(h => h.DailyActiveUsers) : 0;
+
+                if (prevAvgDau > 0)
+                {
+                    stats.DauGrowth = (double)(currentAvgDau - prevAvgDau) / prevAvgDau * 100;
+                }
+                else
+                {
+                    stats.DauGrowth = currentAvgDau > 0 ? 100 : 0;
+                }
+            }
+
+            return stats;
         }
 
         public async Task<IEnumerable<TopSpenderDto>> GetTopSpendersAsync(DateTime? start, DateTime? end, int top)
