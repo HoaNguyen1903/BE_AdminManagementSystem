@@ -114,6 +114,7 @@ namespace Unalive_WebManagement.BLL.Interfaces
         Task<UserDto> CreateUserAsync(CreateUserDto dto);
         Task UpdateUserAsync(int id, UpdateUserDto dto);
         Task BanUserAsync(int id, BanUserRequest dto, int staffId);
+        Task PermanentBanUserAsync(int id, string reason, int staffId);
         Task UpdateUserLastOnlineAsync(int userId);
         Task SetUserOfflineAsync(int userId);
         Task<UserStatusDto?> GetUserStatusAsync(int userId, int onlineThresholdSeconds);

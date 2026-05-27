@@ -106,6 +106,21 @@ namespace Unalive_WebManagement.BLL.Services
 
             if (!isPasswordCorrect) return null;
 
+            if (user.BannedUntil.HasValue && user.BannedUntil.Value > DateTimeOffset.UtcNow)
+            {
+                var remainingTime = user.BannedUntil.Value - DateTimeOffset.UtcNow;
+                string message;
+                if (remainingTime.TotalDays > 365 * 100)
+                {
+                    message = "Your account has been permanently banned.";
+                }
+                else
+                {
+                    message = $"Your account is banned until {user.BannedUntil.Value:yyyy-MM-dd HH:mm:ss} UTC.";
+                }
+                throw new InvalidOperationException(message);
+            }
+
             if (user.IsEmailVerified == 0)
             {
                 throw new InvalidOperationException("Email is not verified.");

@@ -125,6 +125,21 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
+        [HttpPost("{id}/permanent-ban")]
+        public async Task<IActionResult> PermanentBan(int id, [FromBody] string reason)
+        {
+            var staffId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            try
+            {
+                await _userService.PermanentBanUserAsync(id, reason, staffId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpPost("me/heartbeat")]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> Heartbeat()

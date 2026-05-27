@@ -142,7 +142,6 @@ namespace Unalive_WebManagement.BLL.Services
             }
 
             user.Email = dto.Email;
-            user.Password = dto.Password;
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
             user.UserName = dto.UserName;
@@ -165,11 +164,17 @@ namespace Unalive_WebManagement.BLL.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) throw new KeyNotFoundException();
 
-            // Set to null if past date or null
-            user.BannedUntil = (dto.BannedUntil.HasValue && dto.BannedUntil.Value > DateTimeOffset.UtcNow)
-                            ? dto.BannedUntil 
-                : null;
-            user.Banned = user.BannedUntil.HasValue ? (short)1 : (short)0;
+            // If BannedUntil is null or in the past, lift the ban
+            if (!dto.BannedUntil.HasValue || dto.BannedUntil.Value <= DateTimeOffset.UtcNow)
+            {
+                user.BannedUntil = null;
+                user.Banned = 0;
+            }
+            else
+            {
+                user.BannedUntil = dto.BannedUntil;
+                user.Banned = 1;
+            }
 
             await _userRepository.UpdateAsync(user);
 
@@ -178,7 +183,28 @@ namespace Unalive_WebManagement.BLL.Services
                 UserId = id,
                 BanReason = dto.BanReason,
                 BannedDate = DateTimeOffset.UtcNow,
-                BannedUntil = user.BannedUntil, // Log what was actually set
+                BannedUntil = user.BannedUntil,
+                BannedBy = staffId
+            };
+            await _userBanLogRepository.AddAsync(log);
+        }
+
+        public async Task PermanentBanUserAsync(int id, string reason, int staffId)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null) throw new KeyNotFoundException();
+
+            user.BannedUntil = DateTimeOffset.UtcNow.AddYears(1000);
+            user.Banned = 1;
+
+            await _userRepository.UpdateAsync(user);
+
+            var log = new UserBanLog
+            {
+                UserId = id,
+                BanReason = reason,
+                BannedDate = DateTimeOffset.UtcNow,
+                BannedUntil = user.BannedUntil,
                 BannedBy = staffId
             };
             await _userBanLogRepository.AddAsync(log);

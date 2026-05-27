@@ -29,7 +29,6 @@ namespace Unalive_WebManagement.DTOs
     public class UpdateUserDto
     {
         public string Email { get; set; } = null!;
-        public string Password { get; set; } = null!;
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string UserName { get; set; } = null!;
@@ -52,6 +51,7 @@ namespace Unalive_WebManagement.DTOs
     {
         public string BanReason { get; set; } = null!;
         public DateTimeOffset? BannedUntil { get; set; }
+        public bool IsLiftingBan { get; set; }
     }
 
     public class UpdateRankPointRequest
