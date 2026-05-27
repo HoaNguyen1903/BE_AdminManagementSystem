@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,8 +24,15 @@ namespace Unalive_WebManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PurchaseOrder>>> GetAllPurchaseOrders()
         {
-            var orders = await _purchaseOrderService.GetAllPurchaseOrdersAsync();
-            return Ok(orders);
+            try
+            {
+                var orders = await _purchaseOrderService.GetAllPurchaseOrdersAsync();
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching purchase orders.", details = ex.Message });
+            }
         }
 
         // GET: api/PurchaseOrder/5
