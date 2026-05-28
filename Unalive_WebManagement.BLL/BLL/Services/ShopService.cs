@@ -375,9 +375,7 @@ namespace Unalive_WebManagement.BLL.Services
 
         public async Task UpdateShopOrderAsync(int id, ShopOrder updatedOrder)
         {
-            var orders = await _shopOrderRepository.GetAllAsync();
-            var order = orders.FirstOrDefault(o => o.ShopOrderId == id);
-
+            var order = await _shopOrderRepository.GetByIdAsync(id);
             if (order == null) throw new KeyNotFoundException("ShopOrder not found");
 
             // Basic order information
