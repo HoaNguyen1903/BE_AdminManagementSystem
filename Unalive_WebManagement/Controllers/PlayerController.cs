@@ -238,10 +238,10 @@ namespace Unalive_WebManagement.Controllers
             {
                 case "around":
                     var myRankIndex = sortedUserByRankPoint.FindIndex(x => x.UserId == CurrentPlayerId);
-                    var fiveIndexAbove = myRankIndex - 5;
+                    var fiveIndexAbove = Math.Max(0, myRankIndex - 5);
                     var fourIndexBelow = startIndex + limit - 1;
                     startIndex = Math.Max(0, fiveIndexAbove);
-                    stopIndex = Math.Min(totalPlayers - 1, fourIndexBelow);
+                    stopIndex = Math.Min(totalPlayers, fourIndexBelow);
                     break;
                 case "up":
                     long targetStopIndex = cursorRank - 2;
@@ -259,8 +259,8 @@ namespace Unalive_WebManagement.Controllers
             }
             var currentRank = startIndex;
             var rankings = sortedUserByRankPoint
-                .Skip((int)(startIndex + 1))
-                .Take((int)(stopIndex - startIndex - 1))
+                .Skip((int)(startIndex))
+                .Take((int)(stopIndex - startIndex))
                 .Select((user, index) => new PlayerRankDto
                 {
                     Rank = currentRank + index + 1,
