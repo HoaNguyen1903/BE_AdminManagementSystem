@@ -175,6 +175,7 @@ namespace Unalive_WebManagement.DAL.Repositories
         {
             return await _dbSet
                 .Include(o => o.OrderDetails)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
         }
 
