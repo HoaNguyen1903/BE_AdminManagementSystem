@@ -208,7 +208,11 @@ namespace Unalive_WebManagement.Controllers
             var url = await _blobService.UploadImageAsync(file, fileName);
             await _userService.UpdateAvatarAsync(userId, url);
 
-            return Ok(new { avatarUrl = url });
+            return Ok(new ImageUrl { AvatarUrl = url });
+        }
+        class ImageUrl
+        {
+            public string AvatarUrl { get; set; }
         }
 
         private int GetAuthenticatedUserId()
