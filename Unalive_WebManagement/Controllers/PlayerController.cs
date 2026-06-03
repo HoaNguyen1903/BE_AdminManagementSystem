@@ -120,7 +120,6 @@ namespace Unalive_WebManagement.Controllers
             return Ok(await _characterService.GetAllCharacterStatsAsync(query));
         }
 
-        [AllowAnonymous]
         [HttpGet("characters/pvp")]
         public async Task<ActionResult<IEnumerable<CharacterPvPDto>>> GetCharacterPvPs([FromQuery] QueryParameters query)
         {

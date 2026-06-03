@@ -70,6 +70,7 @@ namespace Unalive_WebManagement.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("pvp")]
         public async Task<ActionResult<IEnumerable<CharacterPvPDto>>> GetAllPvPs([FromQuery] QueryParameters query)
         {
