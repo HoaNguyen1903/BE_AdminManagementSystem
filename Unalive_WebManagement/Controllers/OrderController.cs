@@ -145,6 +145,11 @@ namespace Unalive_WebManagement.Controllers
                         return BadRequest(new { message = $"Bundle with ID {itemRequest.BundleId} not found." });
                     }
 
+                    if (bundle.Status == "Unavailable")
+                    {
+                        return BadRequest(new { message = $"Bundle with ID {itemRequest.BundleId} not available." });
+                    }
+
                     int bundleBuyQuantity = 1;
                     float actualPrice = bundle.BundlePrice;
                     string bundleName = bundle.BundleName;
